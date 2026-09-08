@@ -6,21 +6,21 @@
 
 @section('content')
     <div class="content-wrapper">
-        <div class="zolo-page-header" style="margin-bottom:16px">
-            <h1 class="zolo-heading" style="margin:0; font-size:22px">{{ __('manage') . ' ' . __('students') }}</h1>
+        <div class="zolo-page-header">
+            <h1 class="zolo-heading zolo-page-title">{{ __('manage') . ' ' . __('students') }}</h1>
         </div>
 
         <div class="row">
             <div class="col-lg-12 grid-margin stretch-card">
                 <div class="card">
                     <div class="card-body">
-                        <h4 class="card-title" style="display:flex; align-items:center; gap:8px">
-                            <span class="ms" style="font-size:18px; color:var(--zolo-accent)">person_add</span>{{ __('create') . ' ' . __('students') }}
+                        <h4 class="card-title zolo-has-icon">
+                            <i class="mdi mdi-account-plus zolo-card-title-icon"></i>{{ __('create') . ' ' . __('students') }}
                         </h4>
-                        <div style="font-size:12.5px; color:var(--zolo-muted-2); margin:2px 0 16px">{{ __('Gr number is auto-generated. Guardian account is created or linked on submit.') }}</div>
+                        <div class="zolo-card-subtitle">{{ __('Gr number is auto-generated. Guardian account is created or linked on submit.') }}</div>
                         <form class="pt-3 student-registration-form" id="create-form" data-success-function="formSuccessFunction" enctype="multipart/form-data" action="{{ route('students.store') }}" method="POST" novalidate="novalidate">
                             @csrf
-                            <h5 class="zolo-heading" style="font-size:14px; display:flex; align-items:center; gap:8px; margin-bottom:12px"><span class="ms" style="font-size:17px; color:var(--zolo-accent)">assignment</span>{{ __('Admission details') }}</h5>
+                            <h5 class="zolo-heading zolo-section-title"><i class="mdi mdi-clipboard-text-outline"></i>{{ __('Admission details') }}</h5>
                             <div class="row">
                                 <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-3">
                                     <label>{{ __('Gr Number') }} <span class="text-danger">*</span></label>
@@ -80,7 +80,7 @@
                                 @endif
                             </div>
                             <hr>
-                            <h5 class="zolo-heading" style="font-size:14px; display:flex; align-items:center; gap:8px; margin-bottom:12px"><span class="ms" style="font-size:17px; color:var(--zolo-accent)">school</span>{{ __('Student details') }}</h5>
+                            <h5 class="zolo-heading zolo-section-title"><i class="mdi mdi-school"></i>{{ __('Student details') }}</h5>
                             <div class="row">
                                 <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
                                     <label>{{ __('first_name') }} <span class="text-danger">*</span></label>
@@ -142,7 +142,7 @@
 
                             @if(count($extraFields))
                                 <hr>
-                                <h5 class="zolo-heading" style="font-size:14px; display:flex; align-items:center; gap:8px; margin-bottom:12px"><span class="ms" style="font-size:17px; color:var(--zolo-accent)">list_alt</span>{{ __('Custom fields') }}</h5>
+                                <h5 class="zolo-heading zolo-section-title"><i class="mdi mdi-format-list-bulleted"></i>{{ __('Custom fields') }}</h5>
                                 <div class="row other-details">
 
                                     {{-- Loop the FormData --}}
@@ -239,7 +239,7 @@
 
                             <hr>
                             {{-- Guardian Details --}}
-                            <h5 class="zolo-heading" style="font-size:14px; display:flex; align-items:center; gap:8px; margin-bottom:12px"><span class="ms" style="font-size:17px; color:var(--zolo-accent)">family_restroom</span>{{ __('Guardian details') }}</h5>
+                            <h5 class="zolo-heading zolo-section-title"><i class="mdi mdi-account-group"></i>{{ __('Guardian details') }}</h5>
                             <div class="row">
                                 <div class="form-group col-sm-12 col-md-12">
                                     <label for="guardian_email">{{ __('guardian') . ' ' . __('email') }} <span class="text-danger">*</span></label>

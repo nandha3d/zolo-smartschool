@@ -1,17 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
 @php
     $lang = Session::get('language');
 @endphp
-@if($lang)
-    @if ($lang->is_rtl)
-        <html lang="en" dir="rtl">
-    @else
-        <html lang="en" dir="ltl">
-    @endif
-@else
-    <html lang="en" dir="ltl">
-@endif
+<html lang="{{ $lang->code ?? 'en' }}" dir="{{ $lang && $lang->is_rtl ? 'rtl' : 'ltr' }}">
 
 <head>
     <!-- Required meta tags -->
@@ -68,7 +59,7 @@
             <div class="zolo-login-brand">
                 @if ($schoolSettings['horizontal_logo'] ?? $systemSettings['login_page_logo'] ?? $systemSettings['horizontal_logo'] ?? '')
                     <img src="{{ $schoolSettings['horizontal_logo'] ?? $systemSettings['login_page_logo'] ?? $systemSettings['horizontal_logo'] }}"
-                        alt="{{ $schoolSettings['school_name'] ?? $systemSettings['system_name'] ?? 'logo' }}" style="height:32px; max-width:180px; object-fit:contain">
+                        alt="{{ $schoolSettings['school_name'] ?? $systemSettings['system_name'] ?? 'logo' }}" class="zolo-login-logo">
                 @else
                     <div class="zolo-login-mark">{{ Str::substr($schoolSettings['school_name'] ?? $systemSettings['system_name'] ?? 'Z', 0, 1) }}</div>
                     <div class="zolo-login-brand-name">{{ $schoolSettings['school_name'] ?? $systemSettings['system_name'] ?? config('app.name') }}</div>
@@ -79,9 +70,9 @@
                 <h1 class="zolo-login-title">{{ __('One console for the whole campus.') }}</h1>
                 <div class="zolo-login-desc">{{ __('Admissions, attendance, fees, exams, payroll and parent communication — with per-role privileges on every module.') }}</div>
                 <div class="zolo-login-features">
-                    <div class="zolo-login-feature"><span class="ms">verified_user</span>{{ __('Per-role privileges on every module') }}</div>
-                    <div class="zolo-login-feature"><span class="ms">payments</span>{{ __('Fees, payroll and expenses in one place') }}</div>
-                    <div class="zolo-login-feature"><span class="ms">forum</span>{{ __('Built-in parent and staff communication') }}</div>
+                    <div class="zolo-login-feature"><i class="mdi mdi-shield-check"></i>{{ __('Per-role privileges on every module') }}</div>
+                    <div class="zolo-login-feature"><i class="mdi mdi-cash-multiple"></i>{{ __('Fees, payroll and expenses in one place') }}</div>
+                    <div class="zolo-login-feature"><i class="mdi mdi-forum-outline"></i>{{ __('Built-in parent and staff communication') }}</div>
                 </div>
             </div>
             <div class="zolo-login-foot">&copy; {{ date('Y') }} {{ $schoolSettings['school_name'] ?? $systemSettings['system_name'] ?? config('app.name') }}</div>
@@ -89,8 +80,8 @@
 
         <div class="zolo-login-panel">
             <div class="zolo-login-card">
-                <h2 class="zolo-heading" style="font-size:24px; letter-spacing:-0.6px">{{ __('Sign in') }}</h2>
-                <div style="font-size:13.5px; color:var(--zolo-muted-2); margin-top:5px">{{ __('Use your school credentials to continue.') }}</div>
+                <h2 class="zolo-heading zolo-login-h2">{{ __('Sign in') }}</h2>
+                <div class="zolo-login-sub">{{ __('Use your school credentials to continue.') }}</div>
 
                 @if (\Session::has('emailSuccess'))
                     <div class="alert alert-success text-center mt-3" role="alert">{{ \Session::get('emailSuccess') }}.</div>
@@ -108,30 +99,30 @@
                     <div class="alert alert-danger text-center mt-3" role="alert">{{ \Session::get('error') }}.</div>
                 @endif
 
-                <form action="{{ route('login') }}" id="frmLogin" method="POST" style="margin-top:22px">
+                <form action="{{ route('login') }}" id="frmLogin" method="POST" class="zolo-login-form">
                     @csrf
                     <div class="zolo-login-field">
                         <div class="zolo-login-field-label">{{ __('email') }}</div>
                         <div class="zolo-login-input-wrap">
-                            <span class="ms">mail</span>
+                            <i class="mdi mdi-email-outline"></i>
                             <input id="email" type="text" name="email"
                                 value="{{ isset($school) && !empty($school) && $school->type == 'demo' ? $school->user->email : old('email') }}"
                                 required autocomplete="email" autofocus placeholder="{{ __('email_or_mobile') }}">
                         </div>
                     </div>
                     <div class="zolo-login-field">
-                        <div style="display:flex; align-items:center; gap:10px; margin-bottom:6px">
-                            <div class="zolo-login-field-label" style="flex:1; margin-bottom:0">{{ __('password') }}</div>
+                        <div class="zolo-login-label-row">
+                            <div class="zolo-login-field-label">{{ __('password') }}</div>
                             @if (Route::has('password.request'))
-                                <a href="{{ route('password.request') }}" style="font-size:12px; font-weight:600">{{ __('forgot_password') }}</a>
+                                <a href="{{ route('password.request') }}" class="zolo-login-link">{{ __('forgot_password') }}</a>
                             @endif
                         </div>
                         <div class="zolo-login-input-wrap">
-                            <span class="ms">lock</span>
+                            <i class="mdi mdi-lock-outline"></i>
                             <input id="password" type="password" name="password" required
                                 value="{{ isset($school) && !empty($school) && $school->type == 'demo' ? $school->user->mobile : '' }}"
                                 autocomplete="current-password" placeholder="{{ __('password') }}">
-                            <span class="ms zolo-toggle-eye" id="togglePasswordShowHide"><i class="fa fa-eye-slash" id="togglePassword" style="font-size:15px"></i></span>
+                            <span class="zolo-toggle-eye" id="togglePasswordShowHide"><i class="fa fa-eye-slash" id="togglePassword"></i></span>
                         </div>
                     </div>
 
@@ -146,17 +137,17 @@
                         <div class="zolo-login-field">
                             <div class="zolo-login-field-label">{{ __('school_code') }}</div>
                             <div class="zolo-login-input-wrap">
-                                <span class="ms">apartment</span>
+                                <i class="mdi mdi-office-building"></i>
                                 <input id="school_code" type="text" name="code" value="{{ old('school_code') }}" autocomplete="school_code" placeholder="{{ __('school_code') }}">
                             </div>
                         </div>
                     @endif
 
                     <button type="submit" name="btnlogin" id="login_btn"
-                        class="btn btn-primary w-100" style="padding:12px; margin-top:6px">{{ __('login') }}</button>
+                        class="btn btn-primary zolo-login-submit">{{ __('login') }}</button>
 
-                    <div class="my-2 d-flex justify-content-center align-items-center" style="margin-top:12px">
-                        <a href="#" data-bs-toggle="modal" data-bs-dismiss="offcanvas" data-bs-target="#staticBackdrop" style="font-size:12.5px; font-weight:600">
+                    <div class="zolo-login-signup">
+                        <a href="#" data-bs-toggle="modal" data-bs-dismiss="offcanvas" data-bs-target="#staticBackdrop">
                             {{ __('New user Sign up to manage your school activities seamlessly') }}
                         </a>
                     </div>
@@ -166,37 +157,37 @@
                 @if (config('app.demo_mode'))
                     <div class="zolo-demo-divider">{{ __('SIGN IN AS DEMO ROLE') }}</div>
                     @if (empty($school) ?? '')
-                        <div style="font-size:11px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:var(--zolo-muted-3); margin-bottom:6px">Super Admin Panels</div>
-                        <div class="zolo-demo-grid" style="margin-bottom:10px">
+                        <div class="zolo-demo-group-label">Super Admin Panels</div>
+                        <div class="zolo-demo-grid">
                             <button type="button" class="zolo-demo-role" id="superadmin_btn">
-                                <span class="ms">shield_person</span>
-                                <span><span class="zolo-demo-role-label" style="display:block">Super Admin</span><span class="zolo-demo-role-scope">System owner</span></span>
+                                <i class="mdi mdi-shield-account"></i>
+                                <span class="zolo-demo-role-text"><span class="zolo-demo-role-label">Super Admin</span><span class="zolo-demo-role-scope">System owner</span></span>
                             </button>
                             <button type="button" class="zolo-demo-role" id="superadmin_staff_btn">
-                                <span class="ms">badge</span>
-                                <span><span class="zolo-demo-role-label" style="display:block">Staff</span><span class="zolo-demo-role-scope">Support staff</span></span>
+                                <i class="mdi mdi-account-box"></i>
+                                <span class="zolo-demo-role-text"><span class="zolo-demo-role-label">Staff</span><span class="zolo-demo-role-scope">Support staff</span></span>
                             </button>
                         </div>
                     @endif
-                    <div style="font-size:11px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:var(--zolo-muted-3); margin-bottom:6px">School Admin Panels</div>
+                    <div class="zolo-demo-group-label">School Admin Panels</div>
                     <div class="zolo-demo-grid">
                         <button type="button" class="zolo-demo-role" id="schooladmin_btn">
-                            <span class="ms">admin_panel_settings</span>
-                            <span><span class="zolo-demo-role-label" style="display:block">School Admin</span><span class="zolo-demo-role-scope">Full school access</span></span>
+                            <i class="mdi mdi-account-settings"></i>
+                            <span class="zolo-demo-role-text"><span class="zolo-demo-role-label">School Admin</span><span class="zolo-demo-role-scope">Full school access</span></span>
                         </button>
                         <button type="button" class="zolo-demo-role" id="teacher_btn">
-                            <span class="ms">co_present</span>
-                            <span><span class="zolo-demo-role-label" style="display:block">Teacher</span><span class="zolo-demo-role-scope">Class-scoped</span></span>
+                            <i class="mdi mdi-teach"></i>
+                            <span class="zolo-demo-role-text"><span class="zolo-demo-role-label">Teacher</span><span class="zolo-demo-role-scope">Class-scoped</span></span>
                         </button>
                         <button type="button" class="zolo-demo-role" id="schooladmin_staff_btn">
-                            <span class="ms">badge</span>
-                            <span><span class="zolo-demo-role-label" style="display:block">Staff</span><span class="zolo-demo-role-scope">Limited access</span></span>
+                            <i class="mdi mdi-account-box"></i>
+                            <span class="zolo-demo-role-text"><span class="zolo-demo-role-label">Staff</span><span class="zolo-demo-role-scope">Limited access</span></span>
                         </button>
                     </div>
                 @endif
 
                 <div class="zolo-security-note">
-                    <span class="ms">verified_user</span>
+                    <i class="mdi mdi-shield-check"></i>
                     <span>{{ __('Two-factor authentication is enforced for admin accounts. A 6-digit code is sent to the registered number.') }}</span>
                 </div>
             </div>
