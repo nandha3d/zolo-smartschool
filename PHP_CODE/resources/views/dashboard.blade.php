@@ -14,8 +14,8 @@
     </style>
 
     <div class="content-wrapper">
-        <div class="zolo-page-header" style="margin-bottom:16px">
-            <h1 class="zolo-heading" style="margin:0; font-size:22px">{{ __('dashboard') }}</h1>
+        <div class="zolo-page-header">
+            <h1 class="zolo-heading zolo-page-title">{{ __('dashboard') }}</h1>
         </div>
         {{-- School Dashboard --}}
         @if (Auth::user()->hasRole('School Admin') || Auth::user()->school_id)
@@ -102,25 +102,25 @@
                 @endif
             </div>
             @if (Auth::user()->hasRole('School Admin'))
-                <div class="zolo-stat-strip" style="margin-bottom:16px">
+                <div class="zolo-stat-strip">
                     <div class="zolo-stat">
-                        <div class="zolo-stat-label"><span class="ms" style="font-size:16px; color:var(--zolo-accent)">person</span>{{ __('total_teachers') }}</div>
+                        <div class="zolo-stat-label"><i class="mdi mdi-account-tie"></i>{{ __('total_teachers') }}</div>
                         <div class="zolo-stat-value zolo-tabular">{{ $teacher }}</div>
                     </div>
                     <div class="zolo-stat">
-                        <div class="zolo-stat-label"><span class="ms" style="font-size:16px; color:var(--zolo-accent)">school</span>{{ __('total_students') }}</div>
+                        <div class="zolo-stat-label"><i class="mdi mdi-school"></i>{{ __('total_students') }}</div>
                         <div class="zolo-stat-value zolo-tabular">{{ $student }}</div>
                     </div>
                     <div class="zolo-stat">
-                        <div class="zolo-stat-label"><span class="ms" style="font-size:16px; color:var(--zolo-accent)">family_restroom</span>{{ __('Total Guardians') }}</div>
+                        <div class="zolo-stat-label"><i class="mdi mdi-account-group"></i>{{ __('Total Guardians') }}</div>
                         <div class="zolo-stat-value zolo-tabular">{{ $parent }}</div>
                     </div>
                     <div class="zolo-stat">
-                        <div class="zolo-stat-label"><span class="ms" style="font-size:16px; color:var(--zolo-accent)">meeting_room</span>{{ __('total_classes') }}</div>
+                        <div class="zolo-stat-label"><i class="mdi mdi-google-classroom"></i>{{ __('total_classes') }}</div>
                         <div class="zolo-stat-value zolo-tabular">{{ $classes_counter }}</div>
                     </div>
                     <div class="zolo-stat">
-                        <div class="zolo-stat-label"><span class="ms" style="font-size:16px; color:var(--zolo-accent)">account_tree</span>{{ __('total_streams') }}</div>
+                        <div class="zolo-stat-label"><i class="mdi mdi-sitemap"></i>{{ __('total_streams') }}</div>
                         <div class="zolo-stat-value zolo-tabular">{{ $streams }}</div>
                     </div>
                 </div>
@@ -481,21 +481,21 @@
 
         {{-- Super Admin Dashboard --}}
         @if (Auth::user()->hasRole('Super Admin') || !Auth::user()->school_id)
-            <div class="zolo-stat-strip" style="margin-bottom:16px">
+            <div class="zolo-stat-strip">
                 <div class="zolo-stat">
-                    <div class="zolo-stat-label"><span class="ms" style="font-size:16px; color:var(--zolo-accent)">apartment</span>{{ __('total_schools') }}</div>
+                    <div class="zolo-stat-label"><i class="mdi mdi-office-building"></i>{{ __('total_schools') }}</div>
                     <div class="zolo-stat-value zolo-tabular">{{ $super_admin['total_school'] }}</div>
                 </div>
                 <div class="zolo-stat">
-                    <div class="zolo-stat-label"><span class="ms" style="font-size:16px; color:var(--zolo-ok-ink)">check_circle</span>{{ __('active_schools') }}</div>
+                    <div class="zolo-stat-label"><i class="mdi mdi-check-circle zolo-ico-ok"></i>{{ __('active_schools') }}</div>
                     <div class="zolo-stat-value zolo-tabular">{{ $super_admin['active_schools'] }}</div>
                 </div>
                 <div class="zolo-stat">
-                    <div class="zolo-stat-label"><span class="ms" style="font-size:16px; color:var(--zolo-bad-ink)">cancel</span>{{ __('inactive_schools') }}</div>
+                    <div class="zolo-stat-label"><i class="mdi mdi-close-circle zolo-ico-bad"></i>{{ __('inactive_schools') }}</div>
                     <div class="zolo-stat-value zolo-tabular">{{ $super_admin['inactive_schools'] }}</div>
                 </div>
                 <div class="zolo-stat">
-                    <div class="zolo-stat-label"><span class="ms" style="font-size:16px; color:var(--zolo-accent)">inventory_2</span>{{ __('total_packages') }}</div>
+                    <div class="zolo-stat-label"><i class="mdi mdi-package-variant-closed"></i>{{ __('total_packages') }}</div>
                     <div class="zolo-stat-value zolo-tabular">{{ $super_admin['total_packages'] }}</div>
                 </div>
             </div>

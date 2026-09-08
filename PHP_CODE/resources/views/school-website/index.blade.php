@@ -381,7 +381,7 @@
                             <span class="commonTag"> {{ $schoolSettings['faqs_title'] ?? 'Frequently Asked Questions' }}
                             </span>
                             <span class="commonTitle">
-                                {{ $schoolSettings['faqs_heading'] ?? 'Know More About eSchool' }}
+                                {{ $schoolSettings['faqs_heading'] ?? __('Know More About Us') }}
 
                             </span>
 

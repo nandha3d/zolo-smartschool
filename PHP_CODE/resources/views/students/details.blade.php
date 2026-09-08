@@ -6,8 +6,8 @@
 
 @section('content')
     <div class="content-wrapper">
-        <div class="zolo-page-header" style="margin-bottom:16px">
-            <h1 class="zolo-heading" style="margin:0; font-size:22px">{{ __('manage') . ' ' . __('students') }}</h1>
+        <div class="zolo-page-header">
+            <h1 class="zolo-heading zolo-page-title">{{ __('manage') . ' ' . __('students') }}</h1>
         </div>
 
         <div class="row">
