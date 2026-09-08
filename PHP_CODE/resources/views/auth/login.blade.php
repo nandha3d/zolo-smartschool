@@ -62,164 +62,145 @@
 </head>
 
 <body>
-    <div class="container-scroller">
-        <div class="container-fluid page-body-wrapper full-page-wrapper">
-            <div class="content-wrapper login-d-flex align-items-center auth">
-                <div class="row flex-grow">
-                    <div class="col-xl-6 mx-auto auth-form-light p-4 m-4">
-                        {{-- A demo-mode notice linking to the original vendor's hosted demo
-                             was removed here. --}}
-                        <div class="rounded-lg text-left p-5">
-                            <div class="brand-logo text-center">
-                                @if ($schoolSettings['horizontal_logo'] ?? '')
-                                    <img class="img-fluid w-25" src="{{ $schoolSettings['horizontal_logo'] ?? '' }}"
-                                        alt="logo">
-                                @elseif($systemSettings['login_page_logo'] ?? $systemSettings['horizontal_logo'] ?? '')
-                                    <img class="img-fluid w-25"
-                                        src="{{ $systemSettings['login_page_logo'] ?? $systemSettings['horizontal_logo'] ?? '' }}"
-                                        alt="logo">
-                                @else
-                                    <img class="img-fluid w-25" src="{{ url('assets/horizontal-logo.svg') }}" alt="logo">
-                                @endif
+    <div class="zolo-login-shell">
 
-                            </div>
-                            <div class="mt-3">
-                                {{-- emailSuccess --}}
-                                @if (\Session::has('emailSuccess'))
-                                    <div class="alert alert-success text-center" role="alert">
-                                        {{ \Session::get('emailSuccess') }}.
-                                    </div>
-                                @endif
-                                @if (\Session::has('success'))
-                                    <div class="alert alert-success text-center" role="alert">
-                                        {{ \Session::get('success') }}.
-                                    </div>
-                                    <div class="alert alert-success text-center mt-2" role="alert">
-                                        Please ensure you use your registered email for login, and your contact number as
-                                        the password.
-                                    </div>
-                                @endif
-                                {{-- emailError --}}
-                                @if (\Session::has('emailError'))
-                                    <div class="alert alert-danger text-center" role="alert">
-                                        {{ \Session::get('emailError') }}.
-                                    </div>
-                                @endif
-                                @if (\Session::has('error'))
-                                    <div class="alert alert-danger text-center" role="alert">
-                                        {{ \Session::get('error') }}.
-                                    </div>
-                                @endif
-                            </div>
-                            <form action="{{ route('login') }}" id="frmLogin" method="POST" class="pt-3">
-                                @csrf
-                                <div class="form-group">
-                                    <label for="email">{{ __('email') }}</label>
-                                    <input id="email" type="text" class="form-control rounded-lg form-control-lg"
-                                        name="email"
-                                        value="{{ isset($school) && !empty($school) && $school->type == 'demo' ? $school->user->email : old('email') }}"
-                                        required autocomplete="email" autofocus
-                                        placeholder="{{ __('email_or_mobile') }}">
-                                </div>
-                                <div class="form-group">
-                                    <label for="password">{{ __('password') }}</label>
-                                    <div class="input-group">
-                                        <input id="password" type="password"
-                                            class="form-control rounded-lg form-control-lg" name="password" required
-                                            value="{{ isset($school) && !empty($school) && $school->type == 'demo' ? $school->user->mobile : '' }}"
-                                            autocomplete="current-password" placeholder="{{ __('password') }}">
-                                        <div class="input-group-append" cursor="pointer" id="togglePasswordShowHide">
-                                            <span class="input-group-text">
-                                                <i class="fa fa-eye-slash" id="togglePassword"></i>
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                @if ($school ?? '')
-                                    <div class="form-group d-none">
-                                        <label for="school_code">{{ __('school_code') }}</label>
-                                        <input id="school_code" type="text" class="form-control rounded-lg form-control-lg"
-                                            name="code" value="{{ $school->code }}" autocomplete="school_code" autofocus
-                                            placeholder="{{ __('school_code') }}">
-                                    </div>
-                                @else
-                                    <div class="form-group">
-                                        <label for="school_code">{{ __('school_code') }}</label>
-                                        <input id="school_code" type="text" class="form-control rounded-lg form-control-lg"
-                                            name="code" value="{{ old('school_code') }}" autocomplete="school_code"
-                                            autofocus placeholder="{{ __('school_code') }}">
-                                    </div>
-                                @endif
-
-
-                                @if (Route::has('password.request'))
-                                    <div class="my-2 d-flex justify-content-end align-items-center">
-                                        <a class="auth-link text-blue" href="{{ route('password.request') }}">
-                                            {{ __('forgot_password') }}
-                                        </a>
-                                    </div>
-                                @endif
-                                <div class="mt-3">
-                                    <input type="submit" name="btnlogin" id="login_btn" value="{{ __('login') }}"
-                                        class="btn btn-block btn-theme btn-lg font-weight-medium auth-form-btn rounded-lg" />
-                                </div>
-                                <div class="my-2 d-flex justify-content-end align-items-center">
-                                    <a class="text-blue" href="#" data-bs-toggle="modal" data-bs-dismiss="offcanvas"
-                                        data-bs-target="#staticBackdrop">
-                                        {{ __('New user Sign up to manage your school activities seamlessly') }}
-                                    </a>
-                                </div>
-                            </form>
-                            @include('registration_form')
-                            @if (config('app.demo_mode'))
-
-                                <div class="row mt-3">
-                                    <hr style="width: -webkit-fill-available;">
-                                    <div class="col-12 text-center mb-4 text-black-50">Demo Credentials</div>
-                                </div>
-                                @if (empty($school) ?? '')
-                                    <div class="col-12 text-center">
-                                        Super Admin Panels
-                                    </div>
-
-                                    <div class="row mt-3">
-                                        <div class="col-md-6">
-                                            <button class="btn w-100 btn-success mt-2" id="superadmin_btn">Super Admin</button>
-                                        </div>
-
-                                        <div class="col-md-6">
-                                            <button class="btn w-100 btn-info mt-2" id="superadmin_staff_btn">Staff</button>
-                                        </div>
-                                    </div>
-                                @endif
-
-                                <div class="col-12 text-center mt-3">
-                                    <hr class="w-100">
-                                    School Admin Panels
-                                </div>
-
-                                <div class="row mt-3">
-                                    <div class="col-md-4">
-                                        <button class="btn w-100 btn-info mt-2" id="schooladmin_btn">School Admin</button>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <button class="btn w-100 btn-danger mt-2" id="teacher_btn">Teacher</button>
-                                    </div>
-
-                                    <div class="col-md-4">
-                                        <button class="btn w-100 btn-primary mt-2" id="schooladmin_staff_btn">Staff</button>
-                                    </div>
-                                </div>
-
-                            @endif
-                        </div>
-                    </div>
+        <div class="zolo-login-aside">
+            <div class="zolo-login-brand">
+                @if ($schoolSettings['horizontal_logo'] ?? $systemSettings['login_page_logo'] ?? $systemSettings['horizontal_logo'] ?? '')
+                    <img src="{{ $schoolSettings['horizontal_logo'] ?? $systemSettings['login_page_logo'] ?? $systemSettings['horizontal_logo'] }}"
+                        alt="{{ $schoolSettings['school_name'] ?? $systemSettings['system_name'] ?? 'logo' }}" style="height:32px; max-width:180px; object-fit:contain">
+                @else
+                    <div class="zolo-login-mark">{{ Str::substr($schoolSettings['school_name'] ?? $systemSettings['system_name'] ?? 'Z', 0, 1) }}</div>
+                    <div class="zolo-login-brand-name">{{ $schoolSettings['school_name'] ?? $systemSettings['system_name'] ?? config('app.name') }}</div>
+                @endif
+            </div>
+            <div class="zolo-login-mid">
+                <div class="zolo-login-kicker">{{ __('School management console') }}</div>
+                <h1 class="zolo-login-title">{{ __('One console for the whole campus.') }}</h1>
+                <div class="zolo-login-desc">{{ __('Admissions, attendance, fees, exams, payroll and parent communication — with per-role privileges on every module.') }}</div>
+                <div class="zolo-login-features">
+                    <div class="zolo-login-feature"><span class="ms">verified_user</span>{{ __('Per-role privileges on every module') }}</div>
+                    <div class="zolo-login-feature"><span class="ms">payments</span>{{ __('Fees, payroll and expenses in one place') }}</div>
+                    <div class="zolo-login-feature"><span class="ms">forum</span>{{ __('Built-in parent and staff communication') }}</div>
                 </div>
             </div>
-            <!-- content-wrapper ends -->
+            <div class="zolo-login-foot">&copy; {{ date('Y') }} {{ $schoolSettings['school_name'] ?? $systemSettings['system_name'] ?? config('app.name') }}</div>
         </div>
-        <!-- page-body-wrapper ends -->
+
+        <div class="zolo-login-panel">
+            <div class="zolo-login-card">
+                <h2 class="zolo-heading" style="font-size:24px; letter-spacing:-0.6px">{{ __('Sign in') }}</h2>
+                <div style="font-size:13.5px; color:var(--zolo-muted-2); margin-top:5px">{{ __('Use your school credentials to continue.') }}</div>
+
+                @if (\Session::has('emailSuccess'))
+                    <div class="alert alert-success text-center mt-3" role="alert">{{ \Session::get('emailSuccess') }}.</div>
+                @endif
+                @if (\Session::has('success'))
+                    <div class="alert alert-success text-center mt-3" role="alert">{{ \Session::get('success') }}.</div>
+                    <div class="alert alert-success text-center mt-2" role="alert">
+                        Please ensure you use your registered email for login, and your contact number as the password.
+                    </div>
+                @endif
+                @if (\Session::has('emailError'))
+                    <div class="alert alert-danger text-center mt-3" role="alert">{{ \Session::get('emailError') }}.</div>
+                @endif
+                @if (\Session::has('error'))
+                    <div class="alert alert-danger text-center mt-3" role="alert">{{ \Session::get('error') }}.</div>
+                @endif
+
+                <form action="{{ route('login') }}" id="frmLogin" method="POST" style="margin-top:22px">
+                    @csrf
+                    <div class="zolo-login-field">
+                        <div class="zolo-login-field-label">{{ __('email') }}</div>
+                        <div class="zolo-login-input-wrap">
+                            <span class="ms">mail</span>
+                            <input id="email" type="text" name="email"
+                                value="{{ isset($school) && !empty($school) && $school->type == 'demo' ? $school->user->email : old('email') }}"
+                                required autocomplete="email" autofocus placeholder="{{ __('email_or_mobile') }}">
+                        </div>
+                    </div>
+                    <div class="zolo-login-field">
+                        <div style="display:flex; align-items:center; gap:10px; margin-bottom:6px">
+                            <div class="zolo-login-field-label" style="flex:1; margin-bottom:0">{{ __('password') }}</div>
+                            @if (Route::has('password.request'))
+                                <a href="{{ route('password.request') }}" style="font-size:12px; font-weight:600">{{ __('forgot_password') }}</a>
+                            @endif
+                        </div>
+                        <div class="zolo-login-input-wrap">
+                            <span class="ms">lock</span>
+                            <input id="password" type="password" name="password" required
+                                value="{{ isset($school) && !empty($school) && $school->type == 'demo' ? $school->user->mobile : '' }}"
+                                autocomplete="current-password" placeholder="{{ __('password') }}">
+                            <span class="ms zolo-toggle-eye" id="togglePasswordShowHide"><i class="fa fa-eye-slash" id="togglePassword" style="font-size:15px"></i></span>
+                        </div>
+                    </div>
+
+                    @if ($school ?? '')
+                        <div class="zolo-login-field d-none">
+                            <div class="zolo-login-field-label">{{ __('school_code') }}</div>
+                            <div class="zolo-login-input-wrap">
+                                <input id="school_code" type="text" name="code" value="{{ $school->code }}" autocomplete="school_code" placeholder="{{ __('school_code') }}">
+                            </div>
+                        </div>
+                    @else
+                        <div class="zolo-login-field">
+                            <div class="zolo-login-field-label">{{ __('school_code') }}</div>
+                            <div class="zolo-login-input-wrap">
+                                <span class="ms">apartment</span>
+                                <input id="school_code" type="text" name="code" value="{{ old('school_code') }}" autocomplete="school_code" placeholder="{{ __('school_code') }}">
+                            </div>
+                        </div>
+                    @endif
+
+                    <button type="submit" name="btnlogin" id="login_btn"
+                        class="btn btn-primary w-100" style="padding:12px; margin-top:6px">{{ __('login') }}</button>
+
+                    <div class="my-2 d-flex justify-content-center align-items-center" style="margin-top:12px">
+                        <a href="#" data-bs-toggle="modal" data-bs-dismiss="offcanvas" data-bs-target="#staticBackdrop" style="font-size:12.5px; font-weight:600">
+                            {{ __('New user Sign up to manage your school activities seamlessly') }}
+                        </a>
+                    </div>
+                </form>
+                @include('registration_form')
+
+                @if (config('app.demo_mode'))
+                    <div class="zolo-demo-divider">{{ __('SIGN IN AS DEMO ROLE') }}</div>
+                    @if (empty($school) ?? '')
+                        <div style="font-size:11px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:var(--zolo-muted-3); margin-bottom:6px">Super Admin Panels</div>
+                        <div class="zolo-demo-grid" style="margin-bottom:10px">
+                            <button type="button" class="zolo-demo-role" id="superadmin_btn">
+                                <span class="ms">shield_person</span>
+                                <span><span class="zolo-demo-role-label" style="display:block">Super Admin</span><span class="zolo-demo-role-scope">System owner</span></span>
+                            </button>
+                            <button type="button" class="zolo-demo-role" id="superadmin_staff_btn">
+                                <span class="ms">badge</span>
+                                <span><span class="zolo-demo-role-label" style="display:block">Staff</span><span class="zolo-demo-role-scope">Support staff</span></span>
+                            </button>
+                        </div>
+                    @endif
+                    <div style="font-size:11px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:var(--zolo-muted-3); margin-bottom:6px">School Admin Panels</div>
+                    <div class="zolo-demo-grid">
+                        <button type="button" class="zolo-demo-role" id="schooladmin_btn">
+                            <span class="ms">admin_panel_settings</span>
+                            <span><span class="zolo-demo-role-label" style="display:block">School Admin</span><span class="zolo-demo-role-scope">Full school access</span></span>
+                        </button>
+                        <button type="button" class="zolo-demo-role" id="teacher_btn">
+                            <span class="ms">co_present</span>
+                            <span><span class="zolo-demo-role-label" style="display:block">Teacher</span><span class="zolo-demo-role-scope">Class-scoped</span></span>
+                        </button>
+                        <button type="button" class="zolo-demo-role" id="schooladmin_staff_btn">
+                            <span class="ms">badge</span>
+                            <span><span class="zolo-demo-role-label" style="display:block">Staff</span><span class="zolo-demo-role-scope">Limited access</span></span>
+                        </button>
+                    </div>
+                @endif
+
+                <div class="zolo-security-note">
+                    <span class="ms">verified_user</span>
+                    <span>{{ __('Two-factor authentication is enforced for admin accounts. A 6-digit code is sent to the registered number.') }}</span>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="{{ asset('/assets/js/vendor.bundle.base.js') }}"></script>
