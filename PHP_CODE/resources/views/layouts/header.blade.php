@@ -80,6 +80,7 @@
                     </div>
                     <div class="nav-profile-text">
                         <p class="mb-1 text-black">{{ Auth::user()->first_name }}</p>
+                        <p class="zolo-topbar-role mb-0">{{ Auth::user()->getRoleNames()->first() ?? '' }}</p>
                     </div>
                 </a>
                 <div class="dropdown-menu navbar-dropdown" aria-labelledby="profileDropdown">
