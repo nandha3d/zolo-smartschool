@@ -1466,4 +1466,13 @@
         @endif
 
     </ul>
+
+    <div class="zolo-sidebar-role">
+        <div class="zolo-sidebar-role-name">
+            <span class="ms">shield_person</span>{{ Auth::user()->getRoleNames()->first() ?? '' }}
+        </div>
+        <div class="zolo-sidebar-role-summary">
+            {{ Auth::user()->getAllPermissions()->count() }} {{ __('privileges') }} granted on this account.
+        </div>
+    </div>
 </nav>
