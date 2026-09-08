@@ -30,7 +30,7 @@
                         <div class="flex_column_center">
                             <span class="commonTag"> {{ $schoolSettings['our_mission_title'] ?? 'Our Mission' }} </span>
                             <span class="commonTitle">
-                                {{ $schoolSettings['our_mission_heading'] ?? 'Discover Our Mission for eSchool' }}
+                                {{ $schoolSettings['our_mission_heading'] ?? __('Discover Our Mission') }}
                             </span>
 
                             <span class="commonDesc">

@@ -390,6 +390,18 @@ a.text-primary:hover, a.text-primary:focus { color: var(--zolo-accent-hover) !im
   box-shadow: 0 0 0 3px rgba(47, 107, 255, 0.12) !important;
 }
 
+.sidebar .nav .zolo-nav-group {
+  list-style: none;
+  padding: 16px 22px 6px !important;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--zolo-muted-3);
+  background: transparent !important;
+}
+.sidebar .nav .zolo-nav-group:first-child { padding-top: 6px !important; }
+
 .sidebar .nav .nav-item {
   padding: 0 12px !important;
 }

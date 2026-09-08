@@ -16,14 +16,14 @@
 <head>
     <!-- Required meta tags -->
     <meta charset="utf-8">
-    <meta property="og:title" content="{{ $systemSettings['system_name'] ?? 'eSchool - Saas' }}">
+    <meta property="og:title" content="{{ $systemSettings['system_name'] ?? config('app.name') }}">
     <meta property="og:image" content="{{ $systemSettings['horizontal_logo'] ?? asset('assets/home_page/images/logo.png') }}">
     <meta property="og:url" content="{{ url('/') }}">
-    <meta property="og:description" content="{{ $systemSettings['tag_line'] ?? 'eSchool - Saas' }}">
+    <meta property="og:description" content="{{ $systemSettings['tag_line'] ?? config('app.name') }}">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>@yield('title')
         {{-- {{ config('app.name') }} --}}
-        {{ $systemSettings['system_name'] ?? 'eSchool - Saas' }}
+        {{ $systemSettings['system_name'] ?? config('app.name') }}
     </title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
