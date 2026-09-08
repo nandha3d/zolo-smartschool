@@ -217,9 +217,29 @@ label, .form-group > label {
 .alert-info { color: var(--zolo-info-ink) !important; background: var(--zolo-info-bg) !important; border-color: var(--zolo-info-border) !important; }
 .alert li, .alert ul { list-style: none; margin: 0; padding: 0; }
 
-/* ---------- Pagination ---------- */
+/* ---------- Pagination ----------
+   The vendor sheet targets .pagination .page-item.active .page-link (0,3,0),
+   so these selectors have to match that weight to land. */
 .page-link { border-radius: var(--zolo-radius-sm) !important; color: var(--zolo-ink-2); border-color: var(--zolo-border); }
-.page-item.active .page-link { background-color: var(--zolo-accent); border-color: var(--zolo-accent); }
+.pagination .page-item.active .page-link,
+.page-item.active .page-link {
+  background-color: var(--zolo-accent) !important;
+  border-color: var(--zolo-accent) !important;
+  color: #fff !important;
+}
+.page-item.disabled .page-link { color: var(--zolo-muted-3); }
+
+/* ---------- Legacy accent leak ----------
+   The bundled admin theme hardcodes its own purple (#b66dff) across every
+   *-primary utility, so untouched views leak it through icons, badges and
+   borders. Remap those utilities onto the redesign accent. */
+.text-primary, .list-wrapper .completed .remove { color: var(--zolo-accent) !important; }
+a.text-primary:hover, a.text-primary:focus { color: var(--zolo-accent-hover) !important; }
+.bg-primary, .settings-panel .color-tiles .tiles.primary { background: var(--zolo-accent) !important; }
+.border-primary { border-color: var(--zolo-accent) !important; }
+.badge-primary { color: var(--zolo-info-ink) !important; background: var(--zolo-info-bg) !important; border-color: var(--zolo-info-border) !important; }
+.blockquote-primary { border-color: var(--zolo-accent) !important; }
+.image-grouped .text-avatar { background: var(--zolo-accent) !important; }
 
 /* =====================================================================
    Reusable Zolo components (used by the rebuilt shell + flagship screens,
@@ -385,12 +405,23 @@ label, .form-group > label {
   background: var(--zolo-bg);
   color: var(--zolo-ink);
 }
+/* Highlight the active row itself, not the whole expanded group — the vendor
+   sheet paints .nav-item.active white, so that has to be cleared explicitly. */
+.sidebar .nav .nav-item.active { background: transparent !important; }
 .sidebar .nav .nav-item.active > .nav-link,
 .sidebar .nav .nav-item .nav-link.active,
 .sidebar .nav .nav-item .nav-link[aria-expanded="true"] {
-  background: var(--zolo-accent-soft);
+  background: var(--zolo-accent-soft) !important;
   color: var(--zolo-accent-hover);
   font-weight: 700;
+}
+/* The vendor sheet colours the inner .menu-title / icon from --theme-color,
+   so the active state has to be set on those, not just on .nav-link. */
+.sidebar .nav .nav-item.active > .nav-link .menu-title,
+.sidebar .nav .nav-item.active > .nav-link i,
+.sidebar .nav .nav-item .nav-link[aria-expanded="true"] .menu-title,
+.sidebar .nav .nav-item .nav-link[aria-expanded="true"] i.menu-icon {
+  color: var(--zolo-accent-hover) !important;
 }
 .sidebar .nav .nav-item .nav-link i.menu-icon {
   color: var(--zolo-muted-2);
