@@ -14,12 +14,8 @@
     </style>
 
     <div class="content-wrapper">
-        <div class="page-header">
-            <h3 class="page-title">
-                <span class="page-title-icon bg-theme text-white mr-2">
-                    <i class="fa fa-home"></i>
-                </span> {{ __('dashboard') }}
-            </h3>
+        <div class="zolo-page-header" style="margin-bottom:16px">
+            <h1 class="zolo-heading" style="margin:0; font-size:22px">{{ __('dashboard') }}</h1>
         </div>
         {{-- School Dashboard --}}
         @if (Auth::user()->hasRole('School Admin') || Auth::user()->school_id)
@@ -106,91 +102,26 @@
                 @endif
             </div>
             @if (Auth::user()->hasRole('School Admin'))
-                <div class="row">
-                    {{-- Teachers --}}
-                    <div class="col-md-2-4 stretch-card grid-margin">
-                        <div class="card">
-                            <div class="card-body custom-card-body">
-                                <div class="d-flex flex-row flex-wrap">
-                                    <div class="ms-3">
-                                        {{ __('total_teachers') }}
-                                        <p class="text-muted">
-                                        <h3>{{ $teacher }}</h3>
-                                        </p>
-                                        <p class="mt-2 text-success font-weight-bold"> </p>
-                                    </div>
-                                    <img class="ml-auto" src="{{ url('images/teachers.svg') }}" alt="">
-                                </div>
-                            </div>
-                        </div>
+                <div class="zolo-stat-strip" style="margin-bottom:16px">
+                    <div class="zolo-stat">
+                        <div class="zolo-stat-label"><span class="ms" style="font-size:16px; color:var(--zolo-accent)">person</span>{{ __('total_teachers') }}</div>
+                        <div class="zolo-stat-value zolo-tabular">{{ $teacher }}</div>
                     </div>
-                    {{-- Students --}}
-                    <div class="col-md-2-4 stretch-card grid-margin">
-                        <div class="card">
-                            <div class="card-body custom-card-body">
-                                <div class="d-flex flex-row flex-wrap">
-                                    <div class="ms-3">
-                                        {{ __('total_students') }}
-                                        <p class="text-muted">
-                                        <h3>{{ $student }}</h3>
-                                        </p>
-                                        <p class="mt-2 text-success font-weight-bold"> </p>
-                                    </div>
-                                    <img class="ml-auto" src="{{ url('images/students.svg') }}" alt="">
-                                </div>
-                            </div>
-                        </div>
+                    <div class="zolo-stat">
+                        <div class="zolo-stat-label"><span class="ms" style="font-size:16px; color:var(--zolo-accent)">school</span>{{ __('total_students') }}</div>
+                        <div class="zolo-stat-value zolo-tabular">{{ $student }}</div>
                     </div>
-                    {{-- Guardians --}}
-                    <div class="col-md-2-4 stretch-card grid-margin">
-                        <div class="card">
-                            <div class="card-body custom-card-body">
-                                <div class="d-flex flex-row flex-wrap">
-                                    <div class="ms-3">
-                                        {{ __('Total Guardians') }}
-                                        <p class="text-muted">
-                                        <h3>{{ $parent }}</h3>
-                                        </p>
-                                        <p class="mt-2 text-success font-weight-bold"> </p>
-                                    </div>
-                                    <img class="ml-auto" src="{{ url('images/guardians.svg') }}" alt="">
-                                </div>
-                            </div>
-                        </div>
+                    <div class="zolo-stat">
+                        <div class="zolo-stat-label"><span class="ms" style="font-size:16px; color:var(--zolo-accent)">family_restroom</span>{{ __('Total Guardians') }}</div>
+                        <div class="zolo-stat-value zolo-tabular">{{ $parent }}</div>
                     </div>
-                    {{-- Class --}}
-                    <div class="col-md-2-4 stretch-card grid-margin">
-                        <div class="card">
-                            <div class="card-body custom-card-body">
-                                <div class="d-flex flex-row flex-wrap">
-                                    <div class="ms-3">
-                                        {{ __('total_classes') }}
-                                        <p class="text-muted">
-                                        <h3>{{ $classes_counter }}</h3>
-                                        </p>
-                                        <p class="mt-2 text-success font-weight-bold"> </p>
-                                    </div>
-                                    <img class="ml-auto" src="{{ url('images/classes.svg') }}" alt="">
-                                </div>
-                            </div>
-                        </div>
+                    <div class="zolo-stat">
+                        <div class="zolo-stat-label"><span class="ms" style="font-size:16px; color:var(--zolo-accent)">meeting_room</span>{{ __('total_classes') }}</div>
+                        <div class="zolo-stat-value zolo-tabular">{{ $classes_counter }}</div>
                     </div>
-                    {{-- Stream --}}
-                    <div class="col-md-2-4 stretch-card grid-margin">
-                        <div class="card">
-                            <div class="card-body custom-card-body">
-                                <div class="d-flex flex-row flex-wrap">
-                                    <div class="ms-3">
-                                        {{ __('total_streams') }}
-                                        <p class="text-muted">
-                                        <h3>{{ $streams }}</h3>
-                                        </p>
-                                        <p class="mt-2 text-success font-weight-bold"> </p>
-                                    </div>
-                                    <img class="ml-auto" src="{{ url('images/stream.svg') }}" alt="">
-                                </div>
-                            </div>
-                        </div>
+                    <div class="zolo-stat">
+                        <div class="zolo-stat-label"><span class="ms" style="font-size:16px; color:var(--zolo-accent)">account_tree</span>{{ __('total_streams') }}</div>
+                        <div class="zolo-stat-value zolo-tabular">{{ $streams }}</div>
                     </div>
                 </div>
             @endif
@@ -550,74 +481,22 @@
 
         {{-- Super Admin Dashboard --}}
         @if (Auth::user()->hasRole('Super Admin') || !Auth::user()->school_id)
-            <div class="row">
-
-                <div class="col-md-3 stretch-card grid-margin">
-                    <div class="card">
-                        <div class="card-body custom-card-body">
-                            <div class="d-flex flex-row flex-wrap">
-                                <div class="ms-3">
-                                    {{ __('total_schools') }}
-                                    <p class="text-muted">
-                                    <h3>{{ $super_admin['total_school'] }}</h3>
-                                    </p>
-                                    <p class="mt-2 text-success font-weight-bold"> </p>
-                                </div>
-                                <img class="ml-auto" src="{{ url('images/total-schools.svg') }}" alt="">
-                            </div>
-                        </div>
-                    </div>
+            <div class="zolo-stat-strip" style="margin-bottom:16px">
+                <div class="zolo-stat">
+                    <div class="zolo-stat-label"><span class="ms" style="font-size:16px; color:var(--zolo-accent)">apartment</span>{{ __('total_schools') }}</div>
+                    <div class="zolo-stat-value zolo-tabular">{{ $super_admin['total_school'] }}</div>
                 </div>
-
-                <div class="col-md-3 stretch-card grid-margin">
-                    <div class="card">
-                        <div class="card-body custom-card-body">
-                            <div class="d-flex flex-row flex-wrap">
-                                <div class="ms-3">
-                                    {{ __('active_schools') }}
-                                    <p class="text-muted">
-                                    <h3>{{ $super_admin['active_schools'] }}</h3>
-                                    </p>
-                                    <p class="mt-2 text-success font-weight-bold"> </p>
-                                </div>
-                                <img class="ml-auto" src="{{ url('images/active-schools.svg') }}" alt="">
-                            </div>
-                        </div>
-                    </div>
+                <div class="zolo-stat">
+                    <div class="zolo-stat-label"><span class="ms" style="font-size:16px; color:var(--zolo-ok-ink)">check_circle</span>{{ __('active_schools') }}</div>
+                    <div class="zolo-stat-value zolo-tabular">{{ $super_admin['active_schools'] }}</div>
                 </div>
-
-                <div class="col-md-3 stretch-card grid-margin">
-                    <div class="card">
-                        <div class="card-body custom-card-body">
-                            <div class="d-flex flex-row flex-wrap">
-                                <div class="ms-3">
-                                    {{ __('inactive_schools') }}
-                                    <p class="text-muted">
-                                    <h3>{{ $super_admin['inactive_schools'] }}</h3>
-                                    </p>
-                                    <p class="mt-2 text-success font-weight-bold"> </p>
-                                </div>
-                                <img class="ml-auto" src="{{ url('images/inactive-schools.svg') }}" alt="">
-                            </div>
-                        </div>
-                    </div>
+                <div class="zolo-stat">
+                    <div class="zolo-stat-label"><span class="ms" style="font-size:16px; color:var(--zolo-bad-ink)">cancel</span>{{ __('inactive_schools') }}</div>
+                    <div class="zolo-stat-value zolo-tabular">{{ $super_admin['inactive_schools'] }}</div>
                 </div>
-
-                <div class="col-md-3 stretch-card grid-margin">
-                    <div class="card">
-                        <div class="card-body custom-card-body">
-                            <div class="d-flex flex-row flex-wrap">
-                                <div class="ms-3">
-                                    {{ __('total_packages') }}
-                                    <p class="text-muted">
-                                    <h3>{{ $super_admin['total_packages'] }}</h3>
-                                    </p>
-                                    <p class="mt-2 text-success font-weight-bold"> </p>
-                                </div>
-                                <img class="ml-auto" src="{{ url('images/package.svg') }}" alt="">
-                            </div>
-                        </div>
-                    </div>
+                <div class="zolo-stat">
+                    <div class="zolo-stat-label"><span class="ms" style="font-size:16px; color:var(--zolo-accent)">inventory_2</span>{{ __('total_packages') }}</div>
+                    <div class="zolo-stat-value zolo-tabular">{{ $super_admin['total_packages'] }}</div>
                 </div>
             </div>
 

@@ -127,6 +127,13 @@ a:hover { color: var(--zolo-accent-hover); }
 .btn-danger, .btn-inverse-danger  { background-color: var(--zolo-bad-ink) !important; border-color: var(--zolo-bad-ink) !important; }
 .btn-warning, .btn-inverse-warning{ background-color: var(--zolo-warn-ink) !important; border-color: var(--zolo-warn-ink) !important; color: #fff !important; }
 
+/* ---------- Page chrome ---------- */
+.content-wrapper {
+  background: var(--zolo-bg) !important;
+  padding: 20px 26px 44px !important;
+}
+.main-panel { background: var(--zolo-bg) !important; }
+
 /* ---------- Cards ---------- */
 .card {
   border: 1px solid var(--zolo-border);
@@ -139,6 +146,11 @@ a:hover { color: var(--zolo-accent-hover); }
   font-weight: 700;
   font-size: 16px;
 }
+.zolo-card-header {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;
+}
+.zolo-card-header .card-title { margin: 0; flex: 1 1 160px; min-width: 0; }
+.zolo-card-header select { width: auto; }
 
 /* ---------- Tables ---------- */
 .table thead th {
@@ -199,6 +211,19 @@ label, .form-group > label {
   border: 0;
   box-shadow: var(--zolo-shadow-modal);
 }
+
+/* ---------- Alerts ---------- */
+.alert {
+  border-radius: var(--zolo-radius-lg) !important;
+  border: 1px solid transparent;
+  font-size: 13px;
+  padding: 13px 16px;
+}
+.alert-danger { color: var(--zolo-bad-ink) !important; background: var(--zolo-bad-bg) !important; border-color: var(--zolo-bad-border) !important; }
+.alert-success { color: var(--zolo-ok-ink) !important; background: var(--zolo-ok-bg) !important; border-color: var(--zolo-ok-border) !important; }
+.alert-warning { color: var(--zolo-warn-ink) !important; background: var(--zolo-warn-bg) !important; border-color: var(--zolo-warn-border) !important; }
+.alert-info { color: var(--zolo-info-ink) !important; background: var(--zolo-info-bg) !important; border-color: var(--zolo-info-border) !important; }
+.alert li, .alert ul { list-style: none; margin: 0; padding: 0; }
 
 /* ---------- Pagination ---------- */
 .page-link { border-radius: var(--zolo-radius-sm) !important; color: var(--zolo-ink-2); border-color: var(--zolo-border); }
@@ -434,3 +459,69 @@ label, .form-group > label {
   font-weight: 500;
   margin: -2px 0 0;
 }
+
+/* =====================================================================
+   Login screen (Phase 3)
+   ===================================================================== */
+
+.zolo-login-shell { display: flex; min-height: 100vh; flex-wrap: wrap; background: var(--zolo-bg); }
+
+.zolo-login-aside {
+  flex: 1 1 420px; min-width: 0;
+  background: var(--zolo-ink); color: #fff;
+  padding: 44px 46px; display: flex; flex-direction: column;
+}
+.zolo-login-brand { display: flex; align-items: center; gap: 11px; }
+.zolo-login-mark {
+  width: 34px; height: 34px; border-radius: 9px; background: var(--zolo-accent);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--zolo-font-heading); font-weight: 700; font-size: 17px; flex: none;
+}
+.zolo-login-brand-name { font-family: var(--zolo-font-heading); font-weight: 700; font-size: 16px; }
+.zolo-login-mid { margin: auto 0; padding: 40px 0; }
+.zolo-login-kicker { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: #7C8CA8; font-weight: 700; }
+.zolo-login-title {
+  margin: 12px 0 0; font-family: var(--zolo-font-heading); font-size: 34px; line-height: 1.16;
+  font-weight: 700; letter-spacing: -1.1px; max-width: 16ch; color: #fff;
+}
+.zolo-login-desc { margin-top: 14px; font-size: 14.5px; line-height: 1.65; color: #AEBBD1; max-width: 46ch; }
+.zolo-login-features { display: flex; flex-direction: column; gap: 12px; margin-top: 28px; }
+.zolo-login-feature { display: flex; align-items: center; gap: 10px; font-size: 13px; color: #C7D2E8; }
+.zolo-login-feature .ms { color: #5B8CFF; font-size: 18px; }
+.zolo-login-foot { font-size: 12px; color: #68789A; }
+
+.zolo-login-panel { flex: 1 1 420px; min-width: 0; display: flex; align-items: center; justify-content: center; padding: 40px 26px; }
+.zolo-login-card { width: 100%; max-width: 380px; }
+.zolo-login-field { margin-bottom: 14px; }
+.zolo-login-field-label { font-size: 12px; font-weight: 600; color: var(--zolo-ink-2); margin-bottom: 6px; }
+.zolo-login-input-wrap {
+  display: flex; align-items: center; gap: 9px; background: #fff;
+  border: 1px solid var(--zolo-border); border-radius: var(--zolo-radius); padding: 2px 12px;
+}
+.zolo-login-input-wrap input {
+  flex: 1; min-width: 0; border: 0 !important; outline: none; background: none !important;
+  font-size: 13.5px; color: var(--zolo-ink); font-family: var(--zolo-font-body); box-shadow: none !important;
+  padding: 10px 0 !important;
+}
+.zolo-login-input-wrap .ms { font-size: 18px; color: var(--zolo-muted-2); cursor: default; }
+.zolo-login-input-wrap .ms.zolo-toggle-eye { cursor: pointer; }
+
+.zolo-demo-divider { display: flex; align-items: center; gap: 10px; font-size: 11.5px; color: var(--zolo-muted-3); margin: 18px 0 10px; }
+.zolo-demo-divider::before, .zolo-demo-divider::after { content: ''; flex: 1; height: 1px; background: var(--zolo-border); }
+.zolo-demo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; }
+.zolo-demo-role {
+  display: flex; align-items: center; gap: 8px; background: #fff; border: 1px solid var(--zolo-border);
+  border-radius: var(--zolo-radius); padding: 9px 11px; cursor: pointer; width: 100%; text-align: left;
+  font-family: var(--zolo-font-body);
+}
+.zolo-demo-role:hover { border-color: var(--zolo-accent); }
+.zolo-demo-role .ms { font-size: 17px; color: var(--zolo-accent); }
+.zolo-demo-role-label { font-size: 12.5px; font-weight: 600; color: var(--zolo-ink); }
+.zolo-demo-role-scope { font-size: 10.5px; color: var(--zolo-muted-2); }
+
+.zolo-security-note {
+  display: flex; align-items: flex-start; gap: 9px; background: #fff; border: 1px solid var(--zolo-border);
+  border-radius: var(--zolo-radius); padding: 11px 13px; font-size: 12px; color: var(--zolo-muted); line-height: 1.55;
+  margin-top: 14px;
+}
+.zolo-security-note .ms { font-size: 16px; color: var(--zolo-accent); margin-top: 1px; }

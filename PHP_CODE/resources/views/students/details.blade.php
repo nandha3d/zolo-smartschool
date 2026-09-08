@@ -6,10 +6,8 @@
 
 @section('content')
     <div class="content-wrapper">
-        <div class="page-header">
-            <h3 class="page-title">
-                {{ __('manage') . ' ' . __('students') }}
-            </h3>
+        <div class="zolo-page-header" style="margin-bottom:16px">
+            <h1 class="zolo-heading" style="margin:0; font-size:22px">{{ __('manage') . ' ' . __('students') }}</h1>
         </div>
 
         <div class="row">
@@ -19,7 +17,7 @@
                         <h4 class="card-title">
                             {{ __('list') . ' ' . __('students') }}
                         </h4>
-                        <div class="row" id="toolbar">
+                        <div class="row align-items-end" id="toolbar">
                             <div class="form-group col-sm-12 col-md-4">
                                 <label class="filter-menu">{{ __('Class Section') }} <span class="text-danger">*</span></label>
                                 <select name="filter_class_section_id" id="filter_class_section_id" class="form-control">
@@ -38,14 +36,14 @@
                                 </select>
                             </div>
                             @can('student-delete')
-                                <div class="form-group col-12">
+                                <div class="form-group col-12 col-md-4">
                                     <button id="update-status" class="btn btn-secondary" disabled><span class="update-status-btn-name">{{ __('Inactive') }}</span></button>
                                 </div>
                             @endcan
                         </div>
 
                         @can('student-delete')
-                            <div class="col-12 mt-4 text-right">
+                            <div class="col-12 mt-2 mb-2 text-right">
                                 <b><a href="#" class="table-list-type active mr-2" data-id="0">{{__('active')}}</a></b> | <a href="#" class="ml-2 table-list-type" data-id="1">{{__("Inactive")}}</a>
                             </div>
                         @endcan
