@@ -1,0 +1,310 @@
+/*
+ * Zolo Console redesign — design-system foundation.
+ * Loaded after style.min.css / custom.css so it wins on equal specificity.
+ * New markup should prefer the zolo-* classes below over fighting the
+ * legacy admin-theme selectors; Bootstrap primitives (.btn, .card, .table,
+ * .badge, .form-control …) are re-skinned here so unmodified CRUD views
+ * inherit the new look for free.
+ */
+
+:root {
+  --zolo-accent: #2F6BFF;
+  --zolo-accent-hover: #1B4ED1;
+  --zolo-accent-soft: #EAF0FF;
+  --zolo-accent-soft-border: #C9D9FF;
+  --zolo-ink: #0F172A;
+  --zolo-ink-2: #334155;
+  --zolo-muted: #5B6577;
+  --zolo-muted-2: #8A94A6;
+  --zolo-muted-3: #A3AEC0;
+  --zolo-label: #64748B;
+  --zolo-bg: #F4F6FA;
+  --zolo-surface: #ffffff;
+  --zolo-border: #E3E8F0;
+  --zolo-border-soft: #EEF1F6;
+  --zolo-border-soft-2: #F1F4F9;
+
+  --zolo-ok-ink: #047857;    --zolo-ok-bg: #E6F6F0;    --zolo-ok-border: #BCE5D6;
+  --zolo-bad-ink: #B91C1C;   --zolo-bad-bg: #FDECEC;   --zolo-bad-border: #F6C9C9;
+  --zolo-warn-ink: #B45309;  --zolo-warn-bg: #FEF3E2;  --zolo-warn-border: #FADFB4;
+  --zolo-info-ink: #1B4ED1;  --zolo-info-bg: #EAF0FF;  --zolo-info-border: #C9D9FF;
+  --zolo-flat-ink: #475569;  --zolo-flat-bg: #F4F6FA;  --zolo-flat-border: #E3E8F0;
+
+  --zolo-radius-sm: 7px;
+  --zolo-radius: 9px;
+  --zolo-radius-lg: 12px;
+  --zolo-radius-pill: 99px;
+  --zolo-shadow-modal: 0 20px 50px rgba(15, 23, 42, 0.28);
+
+  --zolo-font-heading: 'Instrument Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --zolo-font-body: 'Figtree', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  /* Keep the app's existing theming hook pointed at the new accent by default. */
+  --theme-color: var(--zolo-accent);
+  --theme-color-dark: var(--zolo-accent-hover);
+}
+
+/* ---------- Material Symbols icon helper ---------- */
+.ms {
+  font-family: 'Material Symbols Sharp';
+  font-weight: 400;
+  font-style: normal;
+  font-size: 20px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  vertical-align: middle;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- Base ---------- */
+body {
+  background: var(--zolo-bg);
+  color: var(--zolo-ink);
+  font-family: var(--zolo-font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6,
+.zolo-heading {
+  font-family: var(--zolo-font-heading);
+  font-weight: 700;
+  letter-spacing: -0.4px;
+  color: var(--zolo-ink);
+}
+
+a { color: var(--zolo-accent); }
+a:hover { color: var(--zolo-accent-hover); }
+
+.zolo-tabular { font-variant-numeric: tabular-nums; }
+
+/* ---------- Buttons ---------- */
+.btn {
+  border-radius: var(--zolo-radius) !important;
+  font-weight: 600;
+  font-size: 0.83rem;
+}
+
+.btn-primary,
+.btn-inverse-primary,
+.wizard > .actions a {
+  color: #fff !important;
+  background-color: var(--zolo-accent) !important;
+  border-color: var(--zolo-accent) !important;
+}
+
+.btn-primary:hover, .btn-primary:focus,
+.btn-inverse-primary:hover, .btn-inverse-primary:focus,
+.wizard > .actions a:hover {
+  background-color: var(--zolo-accent-hover) !important;
+  border-color: var(--zolo-accent-hover) !important;
+  box-shadow: 0 0 0 0.2rem rgba(47, 107, 255, 0.25) !important;
+}
+
+.btn-outline-primary {
+  color: var(--zolo-accent) !important;
+  border-color: var(--zolo-accent) !important;
+}
+.btn-outline-primary:hover {
+  color: #fff !important;
+  background-color: var(--zolo-accent) !important;
+}
+
+.btn-light, .btn-secondary, .btn-inverse-secondary {
+  color: var(--zolo-ink-2) !important;
+  background-color: #fff !important;
+  border-color: var(--zolo-border) !important;
+}
+.btn-light:hover, .btn-secondary:hover, .btn-inverse-secondary:hover {
+  background-color: var(--zolo-bg) !important;
+}
+
+.btn-success, .btn-inverse-success { background-color: var(--zolo-ok-ink) !important; border-color: var(--zolo-ok-ink) !important; }
+.btn-danger, .btn-inverse-danger  { background-color: var(--zolo-bad-ink) !important; border-color: var(--zolo-bad-ink) !important; }
+.btn-warning, .btn-inverse-warning{ background-color: var(--zolo-warn-ink) !important; border-color: var(--zolo-warn-ink) !important; color: #fff !important; }
+
+/* ---------- Cards ---------- */
+.card {
+  border: 1px solid var(--zolo-border);
+  border-radius: var(--zolo-radius-lg) !important;
+  box-shadow: none !important;
+}
+.card .card-body { padding: 18px 20px; }
+.card-title {
+  font-family: var(--zolo-font-heading);
+  font-weight: 700;
+  font-size: 16px;
+}
+
+/* ---------- Tables ---------- */
+.table thead th {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--zolo-label);
+  background: #FAFBFD;
+  border-bottom: 1px solid var(--zolo-border);
+  border-top: 0;
+}
+.table td, .table th { border-color: var(--zolo-border-soft-2); vertical-align: middle; }
+.table-hover tbody tr:hover { background: #FAFBFD; }
+
+/* ---------- Badges / status pills ---------- */
+.badge {
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 11px;
+  padding: 3px 8px;
+  border: 1px solid transparent;
+}
+.badge.badge-success, .badge.bg-success, .status-active { color: var(--zolo-ok-ink) !important; background: var(--zolo-ok-bg) !important; border-color: var(--zolo-ok-border) !important; }
+.badge.badge-danger, .badge.bg-danger, .status-inactive { color: var(--zolo-bad-ink) !important; background: var(--zolo-bad-bg) !important; border-color: var(--zolo-bad-border) !important; }
+.badge.badge-warning, .badge.bg-warning { color: var(--zolo-warn-ink) !important; background: var(--zolo-warn-bg) !important; border-color: var(--zolo-warn-border) !important; }
+.badge.badge-info, .badge.bg-info { color: var(--zolo-info-ink) !important; background: var(--zolo-info-bg) !important; border-color: var(--zolo-info-border) !important; }
+.badge.badge-secondary, .badge.bg-secondary { color: var(--zolo-flat-ink) !important; background: var(--zolo-flat-bg) !important; border-color: var(--zolo-flat-border) !important; }
+
+/* ---------- Forms ---------- */
+.form-control, .form-select, .select2-container--default .select2-selection {
+  border-radius: var(--zolo-radius) !important;
+  border-color: var(--zolo-border) !important;
+  font-size: 13.5px;
+}
+.form-control:focus, .form-select:focus {
+  border-color: var(--zolo-accent) !important;
+  box-shadow: 0 0 0 3px rgba(47, 107, 255, 0.12) !important;
+}
+label, .form-group > label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--zolo-ink-2);
+}
+
+/* ---------- Dropdowns / modals ---------- */
+.dropdown-menu {
+  border: 1px solid var(--zolo-border);
+  border-radius: var(--zolo-radius) !important;
+  box-shadow: var(--zolo-shadow-modal);
+}
+.dropdown .dropdown-menu .dropdown-item:hover {
+  background-color: var(--zolo-accent-soft) !important;
+  color: var(--zolo-accent-hover) !important;
+}
+.modal-content {
+  border-radius: 14px !important;
+  border: 0;
+  box-shadow: var(--zolo-shadow-modal);
+}
+
+/* ---------- Pagination ---------- */
+.page-link { border-radius: var(--zolo-radius-sm) !important; color: var(--zolo-ink-2); border-color: var(--zolo-border); }
+.page-item.active .page-link { background-color: var(--zolo-accent); border-color: var(--zolo-accent); }
+
+/* =====================================================================
+   Reusable Zolo components (used by the rebuilt shell + flagship screens,
+   and safe to sprinkle onto existing CRUD views during rollout).
+   ===================================================================== */
+
+.zolo-page { padding: 20px 26px 44px; display: flex; flex-direction: column; gap: 16px; }
+
+.zolo-page-header {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 12px;
+}
+.zolo-page-header .zolo-subtitle { flex: 1 1 260px; min-width: 0; font-size: 13px; color: var(--zolo-muted-2); }
+
+.zolo-card {
+  background: var(--zolo-surface);
+  border: 1px solid var(--zolo-border);
+  border-radius: var(--zolo-radius-lg);
+  padding: 18px 20px;
+}
+.zolo-card-dark {
+  background: var(--zolo-ink);
+  color: #fff;
+  border-radius: var(--zolo-radius-lg);
+  padding: 18px 20px;
+}
+
+.zolo-stat-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  background: var(--zolo-surface);
+  border: 1px solid var(--zolo-border);
+  border-radius: var(--zolo-radius-lg);
+  overflow: hidden;
+}
+.zolo-stat {
+  padding: 15px 18px;
+  border-left: 1px solid var(--zolo-border-soft);
+}
+.zolo-stat:first-child { border-left: 0; }
+.zolo-stat .zolo-stat-label {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 11.5px; font-weight: 600; color: var(--zolo-label);
+  text-transform: uppercase; letter-spacing: 0.02em;
+}
+.zolo-stat .zolo-stat-value {
+  font-family: var(--zolo-font-heading);
+  font-size: 25px; font-weight: 700; letter-spacing: -0.8px;
+  margin-top: 9px; line-height: 1;
+}
+
+.zolo-filterbar {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 9px;
+  background: var(--zolo-surface); border: 1px solid var(--zolo-border);
+  border-radius: var(--zolo-radius-lg); padding: 13px 16px;
+}
+.zolo-search {
+  display: flex; align-items: center; gap: 8px; flex: 1 1 220px; min-width: 0;
+  background: var(--zolo-bg); border: 1px solid var(--zolo-border);
+  border-radius: 8px; padding: 8px 11px;
+}
+.zolo-search input {
+  flex: 1; min-width: 0; border: 0; outline: none; background: none;
+  font-size: 13px; color: var(--zolo-ink); font-family: var(--zolo-font-body);
+}
+
+.zolo-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 11px; font-weight: 600; border-radius: 6px; padding: 2px 8px;
+  border: 1px solid transparent;
+}
+.zolo-badge-ok   { color: var(--zolo-ok-ink);   background: var(--zolo-ok-bg);   border-color: var(--zolo-ok-border); }
+.zolo-badge-bad  { color: var(--zolo-bad-ink);  background: var(--zolo-bad-bg);  border-color: var(--zolo-bad-border); }
+.zolo-badge-warn { color: var(--zolo-warn-ink); background: var(--zolo-warn-bg); border-color: var(--zolo-warn-border); }
+.zolo-badge-info { color: var(--zolo-info-ink); background: var(--zolo-info-bg); border-color: var(--zolo-info-border); }
+.zolo-badge-flat { color: var(--zolo-flat-ink); background: var(--zolo-flat-bg); border-color: var(--zolo-flat-border); }
+
+.zolo-table-wrap {
+  background: var(--zolo-surface); border: 1px solid var(--zolo-border);
+  border-radius: var(--zolo-radius-lg); overflow: hidden;
+}
+.zolo-table-wrap table { margin-bottom: 0; }
+
+.zolo-donut {
+  position: relative; border-radius: 50%; flex: none;
+}
+.zolo-donut::after {
+  content: ''; position: absolute; inset: 13px; border-radius: 50%;
+  background: var(--zolo-surface);
+}
+.zolo-donut-center {
+  position: absolute; inset: 13px; border-radius: 50%;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  z-index: 1;
+}
+
+.zolo-toast {
+  position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%);
+  display: flex; align-items: center; gap: 10px;
+  background: var(--zolo-ink); color: #fff; border-radius: 10px;
+  padding: 12px 16px; font-size: 13px; font-weight: 500; z-index: 1080;
+  box-shadow: var(--zolo-shadow-modal);
+}
+
+.zolo-lock { color: #C2CBD9 !important; }
+.zolo-locked { opacity: 0.75; cursor: not-allowed !important; }

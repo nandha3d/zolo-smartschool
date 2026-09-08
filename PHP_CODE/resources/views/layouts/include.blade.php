@@ -1,6 +1,10 @@
 @php
     $lang = Session::get('language');
 @endphp
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Sharp:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet" />
 <link rel="stylesheet" href="{{ asset('/assets/css/materialdesignicons.min.css') }}">
 <link rel="stylesheet" href="{{ asset('/assets/css/vendor.bundle.base.css') }}">
 
@@ -31,6 +35,9 @@
 <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.22.1/dist/bootstrap-table.min.css">
 <link rel="stylesheet" href="{{ asset('/assets/bootstrap-table/fixed-columns.min.css') }}">
 <link rel="stylesheet" href="{{ asset('/assets/bootstrap-table/reorder-rows.css') }}">
+
+{{-- Zolo Console redesign — loaded last so it wins on equal specificity. --}}
+<link rel="stylesheet" href="{{ asset('/assets/css/zolo-theme.css') }}?v={{ filemtime(public_path('assets/css/zolo-theme.css')) }}">
 
 <script src="{{ asset('/assets/js/vendor.bundle.base.js') }}"></script>
 <script src='{{ asset('/assets/js/fullcalendar.js') }}'></script>
