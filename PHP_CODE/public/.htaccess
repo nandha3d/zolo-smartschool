@@ -1,0 +1,36 @@
+<IfModule mod_rewrite.c>
+    <IfModule mod_negotiation.c>
+        Options -MultiViews -Indexes
+    </IfModule>
+
+    # CORS is handled in config/cors.php, by Laravel's HandleCors middleware. This
+    # file used to set the headers a second time - reflecting an allowed origin with
+    # credentials enabled, hardcoded to the original vendor's domain. Two layers with
+    # different rules is a good way to end up with neither being the one you think.
+    #
+    # Note: this file is Apache-only. On nginx these rewrite rules must be ported by
+    # hand - see the deployment notes in DEPLOYMENT.md.
+    RewriteEngine On
+
+    RewriteCond %{HTTP:school-code} ^(.*)
+    RewriteRule .* - [e=HTTP_SCHOOL_CODE:%1]
+
+    # Handle Authorization Header
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+    # Redirect Trailing Slashes If Not A Folder...
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_URI} (.+)/$
+    RewriteRule ^ %1 [L,R=301]
+
+    # Send Requests To Front Controller...
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ index.php [L]
+</IfModule>
+<IfModule mod_headers.c>
+    <FilesMatch "\.(jpg|jpeg|png|gif|webp|svg)$">
+        Header set Access-Control-Allow-Origin "*"
+    </FilesMatch>
+</IfModule>

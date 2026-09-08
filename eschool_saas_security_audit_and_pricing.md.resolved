@@ -1,0 +1,388 @@
+# eSchool SaaS v1.8.0 — Security Audit, Privacy Analysis & Deployment Pricing
+
+> **Audit Date:** 10 April 2026  
+> **Auditor:** Antigravity Security Analysis Engine  
+> **Scope:** Full-stack security review (Laravel 10 Backend + Flutter Mobile Apps)  
+> **Classification:** CONFIDENTIAL — For Client Decision-Making
+
+---
+
+## Table of Contents
+
+1. [Executive Summary](#executive-summary)
+2. [Part A — Security Audit Report](#part-a--security-audit-report)
+3. [Part B — Data Privacy Efficiency Analysis](#part-b--data-privacy-efficiency-analysis)
+4. [Part C — Standalone Deployment Cost (INR)](#part-c--standalone-deployment-cost-inr)
+
+---
+
+## Executive Summary
+
+eSchool SaaS v1.8.0 is a multi-tenant school management system built on **Laravel 10** with **Flutter** mobile apps. It provides decent *baseline* security through Laravel's built-in protections but has **significant gaps** that must be addressed before any production deployment handling real student/parent data.
+
+| Category | Rating |
+|---|---|
+| **Overall Security** | ⚠️ **MODERATE — Needs Hardening** |
+| **Data Privacy** | 🔴 **WEAK — Not Compliant for Sensitive Data** |
+| **Production Readiness** | ⚠️ **Conditional — Requires 4-6 Weeks Remediation** |
+
+---
+
+## Part A — Security Audit Report
+
+### 1. Authentication & Access Control
+
+#### 1.1 What's Working ✅
+- Laravel's `AuthenticatesUsers` trait provides standard auth flow
+- Bcrypt password hashing (10 rounds) — acceptable
+- Two-Factor Authentication (2FA) via email — present
+- Role-Based Access Control via Spatie Permission package
+- Multi-guard architecture (`web`, `school_web`) for tenant isolation
+- Password reset with expiring tokens (60 min)
+- Session regeneration on logout
+
+#### 1.2 Critical Issues 🔴
+
+| # | Issue | Severity | File | Details |
+|---|---|---|---|---|
+| **A-1** | **2FA uses weak random generation** | 🔴 CRITICAL | `LoginController.php:232` | Uses `rand()` instead of `random_int()` for 2FA code generation. `rand()` is cryptographically insecure and predictable. |
+| **A-2** | **2FA code stored in plaintext** | 🔴 CRITICAL | `LoginController.php:147` | `two_factor_secret` stored as plaintext in database. Should be hashed or encrypted. |
+| **A-3** | **2FA middleware has logic bug** | 🔴 CRITICAL | `CheckTwoFactorAuthenticated.php:23` | Uses `&&` (AND) for `hasRole('School Admin') && hasRole('Super Admin')` — a user can never have BOTH roles simultaneously. This means 2FA expiry check **never executes**. Should be `||` (OR). |
+| **A-4** | **No login rate-limiting on web** | 🟠 HIGH | `LoginController.php` | No `ThrottlesLogins` trait or custom rate limiting on the web login form. Susceptible to brute-force attacks. |
+| **A-5** | **Default credentials exposed in mobile app** | 🟠 HIGH | `constants.dart:43-50` | Hardcoded default login credentials (`defaultStudentGRNumber`, `defaultParentPassword`, `defaultSchoolCode`) shipped in production app binary. |
+| **A-6** | **Minimum password length only 6 chars (mobile)** | 🟡 MEDIUM | `constants.dart:93` | `minimumPasswordLength = 6`. Web enforces 8 chars. Inconsistency allows weaker passwords via mobile. |
+| **A-7** | **Sanctum tokens never expire** | 🟠 HIGH | `sanctum.php:47` | `'expiration' => null` — API tokens live forever once issued. Compromised tokens cannot auto-expire. |
+
+---
+
+### 2. API Security
+
+| # | Issue | Severity | Details |
+|---|---|---|---|
+| **B-1** | **CORS allows all origins** | 🔴 CRITICAL | `cors.php:22` — `'allowed_origins' => ['*']`. Any website can make API requests. Must whitelist specific domains. |
+| **B-2** | **No API rate limiting on most routes** | 🟠 HIGH | Only the `api` middleware group has `'throttle:api'`, but many routes bypass this. No per-endpoint throttling. |
+| **B-3** | **School-code header is the only tenant identifier** | 🟠 HIGH | `APISwitchDatabase.php:23` — Tenant switching based purely on `school-code` header. No cryptographic verification. An attacker guessing school codes can probe any tenant's data. |
+| **B-4** | **CSRF exemptions too broad** | 🟡 MEDIUM | `VerifyCsrfToken.php:24` — `'api/*'` exempted. While typical for API routes, webhook endpoints (`webhook/*`, `subscription/webhook/*`) should use signature verification instead. |
+
+---
+
+### 3. Database & Multi-Tenancy Security
+
+| # | Issue | Severity | Details |
+|---|---|---|---|
+| **C-1** | **Shared credentials for all school databases** | 🔴 CRITICAL | `database.php:71-72` — The `school` connection uses the same `DB_USERNAME` /`DB_PASSWORD` as the master. If one school DB is compromised, all school DBs are accessible. |
+| **C-2** | **Database name from session without sanitization** | 🟠 HIGH | `CheckRole.php:26` — `Config::set('database.connections.school.database', $school_database_name)` from session value. If session is tampered, could target arbitrary databases. |
+| **C-3** | **SQL strict mode disabled** | 🟡 MEDIUM | `database.php:59,76` — `'strict' => false` for both MySQL connections. Allows silent data truncation and invalid dates. |
+| **C-4** | **Raw SQL in backup controller — SQL injection risk** | 🟠 HIGH | `DatabaseBackupController.php:147,356` — `SHOW CREATE TABLE \`$table\`` uses variable interpolation. Although table names come from `SHOW TABLES`, the backup restore flow at line 677 uses `DB::unprepared(trim($query))` to execute arbitrary SQL from uploaded files — a severe risk. |
+
+---
+
+### 4. Session & Cookie Security
+
+| # | Issue | Severity | Details |
+|---|---|---|---|
+| **D-1** | **Session encryption disabled** | 🟡 MEDIUM | `session.php:49` — `'encrypt' => false`. Session data stored in plaintext on disk. |
+| **D-2** | **Session driver is file-based** | 🟡 MEDIUM | `SESSION_DRIVER=file` — Not suitable for multi-server production. Use `database` or `redis`. |
+| **D-3** | **HTTPS cookie enforcement not set** | 🟠 HIGH | `session.php:171` — `'secure' => env('SESSION_SECURE_COOKIE')` with no default. Must be explicitly `true` in production. |
+| **D-4** | **Session lifetime 24 hours** | 🟡 MEDIUM | `SESSION_LIFETIME=1440` (24 hrs). Too long for an educational platform with shared devices. Recommend 2-4 hours. |
+
+---
+
+### 5. Input Validation & Mass Assignment
+
+| # | Issue | Severity | Details |
+|---|---|---|---|
+| **E-1** | **No dedicated FormRequest classes** | 🟠 HIGH | Zero `FormRequest` classes found. All validation is inline in controllers using `$request->validate()` or `Validator::make()`. Violates separation of concerns and makes auditing harder. |
+| **E-2** | **Extensive use of `$request->all()`** | 🟠 HIGH | 50+ instances of `$request->all()` passed directly to `create()` / `update()` across controllers. While `$fillable` guards exist on models, this pattern is risky if fillable arrays are too permissive. |
+| **E-3** | **Profile update mass-assigns all fields** | 🟠 HIGH | `AuthController.php:142` — `$userData = array(...$request->all())` with no field whitelist on profile update. Could allow setting `status`, `school_id`, or `reset_request` fields. |
+
+---
+
+### 6. Content Security & XSS
+
+| # | Issue | Severity | Details |
+|---|---|---|---|
+| **F-1** | **`htmlspecialchars_decode()` on privacy policy output** | 🟡 MEDIUM | `SchoolSettingsController.php:456` — Decodes HTML entities before output, potentially enabling stored XSS if admin inputs malicious HTML. |
+| **F-2** | **No Content Security Policy headers** | 🟡 MEDIUM | Missing CSP, X-Frame-Options, X-Content-Type-Options, and Referrer-Policy headers. |
+
+---
+
+### 7. Payment Security
+
+| # | Issue | Severity | Details |
+|---|---|---|---|
+| **G-1** | **Payment keys stored in plaintext DB** | 🟠 HIGH | `PaymentConfiguration` model stores `api_key`, `secret_key`, `webhook_secret_key` as plaintext in the database. No encryption via `$casts` or `Crypt::`. |
+| **G-2** | **No payment state machine or fraud detection** | 🟡 MEDIUM | Payment flow goes directly from Gateways → Controllers. No centralized `PaymentStateMachine` or `FraudDetectionService`. |
+| **G-3** | **Webhook signature verification unclear** | 🟡 MEDIUM | Webhook routes are CSRF-exempt (correct), but the code should verify webhook signatures from Stripe/Razorpay/Paystack. Requires separate file-level audit. |
+
+---
+
+### 8. Logging & Audit Trail
+
+| # | Issue | Severity | Details |
+|---|---|---|---|
+| **H-1** | **No security audit logging** | 🔴 CRITICAL | Zero `SecurityAuditLog`, `AuditLog`, or admin action tracking found. No record of who changed what, when. |
+| **H-2** | **Single log file (no rotation)** | 🟡 MEDIUM | Uses `single` driver log. Should use `daily` with 14-30 day rotation for production. |
+| **H-3** | **Debug level logging in production** | 🟡 MEDIUM | `LOG_LEVEL=debug` in `.env`. Should be `warning` or `error` in production. |
+| **H-4** | **Sensitive data in logs** | 🟡 MEDIUM | `LoginController.php:101` logs database name, `PaymentController.php:21` logs full payment callback. |
+
+---
+
+### 9. Dependency Security
+
+| # | Issue | Severity | Details |
+|---|---|---|---|
+| **I-1** | **`roave/security-advisories` installed** | ✅ GOOD | Dev dependency blocks known vulnerable packages. |
+| **I-2** | **Laravel 10 at end-of-life** | 🟠 HIGH | Laravel 10 reached EOL Feb 2025. No longer receiving security patches. Should upgrade to Laravel 11. |
+| **I-3** | **DebugBar in project** | 🟡 MEDIUM | `barryvdh/laravel-debugbar` is a dev dependency but must NEVER be enabled in production (`APP_DEBUG=false` ✅). |
+
+---
+
+### 10. Infrastructure Concerns
+
+| # | Issue | Severity | Details |
+|---|---|---|---|
+| **J-1** | **`.env` has weak defaults** | 🟠 HIGH | `DB_PASSWORD=admin`, `APP_ENV=local`. These must be changed before any deployment. |
+| **J-2** | **`APP_KEY` exposed in `.env`** | ⚠️ NOTE | The base64 app key is visible. Standard in Laravel, but `.env` must never be committed to git. |
+| **J-3** | **No WAF or DDoS protection mentioned** | 🟡 MEDIUM | No Cloudflare/AWS Shield configuration evident. |
+
+---
+
+### Security Score Summary
+
+| Domain | Score (out of 10) | Grade |
+|---|---|---|
+| Authentication | 5/10 | D |
+| API Security | 3/10 | F |
+| Database Security | 4/10 | D |
+| Session Security | 5/10 | D |
+| Input Validation | 4/10 | D |
+| Payment Security | 4/10 | D |
+| Logging/Audit | 2/10 | F |
+| Dependency Mgmt | 6/10 | C |
+| **Overall** | **4.1/10** | **D** |
+
+> [!CAUTION]
+> **Verdict:** eSchool SaaS v1.8.0 provides *basic* security through Laravel framework defaults but has **15 Critical/High vulnerabilities** and **12 Medium/Low issues**. It is **NOT production-ready** for handling real student data without remediation.
+
+---
+
+## Part B — Data Privacy Efficiency Analysis
+
+### Privacy Compliance Matrix
+
+| Requirement | GDPR (EU) | DPDPA (India) | FERPA (USA) | eSchool Status |
+|---|---|---|---|---|
+| Data Encryption at Rest | Required | Required | Required | 🔴 **MISSING** — No `Crypt::` or AES-256 on sensitive fields |
+| Data Encryption in Transit | Required | Required | Required | ⚠️ **Partial** — TLS config exists but not enforced |
+| Consent Management | Required | Required | N/A | 🔴 **MISSING** — No consent tracking system |
+| Right to Erasure (Data Deletion) | Required | Required | N/A | 🔴 **MISSING** — Soft-deletes only, no true data purge |
+| Data Portability | Required | Upcoming | N/A | 🔴 **MISSING** — No data export for users |
+| Purpose Limitation | Required | Required | Required | ⚠️ **Partial** — No clear data usage policies enforced in code |
+| Data Minimization | Required | Required | Recommended | ⚠️ **Partial** — Some excess data collection |
+| Breach Notification | 72 hours | "Without delay" | Required | 🔴 **MISSING** — No breach detection or notification system |
+| Data Retention Policy | Required | Required | Required | 🔴 **MISSING** — No automated data lifecycle management |
+| Access Logging | Required | Required | Required | 🔴 **MISSING** — No data access audit trail |
+| Privacy Policy | Required | Required | Required | ✅ **Present** — Schools can set privacy policies |
+| Parental Consent (Minors) | Required | Required | Required | 🔴 **MISSING** — No age verification or parental consent flow |
+
+### Privacy Efficiency Rating
+
+| Metric | Rating |
+|---|---|
+| **Data Privacy Score** | **2/10 — CRITICALLY DEFICIENT** |
+| **Compliance Readiness** | **Not Ready for any major privacy regulation** |
+| **Estimated Remediation** | **8-12 weeks of dedicated development** |
+
+### What Sensitive Data Is Stored
+
+| Data Type | Storage | Encryption | Sensitivity |
+|---|---|---|---|
+| Student Names, DOB, Address | MySQL (plaintext) | ❌ None | 🔴 HIGH (PII of minors) |
+| Parent Contact Info (email, phone) | MySQL (plaintext) | ❌ None | 🔴 HIGH (PII) |
+| Student Academic Records | MySQL (plaintext) | ❌ None | 🟠 HIGH |
+| Attendance Records | MySQL (plaintext) | ❌ None | 🟡 MEDIUM |
+| Payment Information | MySQL (plaintext) | ❌ None | 🔴 CRITICAL |
+| Health/Medical Data (if custom fields used) | MySQL (plaintext) | ❌ None | 🔴 CRITICAL |
+| Staff Salary Information | MySQL (plaintext) | ❌ None | 🔴 HIGH |
+| Profile Photos | File Storage | ❌ None | 🟡 MEDIUM |
+| API Tokens | MySQL (hashed) | ✅ Hashed | ✅ Acceptable |
+| Passwords | MySQL (bcrypt) | ✅ Hashed | ✅ Acceptable |
+
+> [!WARNING]
+> **If a client prioritizes data privacy**, this system is currently **not suitable** for deployment without **major enhancements**. All personally identifiable information (PII) — especially of minors (students) — is stored in unencrypted plaintext. A single database breach would expose everything.
+
+### Recommended Privacy Remediation Roadmap
+
+| Priority | Enhancement | Effort | Impact |
+|---|---|---|---|
+| P0 | Encrypt PII fields (names, addresses, phone) using Laravel `Crypt::` | 2 weeks | 🔴 Critical |
+| P0 | Add data access audit logging | 1 week | 🔴 Critical |
+| P0 | Implement data retention/purge policy | 1 week | 🔴 Critical |
+| P1 | Build consent management for parents | 2 weeks | 🟠 High |
+| P1 | Data export endpoint (DSAR/Right to Access) | 1 week | 🟠 High |
+| P1 | Breach detection and notification automation | 2 weeks | 🟠 High |
+| P2 | TLS enforcement (HTTPS only cookies, HSTS) | 1 day | 🟡 Medium |
+| P2 | Parental consent workflow for minors | 1 week | 🟡 Medium |
+| P2 | Data minimization audit | 3 days | 🟡 Medium |
+
+---
+
+## Part C — Standalone Deployment Cost (INR)
+
+> **Pricing basis:** India market rates (April 2026). Assumes one school with up to 3,000 students, 150 staff.
+
+---
+
+### Option 1: One-Time Standalone Deployment (Buy-Once)
+
+#### A. Initial Setup & Deployment Costs
+
+| Item | Description | Cost (₹) |
+|---|---|---|
+| **eSchool SaaS License** | CodeCanyon Extended License (one-time) | ₹15,000 |
+| **Server Setup (VPS/Cloud)** | DigitalOcean / AWS / Hostinger VPS (4 vCPU, 8GB RAM, 160GB SSD) — 1st year | ₹36,000/year |
+| **Domain Name** | .in or .com domain registration (1 year) | ₹800 |
+| **SSL Certificate** | Let's Encrypt (Free) or Premium Wildcard SSL | ₹0 – ₹5,000 |
+| **Server Configuration** | Ubuntu + Nginx + PHP 8.1 + MySQL 8 + Redis + SSL + Firewall setup | ₹15,000 |
+| **Application Deployment** | Install eSchool, configure multi-DB architecture, set up cron jobs, queue workers | ₹10,000 |
+| **Mobile App Customization** | Rebrand Flutter apps (logo, colors, app name, splash screen) | ₹15,000 |
+| **Mobile App Publishing** | Google Play ($25 one-time) + Apple App Store ($99/year ≈ ₹8,300) | ₹10,400 |
+| **Email Configuration** | SMTP setup (Amazon SES / Mailgun / SendGrid) | ₹3,000 |
+| **Payment Gateway Integration** | Razorpay / Stripe configuration + testing | ₹5,000 |
+| **Database Backup Automation** | Automated daily backups to S3/Google Drive | ₹5,000 |
+| **Security Hardening (Basic)** | Firewall rules, fail2ban, SSH key-only, disable root, header config | ₹8,000 |
+| **Data Migration** | Importing existing student/staff data from Excel/CSV/old system | ₹10,000 – ₹25,000 |
+| **Training** | Admin + teachers training (2 sessions, 2 hrs each) | ₹8,000 |
+| **Documentation** | User manual, admin guide | ₹5,000 |
+
+| **TOTAL ONE-TIME SETUP** | | **₹1,47,200 – ₹1,67,200** |
+|---|---|---|
+
+> [!NOTE]
+> Approximately **₹1.5L – ₹1.7L** for a complete standalone deployment.
+
+---
+
+#### B. Security Hardening Package (Recommended Add-on)
+
+If the client wants proper security and privacy compliance:
+
+| Item | Description | Cost (₹) |
+|---|---|---|
+| **Full Security Audit & Fix** | Fix all 27 vulnerabilities identified in Part A | ₹75,000 |
+| **Data Encryption Implementation** | Encrypt PII fields at rest using Laravel Crypt | ₹40,000 |
+| **Audit Logging System** | Build SecurityAuditLog for all admin actions | ₹30,000 |
+| **Consent Management Module** | Parental consent tracking system | ₹25,000 |
+| **DPDPA Compliance Package** | India's Digital Personal Data Protection Act compliance | ₹35,000 |
+| **Penetration Testing** | Third-party pentest with report | ₹50,000 – ₹1,00,000 |
+
+| **TOTAL SECURITY PACKAGE** | | **₹2,55,000 – ₹3,05,000** |
+|---|---|---|
+
+---
+
+### Option 2: Annual Maintenance Contract (AMC)
+
+| Service | Frequency | Annual Cost (₹) |
+|---|---|---|
+| **Server Hosting** | Monthly | ₹36,000 |
+| **Server Monitoring & Uptime** | 24/7 monitoring, 4-hr response time | ₹24,000 |
+| **Software Updates** | eSchool version updates + Laravel patches | ₹30,000 |
+| **Security Patches** | Dependency updates, vulnerability fixes | ₹18,000 |
+| **Database Maintenance** | Optimization, index tuning, cleanup | ₹12,000 |
+| **Backup Management** | Daily automated + weekly verified restores | ₹12,000 |
+| **SSL Renewal** | Annual certificate renewal | ₹0 – ₹5,000 |
+| **Apple Developer Renewal** | Annual App Store fee | ₹8,300 |
+| **Email Service** | SES/Mailgun (up to 10,000 emails/month) | ₹6,000 |
+| **Bug Fixes** | Up to 20 bug fixes per year | ₹24,000 |
+| **Priority Support** | Email + Phone (business hours) | ₹18,000 |
+
+| **TOTAL AMC** | | **₹1,88,300 – ₹1,93,300/year** |
+|---|---|---|
+
+> [!NOTE]
+> Approximately **₹1.9L/year** for comprehensive maintenance.
+
+---
+
+### Option 3: Subscription-Based Model (SaaS / Pay-Monthly)
+
+Best for clients who prefer predictable monthly costs with no large upfront investment.
+
+#### Tier Structure
+
+| Plan | Students | Staff | Storage | Monthly (₹) | Annual (₹) | Savings vs Monthly |
+|---|---|---|---|---|---|---|
+| **Starter** | Up to 500 | Up to 30 | 10 GB | ₹8,999 | ₹89,990 | 17% |
+| **Standard** | Up to 1,500 | Up to 75 | 25 GB | ₹14,999 | ₹1,49,990 | 17% |
+| **Professional** | Up to 3,000 | Up to 150 | 50 GB | ₹22,999 | ₹2,29,990 | 17% |
+| **Enterprise** | Unlimited | Unlimited | 100 GB | ₹34,999 | ₹3,49,990 | 17% |
+
+#### What's Included in Subscription
+
+| Feature | Starter | Standard | Professional | Enterprise |
+|---|---|---|---|---|
+| Web Admin Panel | ✅ | ✅ | ✅ | ✅ |
+| Android + iOS Apps | ✅ | ✅ | ✅ | ✅ |
+| Branded Apps (Custom Logo) | ❌ | ✅ | ✅ | ✅ |
+| Custom Domain | ❌ | ✅ | ✅ | ✅ |
+| SSL Certificate | ✅ | ✅ | ✅ | ✅ |
+| Daily Backups | ✅ | ✅ | ✅ | ✅ |
+| Email Notifications | 1,000/mo | 5,000/mo | 10,000/mo | Unlimited |
+| Payment Gateway | 1 | 2 | All | All |
+| Online Exams | ✅ | ✅ | ✅ | ✅ |
+| Fee Management | ✅ | ✅ | ✅ | ✅ |
+| Attendance + Timetable | ✅ | ✅ | ✅ | ✅ |
+| Reports & Analytics | Basic | Advanced | Advanced | Custom |
+| Chat System | ❌ | ✅ | ✅ | ✅ |
+| Transportation Module | ❌ | ❌ | ✅ | ✅ |
+| Payroll Management | ❌ | ❌ | ✅ | ✅ |
+| Data Encryption (At Rest) | ❌ | ❌ | ✅ | ✅ |
+| Security Audit Logging | ❌ | ❌ | ✅ | ✅ |
+| Priority Support | Email (48hr) | Email (24hr) | Email + Phone (8hr) | Dedicated Manager |
+| SLA Uptime | 99% | 99.5% | 99.9% | 99.95% |
+| Data Export on Exit | ❌ | ✅ | ✅ | ✅ |
+
+---
+
+### Cost Comparison Summary
+
+| Model | Year 1 Cost (₹) | Year 2+ Cost (₹) | Best For |
+|---|---|---|---|
+| **Standalone (Basic)** | ₹1,47,200 + ₹1,88,300 = **₹3,35,500** | ₹1,88,300/year | Schools wanting full control, tech-savvy admin |
+| **Standalone (+ Security)** | ₹1,47,200 + ₹2,55,000 + ₹1,88,300 = **₹5,90,500** | ₹1,88,300/year | Schools needing compliance (DPDPA, data privacy) |
+| **Subscription (Standard)** | **₹1,49,990/year** | ₹1,49,990/year | Schools wanting hassle-free, predictable costs |
+| **Subscription (Professional)** | **₹2,29,990/year** | ₹2,29,990/year | Schools needing full features + encryption |
+
+> [!TIP]
+> **Recommendation for privacy-conscious clients:** Go with **Standalone + Security Package** (₹5.9L Year 1, ₹1.9L/year after) for full data ownership. Or choose **Professional Subscription** (₹2.3L/year) for managed security with lower upfront cost.
+
+---
+
+### Payment Terms (Suggested)
+
+| Milestone | Standalone | Subscription |
+|---|---|---|
+| Contract Signing | 40% advance | 1 month + setup fee |
+| Server Ready + App Deployed | 30% | — |
+| Data Migration Complete + Training | 20% | — |
+| 30-Day Post-Launch Support Complete | 10% | — |
+| Monthly / Annual Renewal | AMC payable quarterly | Auto-debit / invoice |
+
+---
+
+### Warranty & SLA
+
+| Term | Details |
+|---|---|
+| **Bug Fix Warranty** | 90 days free bug fixes after deployment |
+| **Response Time (AMC)** | Critical: 4 hours · High: 8 hours · Medium: 24 hours · Low: 48 hours |
+| **Uptime SLA** | 99.5% (Standalone) · 99.9% (Professional Subscription) |
+| **Data Ownership** | Client owns 100% of data in Standalone · Full export on exit for Subscription |
+| **Source Code** | Provided in Standalone · Not provided in Subscription |
+
+---
+
+> [!IMPORTANT]
+> **Final Note:** All prices are estimates based on current India market rates (April 2026) and may vary ±10-15% based on specific requirements, data volume, customization needs, and vendor selection. GST (18%) is extra on all amounts.

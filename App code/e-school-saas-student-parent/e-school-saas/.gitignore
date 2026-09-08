@@ -1,0 +1,36 @@
+# Flutter / Dart build output - all regenerable, none of it belongs in source.
+# The student app previously shipped 8.8 GB of build/ plus .dart_tool and
+# ios/Pods. Compiled kernel blobs under build/ also embed API keys.
+build/
+.dart_tool/
+.packages
+.flutter-plugins
+.flutter-plugins-dependencies
+*.iml
+
+# iOS
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/Flutter/Generated.xcconfig
+ios/Flutter/flutter_export_environment.sh
+
+# Android
+android/.gradle/
+android/local.properties
+android/key.properties
+**/*.jks
+**/*.keystore
+
+# Firebase - regenerate these from your own project, never commit them
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
+lib/firebase_options.dart
+
+# Windows build tooling
+nuget.exe
+windows/flutter/ephemeral/
+
+.idea/
+.vscode/

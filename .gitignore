@@ -1,0 +1,93 @@
+# ---------------------------------------------------------------
+# Secrets — never commit
+# ---------------------------------------------------------------
+PASS.txt
+.env
+*.env
+!.env.example
+**/key.properties
+**/local.properties
+*.jks
+*.keystore
+*.p12
+*.pem
+google-services.json
+GoogleService-Info.plist
+
+# ---------------------------------------------------------------
+# Archives / release bundles (kept out of git; ~280 MB)
+# ---------------------------------------------------------------
+*.zip
+Updates/
+
+# ---------------------------------------------------------------
+# Laravel (PHP_CODE)
+# ---------------------------------------------------------------
+/PHP_CODE/vendor/
+/PHP_CODE/node_modules/
+/PHP_CODE/storage/app/*
+!/PHP_CODE/storage/app/.gitignore
+/PHP_CODE/storage/framework/cache/*
+/PHP_CODE/storage/framework/sessions/*
+/PHP_CODE/storage/framework/testing/*
+/PHP_CODE/storage/framework/views/*
+/PHP_CODE/storage/logs/*
+/PHP_CODE/storage/debugbar/*
+/PHP_CODE/public/hot
+/PHP_CODE/public/storage
+/PHP_CODE/bootstrap/cache/*
+!/PHP_CODE/bootstrap/cache/.gitignore
+/PHP_CODE/.phpunit.result.cache
+Homestead.json
+Homestead.yaml
+
+# ---------------------------------------------------------------
+# Flutter / Dart (App code)
+# ---------------------------------------------------------------
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+**/generated_plugin_registrant.dart
+
+# Android build
+.gradle/
+**/android/.gradle/
+**/android/captures/
+**/android/app/debug/
+**/android/app/profile/
+**/android/app/release/
+*.iml.bak
+
+# iOS build
+**/ios/Pods/
+**/ios/.symlinks/
+**/ios/Flutter/App.framework
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Flutter.podspec
+**/ios/Flutter/flutter_export_environment.sh
+**/ios/Flutter/ephemeral/
+
+# Windows / desktop build (323 MB of engine artifacts)
+**/windows/flutter/ephemeral/
+**/linux/flutter/ephemeral/
+**/macos/Flutter/ephemeral/
+*.pdb
+*.dll
+*.exe
+*.lib
+*.exp
+
+# ---------------------------------------------------------------
+# Editors / OS / temp
+# ---------------------------------------------------------------
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+~$*
+*.tmp

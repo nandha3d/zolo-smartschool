@@ -1,0 +1,102 @@
+{
+    "name": "zoloschools/platform",
+    "type": "project",
+    "description": "Zolo Schools - School Management Platform",
+    "keywords": [
+        "zolo",
+        "schools",
+        "school-management"
+    ],
+    "repositories": [
+        {
+            "type": "path",
+            "url": "packages/laravel-wizard-installer"
+        }
+    ],
+    "license": "proprietary",
+    "require": {
+        "php": "^8.2",
+        "ext-curl": "*",
+        "ext-pdo": "*",
+        "ext-zip": "*",
+        "awobaz/compoships": "^3.1",
+        "barryvdh/laravel-dompdf": "^3.1",
+        "cboden/ratchet": "^0.4.4",
+        "dacoto/laravel-env-set": "^2.2",
+        "google/apiclient": "^2.18",
+        "guzzlehttp/guzzle": "^7.9",
+        "intervention/image": "^3.11",
+        "konekt/html": "^6.8",
+        "laravel/framework": "^12.0",
+        "laravel/sanctum": "^4.0",
+        "laravel/tinker": "^2.10",
+        "laravel/ui": "^4.6",
+        "maatwebsite/excel": "^3.1.70",
+        "mahesh-kerai/update-generator": "^3.1",
+        "psr/simple-cache": "^3.0",
+        "razorpay/razorpay": "2.*",
+        "sagar/laravel-wizard-installer": "*",
+        "spatie/laravel-permission": "^6.0",
+        "stripe/stripe-php": "^17.0"
+    },
+    "require-dev": {
+        "roave/security-advisories": "dev-latest",
+        "barryvdh/laravel-debugbar": "^3.15",
+        "barryvdh/laravel-ide-helper": "^3.5",
+        "fakerphp/faker": "^1.23",
+        "laravel/sail": "^1.41",
+        "mockery/mockery": "^1.6",
+        "nunomaduro/collision": "^8.6",
+        "phpunit/phpunit": "^11.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/",
+            "Database\\Factories\\": "database/factories/",
+            "Database\\Seeders\\": "database/seeders/"
+        },
+        "files": [
+            "app/Helpers/settings_helper.php",
+            "app/Helpers/notification_helper.php"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "post-autoload-dump": [
+            "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
+            "@php artisan package:discover --ansi"
+        ],
+        "post-update-cmd": [
+            "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
+        ],
+        "post-root-package-install": [
+            "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
+        ],
+        "post-create-project-cmd": [
+            "@php artisan key:generate --ansi"
+        ],
+        "pre-autoload-dump": "Google\\Task\\Composer::cleanup"
+    },
+    "extra": {
+        "laravel": {
+            "dont-discover": []
+        },
+        "google/apiclient-services": [
+            "FirebaseCloudMessaging"
+        ]
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "preferred-install": "dist",
+        "sort-packages": true,
+        "allow-plugins": {
+            "php-http/discovery": true
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
