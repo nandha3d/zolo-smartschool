@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
-import 'package:eschool_saas_staff/data/models/assignment.dart';
-import 'package:eschool_saas_staff/utils/api.dart';
+import 'package:zolo_smart_school_staff/data/models/assignment.dart';
+import 'package:zolo_smart_school_staff/utils/api.dart';
 import 'package:file_picker/file_picker.dart';
 
 class AssignmentRepository {

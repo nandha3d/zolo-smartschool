@@ -1,5 +1,5 @@
-import 'package:eschool/data/models/transportPlanDetails.dart';
-import 'package:eschool/data/repositories/transportRepository.dart';
+import 'package:zolo_smart_school/data/models/transportPlanDetails.dart';
+import 'package:zolo_smart_school/data/repositories/transportRepository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 abstract class TransportPlanDetailsState {}

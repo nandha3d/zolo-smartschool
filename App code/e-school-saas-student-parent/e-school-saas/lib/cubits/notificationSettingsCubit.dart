@@ -1,4 +1,4 @@
-import 'package:eschool/data/repositories/settingsRepository.dart';
+import 'package:zolo_smart_school/data/repositories/settingsRepository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class NotificationSettingsState {

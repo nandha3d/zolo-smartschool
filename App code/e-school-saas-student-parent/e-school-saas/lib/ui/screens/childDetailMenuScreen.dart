@@ -1,22 +1,22 @@
-import 'package:eschool/app/routes.dart';
-import 'package:eschool/cubits/authCubit.dart';
-import 'package:eschool/cubits/vehicleAssignmentStatusCubit.dart';
-import 'package:eschool/data/models/student.dart';
-import 'package:eschool/data/models/subject.dart';
-import 'package:eschool/ui/widgets/customBackButton.dart';
-import 'package:eschool/ui/widgets/screenTopBackgroundContainer.dart';
-import 'package:eschool/utils/animationConfiguration.dart';
-import 'package:eschool/utils/labelKeys.dart';
-import 'package:eschool/utils/systemModules.dart';
-import 'package:eschool/utils/utils.dart';
+import 'package:zolo_smart_school/app/routes.dart';
+import 'package:zolo_smart_school/cubits/authCubit.dart';
+import 'package:zolo_smart_school/cubits/vehicleAssignmentStatusCubit.dart';
+import 'package:zolo_smart_school/data/models/student.dart';
+import 'package:zolo_smart_school/data/models/subject.dart';
+import 'package:zolo_smart_school/ui/widgets/customBackButton.dart';
+import 'package:zolo_smart_school/ui/widgets/screenTopBackgroundContainer.dart';
+import 'package:zolo_smart_school/utils/animationConfiguration.dart';
+import 'package:zolo_smart_school/utils/labelKeys.dart';
+import 'package:zolo_smart_school/utils/systemModules.dart';
+import 'package:zolo_smart_school/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
-import 'package:eschool/data/repositories/transportRepository.dart';
-import 'package:eschool/ui/screens/parentTransportEnroll/transportHome/transportRequestDetailsScreen.dart';
-import 'package:eschool/data/models/transportDashboard.dart';
+import 'package:zolo_smart_school/data/repositories/transportRepository.dart';
+import 'package:zolo_smart_school/ui/screens/parentTransportEnroll/transportHome/transportRequestDetailsScreen.dart';
+import 'package:zolo_smart_school/data/models/transportDashboard.dart';
 
 class ChildDetailMenuScreen extends StatefulWidget {
   final Student student;

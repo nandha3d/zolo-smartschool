@@ -9,8 +9,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link href="{{ asset('/assets/bootstrap5/bootstrap.min.css') }}" rel="stylesheet">
     <link href="{{ asset('assets/home_page/css/style.css') }}" rel="stylesheet">
 
     <title>{{ __('login') }} || {{ config('app.name') }}</title>
@@ -49,7 +48,6 @@
             opacity: 1 !important;
         }
     </style>
-    <script async src="https://www.google.com/recaptcha/api.js"></script>
 </head>
 
 <body>
@@ -201,9 +199,7 @@
     <script src="{{ asset('/assets/js/sweetalert2.all.min.js') }}"></script>
     <script src="{{ asset('/assets/js/custom/function.js') }}"></script>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
-        crossorigin="anonymous"></script>
+    <script src="{{ asset('/assets/bootstrap5/bootstrap.bundle.min.js') }}"></script>
 
     <script type='text/javascript'>
         $("#frmLogin").validate({

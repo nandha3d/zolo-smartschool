@@ -1,5 +1,5 @@
-import 'package:eschool/data/models/electiveSubjectGroup.dart';
-import 'package:eschool/utils/api.dart';
+import 'package:zolo_smart_school/data/models/electiveSubjectGroup.dart';
+import 'package:zolo_smart_school/utils/api.dart';
 
 class ClassRepository {
   Future<List<ElectiveSubjectGroup>> getElectiveSubjects() async {

@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
-import 'package:eschool_saas_staff/data/models/studyMaterial.dart';
-import 'package:eschool_saas_staff/data/repositories/studyMaterialRepository.dart';
-import 'package:eschool_saas_staff/utils/labelKeys.dart';
+import 'package:zolo_smart_school_staff/data/models/studyMaterial.dart';
+import 'package:zolo_smart_school_staff/data/repositories/studyMaterialRepository.dart';
+import 'package:zolo_smart_school_staff/utils/labelKeys.dart';
 import 'package:external_path/external_path.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

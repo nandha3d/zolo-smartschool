@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:eschool_saas_staff/data/models/tripDetails.dart';
-import 'package:eschool_saas_staff/data/models/trip.dart';
+import 'package:zolo_smart_school_staff/data/models/tripDetails.dart';
+import 'package:zolo_smart_school_staff/data/models/trip.dart';
 import 'package:get/get.dart';
-import 'package:eschool_saas_staff/ui/screens/tripDetailsScreen/widgets/tripDetailsAppBar.dart';
-import 'package:eschool_saas_staff/ui/screens/tripDetailsScreen/widgets/tripStatusHeader.dart';
-import 'package:eschool_saas_staff/ui/screens/tripDetailsScreen/widgets/tripTimeline.dart';
-import 'package:eschool_saas_staff/ui/screens/tripDetailsScreen/widgets/tripActionButtons.dart';
-import 'package:eschool_saas_staff/ui/screens/tripDetailsScreen/widgets/tripPassengersList.dart';
-import 'package:eschool_saas_staff/ui/screens/tripDetailsScreen/widgets/startTripBottomSheet.dart';
-import 'package:eschool_saas_staff/cubits/transport/tripsCubit.dart';
+import 'package:zolo_smart_school_staff/ui/screens/tripDetailsScreen/widgets/tripDetailsAppBar.dart';
+import 'package:zolo_smart_school_staff/ui/screens/tripDetailsScreen/widgets/tripStatusHeader.dart';
+import 'package:zolo_smart_school_staff/ui/screens/tripDetailsScreen/widgets/tripTimeline.dart';
+import 'package:zolo_smart_school_staff/ui/screens/tripDetailsScreen/widgets/tripActionButtons.dart';
+import 'package:zolo_smart_school_staff/ui/screens/tripDetailsScreen/widgets/tripPassengersList.dart';
+import 'package:zolo_smart_school_staff/ui/screens/tripDetailsScreen/widgets/startTripBottomSheet.dart';
+import 'package:zolo_smart_school_staff/cubits/transport/tripsCubit.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:eschool_saas_staff/utils/constants.dart';
-import 'package:eschool_saas_staff/utils/labelKeys.dart';
-import 'package:eschool_saas_staff/utils/utils.dart';
+import 'package:zolo_smart_school_staff/utils/constants.dart';
+import 'package:zolo_smart_school_staff/utils/labelKeys.dart';
+import 'package:zolo_smart_school_staff/utils/utils.dart';
 
 class TripDetailsScreen extends StatefulWidget {
   final TripDetails? tripDetails;

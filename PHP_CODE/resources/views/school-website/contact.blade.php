@@ -102,7 +102,7 @@
 
 @section('script')
     <script async src="https://www.google.com/recaptcha/api.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="{{ asset('/assets/vendor/jquery/jquery.min.js') }}"></script>
     <script src="{{ asset('/assets/js/custom/common.js') }}"></script>
     <script src="{{ asset('/assets/js/custom/custom.js') }}"></script>
     <script src="{{ asset('/assets/js/custom/validate.js') }}"></script>

@@ -5,18 +5,18 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
-import 'package:eschool_saas_staff/data/models/notificationDetails.dart'
+import 'package:zolo_smart_school_staff/data/models/notificationDetails.dart'
     as notificationDetails;
-import 'package:eschool_saas_staff/app/routes.dart';
-import 'package:eschool_saas_staff/data/repositories/announcementRepository.dart';
-import 'package:eschool_saas_staff/data/repositories/authRepository.dart';
-import 'package:eschool_saas_staff/ui/screens/leaves/leavesScreen.dart';
-import 'package:eschool_saas_staff/utils/api.dart';
-import 'package:eschool_saas_staff/utils/hiveBoxKeys.dart';
-import 'package:eschool_saas_staff/utils/labelKeys.dart';
-import 'package:eschool_saas_staff/utils/utils.dart';
+import 'package:zolo_smart_school_staff/app/routes.dart';
+import 'package:zolo_smart_school_staff/data/repositories/announcementRepository.dart';
+import 'package:zolo_smart_school_staff/data/repositories/authRepository.dart';
+import 'package:zolo_smart_school_staff/ui/screens/leaves/leavesScreen.dart';
+import 'package:zolo_smart_school_staff/utils/api.dart';
+import 'package:zolo_smart_school_staff/utils/hiveBoxKeys.dart';
+import 'package:zolo_smart_school_staff/utils/labelKeys.dart';
+import 'package:zolo_smart_school_staff/utils/utils.dart';
 
-import 'package:eschool_saas_staff/utils/pushMessaging.dart';
+import 'package:zolo_smart_school_staff/utils/pushMessaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';

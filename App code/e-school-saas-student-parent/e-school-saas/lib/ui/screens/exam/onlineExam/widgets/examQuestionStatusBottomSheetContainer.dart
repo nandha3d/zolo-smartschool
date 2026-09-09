@@ -1,14 +1,14 @@
-import 'package:eschool/cubits/submitOnlineExamAnswersCubit.dart';
-import 'package:eschool/data/models/question.dart';
-import 'package:eschool/ui/widgets/customCircularProgressIndicator.dart';
+import 'package:zolo_smart_school/cubits/submitOnlineExamAnswersCubit.dart';
+import 'package:zolo_smart_school/data/models/question.dart';
+import 'package:zolo_smart_school/ui/widgets/customCircularProgressIndicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:eschool/cubits/onlineExamQuestionsCubit.dart';
-import 'package:eschool/ui/widgets/customRoundedButton.dart';
+import 'package:zolo_smart_school/cubits/onlineExamQuestionsCubit.dart';
+import 'package:zolo_smart_school/ui/widgets/customRoundedButton.dart';
 
-import 'package:eschool/utils/labelKeys.dart';
-import 'package:eschool/utils/utils.dart';
+import 'package:zolo_smart_school/utils/labelKeys.dart';
+import 'package:zolo_smart_school/utils/utils.dart';
 import 'package:get/get.dart';
 
 class ExamQuestionStatusBottomSheetContainer extends StatelessWidget {

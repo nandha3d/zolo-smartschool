@@ -1,5 +1,5 @@
-import 'package:eschool_saas_staff/data/models/announcementClass.dart';
-import 'package:eschool_saas_staff/data/models/studyMaterial.dart';
+import 'package:zolo_smart_school_staff/data/models/announcementClass.dart';
+import 'package:zolo_smart_school_staff/data/models/studyMaterial.dart';
 
 class Announcement {
   final int? id;

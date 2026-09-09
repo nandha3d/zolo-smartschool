@@ -2,14 +2,14 @@
 import 'dart:io';
 
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:eschool_saas_staff/cubits/downloadFileCubit.dart';
-import 'package:eschool_saas_staff/data/models/assignmentSubmission.dart';
-import 'package:eschool_saas_staff/data/models/studyMaterial.dart';
-import 'package:eschool_saas_staff/data/repositories/authRepository.dart';
-import 'package:eschool_saas_staff/ui/widgets/customTextContainer.dart';
-import 'package:eschool_saas_staff/ui/widgets/downloadFileBottomsheetContainer.dart';
-import 'package:eschool_saas_staff/utils/constants.dart';
-import 'package:eschool_saas_staff/utils/labelKeys.dart';
+import 'package:zolo_smart_school_staff/cubits/downloadFileCubit.dart';
+import 'package:zolo_smart_school_staff/data/models/assignmentSubmission.dart';
+import 'package:zolo_smart_school_staff/data/models/studyMaterial.dart';
+import 'package:zolo_smart_school_staff/data/repositories/authRepository.dart';
+import 'package:zolo_smart_school_staff/ui/widgets/customTextContainer.dart';
+import 'package:zolo_smart_school_staff/ui/widgets/downloadFileBottomsheetContainer.dart';
+import 'package:zolo_smart_school_staff/utils/constants.dart';
+import 'package:zolo_smart_school_staff/utils/labelKeys.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

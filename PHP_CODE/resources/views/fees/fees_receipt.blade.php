@@ -11,7 +11,7 @@
     </style>
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>Fees Receipt || {{ config('app.name') }}</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.0/css/bootstrap.min.css" crossorigin="anonymous" referrerpolicy="no-referrer"/>
+    <link rel="stylesheet" href="{{ asset('/assets/vendor/bootstrap4.6/bootstrap.min.css') }}" crossorigin="anonymous" referrerpolicy="no-referrer"/>
 </head>
 <body>
 <div class="container ">

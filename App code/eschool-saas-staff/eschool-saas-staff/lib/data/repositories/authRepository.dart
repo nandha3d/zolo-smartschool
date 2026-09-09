@@ -1,9 +1,9 @@
 import 'package:dio/dio.dart';
-import 'package:eschool_saas_staff/data/models/userDetails.dart';
-import 'package:eschool_saas_staff/utils/api.dart';
-import 'package:eschool_saas_staff/utils/hiveBoxKeys.dart';
-import 'package:eschool_saas_staff/utils/labelKeys.dart';
-import 'package:eschool_saas_staff/utils/pushMessaging.dart';
+import 'package:zolo_smart_school_staff/data/models/userDetails.dart';
+import 'package:zolo_smart_school_staff/utils/api.dart';
+import 'package:zolo_smart_school_staff/utils/hiveBoxKeys.dart';
+import 'package:zolo_smart_school_staff/utils/labelKeys.dart';
+import 'package:zolo_smart_school_staff/utils/pushMessaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 

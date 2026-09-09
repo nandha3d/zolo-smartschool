@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
-import 'package:eschool/data/models/schoolDetails.dart';
-import 'package:eschool/data/repositories/schoolDetailsRepository.dart';
+import 'package:zolo_smart_school/data/models/schoolDetails.dart';
+import 'package:zolo_smart_school/data/repositories/schoolDetailsRepository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 abstract class SchooldetailsState extends Equatable {}

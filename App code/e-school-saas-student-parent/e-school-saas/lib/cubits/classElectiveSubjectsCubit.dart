@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
-import 'package:eschool/data/models/electiveSubjectGroup.dart';
-import 'package:eschool/data/repositories/classRepository.dart';
+import 'package:zolo_smart_school/data/models/electiveSubjectGroup.dart';
+import 'package:zolo_smart_school/data/repositories/classRepository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 abstract class ClassElectiveSubjectsState extends Equatable {}

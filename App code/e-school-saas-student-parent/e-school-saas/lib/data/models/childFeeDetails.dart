@@ -1,10 +1,10 @@
-import 'package:eschool/data/models/classFeeType.dart';
-import 'package:eschool/data/models/advanceFee.dart';
-import 'package:eschool/data/models/classDetails.dart';
-import 'package:eschool/data/models/installment.dart';
-import 'package:eschool/data/models/paidFeeDetails.dart';
-import 'package:eschool/data/models/sessionYear.dart';
-import 'package:eschool/utils/labelKeys.dart';
+import 'package:zolo_smart_school/data/models/classFeeType.dart';
+import 'package:zolo_smart_school/data/models/advanceFee.dart';
+import 'package:zolo_smart_school/data/models/classDetails.dart';
+import 'package:zolo_smart_school/data/models/installment.dart';
+import 'package:zolo_smart_school/data/models/paidFeeDetails.dart';
+import 'package:zolo_smart_school/data/models/sessionYear.dart';
+import 'package:zolo_smart_school/utils/labelKeys.dart';
 
 class ChildFeeDetails {
   final int? id;

@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
-import 'package:eschool_saas_staff/data/models/expense.dart';
-import 'package:eschool_saas_staff/utils/api.dart';
+import 'package:zolo_smart_school_staff/data/models/expense.dart';
+import 'package:zolo_smart_school_staff/utils/api.dart';
 
 class ExpenseRepository {
   // Get expense categories

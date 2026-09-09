@@ -1,5 +1,5 @@
-import 'package:eschool/data/models/liveRoute.dart';
-import 'package:eschool/data/repositories/liveRouteRepository.dart';
+import 'package:zolo_smart_school/data/models/liveRoute.dart';
+import 'package:zolo_smart_school/data/repositories/liveRouteRepository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 abstract class LiveRouteState {}

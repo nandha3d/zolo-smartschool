@@ -1,10 +1,10 @@
-import 'package:eschool/cubits/resetPasswordRequestCubit.dart';
-import 'package:eschool/ui/widgets/bottomsheetTopTitleAndCloseButton.dart';
-import 'package:eschool/ui/widgets/customRoundedButton.dart';
-import 'package:eschool/ui/widgets/customTextFieldContainer.dart';
-import 'package:eschool/utils/hiveBoxKeys.dart';
-import 'package:eschool/utils/labelKeys.dart';
-import 'package:eschool/utils/utils.dart';
+import 'package:zolo_smart_school/cubits/resetPasswordRequestCubit.dart';
+import 'package:zolo_smart_school/ui/widgets/bottomsheetTopTitleAndCloseButton.dart';
+import 'package:zolo_smart_school/ui/widgets/customRoundedButton.dart';
+import 'package:zolo_smart_school/ui/widgets/customTextFieldContainer.dart';
+import 'package:zolo_smart_school/utils/hiveBoxKeys.dart';
+import 'package:zolo_smart_school/utils/labelKeys.dart';
+import 'package:zolo_smart_school/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/route_manager.dart';

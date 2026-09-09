@@ -1,5 +1,5 @@
-import 'package:eschool/data/models/assignmentList.dart';
-import 'package:eschool/data/repositories/reportRepository.dart';
+import 'package:zolo_smart_school/data/models/assignmentList.dart';
+import 'package:zolo_smart_school/data/repositories/reportRepository.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 

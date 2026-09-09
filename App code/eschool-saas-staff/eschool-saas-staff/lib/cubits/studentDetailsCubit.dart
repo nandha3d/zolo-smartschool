@@ -1,6 +1,6 @@
-import 'package:eschool_saas_staff/data/models/studentDetailsResponse.dart';
-import 'package:eschool_saas_staff/data/models/subject.dart';
-import 'package:eschool_saas_staff/data/repositories/studentDetailsRepository.dart';
+import 'package:zolo_smart_school_staff/data/models/studentDetailsResponse.dart';
+import 'package:zolo_smart_school_staff/data/models/subject.dart';
+import 'package:zolo_smart_school_staff/data/repositories/studentDetailsRepository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 abstract class StudentDetailsState {}

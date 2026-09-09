@@ -1,10 +1,10 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
-import 'package:eschool/data/models/studyMaterial.dart';
-import 'package:eschool/data/repositories/subjectRepository.dart';
-import 'package:eschool/utils/errorMessageKeysAndCodes.dart';
-import 'package:eschool/utils/utils.dart';
+import 'package:zolo_smart_school/data/models/studyMaterial.dart';
+import 'package:zolo_smart_school/data/repositories/subjectRepository.dart';
+import 'package:zolo_smart_school/utils/errorMessageKeysAndCodes.dart';
+import 'package:zolo_smart_school/utils/utils.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:path_provider/path_provider.dart';

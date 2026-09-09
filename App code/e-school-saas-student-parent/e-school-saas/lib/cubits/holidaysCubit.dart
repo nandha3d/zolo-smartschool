@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
-import 'package:eschool/data/models/holiday.dart';
-import 'package:eschool/data/repositories/systemInfoRepository.dart';
+import 'package:zolo_smart_school/data/models/holiday.dart';
+import 'package:zolo_smart_school/data/repositories/systemInfoRepository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 abstract class HolidaysState extends Equatable {}

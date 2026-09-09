@@ -1,4 +1,4 @@
-import 'package:eschool/ui/widgets/customUserProfileImageWidget.dart';
+import 'package:zolo_smart_school/ui/widgets/customUserProfileImageWidget.dart';
 
 import 'package:flutter/material.dart';
 

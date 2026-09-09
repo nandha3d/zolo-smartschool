@@ -1,5 +1,5 @@
-import 'package:eschool/ui/widgets/customShimmerContainer.dart';
-import 'package:eschool/ui/widgets/shimmerLoadingContainer.dart';
+import 'package:zolo_smart_school/ui/widgets/customShimmerContainer.dart';
+import 'package:zolo_smart_school/ui/widgets/shimmerLoadingContainer.dart';
 import 'package:flutter/material.dart';
 
 class SubjectsShimmerLoadingContainer extends StatelessWidget {

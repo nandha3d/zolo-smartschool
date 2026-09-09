@@ -1,5 +1,5 @@
-import 'package:eschool/data/models/childFeeDetails.dart';
-import 'package:eschool/data/repositories/feeRepository.dart';
+import 'package:zolo_smart_school/data/models/childFeeDetails.dart';
+import 'package:zolo_smart_school/data/repositories/feeRepository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 abstract class ChildFeeDetailsState {}

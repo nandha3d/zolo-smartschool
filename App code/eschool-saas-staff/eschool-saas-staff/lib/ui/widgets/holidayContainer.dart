@@ -1,11 +1,11 @@
-import 'package:eschool_saas_staff/data/models/holiday.dart';
-import 'package:eschool_saas_staff/ui/widgets/customBottomsheet.dart';
-import 'package:eschool_saas_staff/ui/widgets/customTextContainer.dart';
-import 'package:eschool_saas_staff/ui/widgets/readMoreTextButton.dart';
-import 'package:eschool_saas_staff/ui/widgets/textWithFadedBackgroundContainer.dart';
-import 'package:eschool_saas_staff/utils/constants.dart';
-import 'package:eschool_saas_staff/utils/labelKeys.dart';
-import 'package:eschool_saas_staff/utils/utils.dart';
+import 'package:zolo_smart_school_staff/data/models/holiday.dart';
+import 'package:zolo_smart_school_staff/ui/widgets/customBottomsheet.dart';
+import 'package:zolo_smart_school_staff/ui/widgets/customTextContainer.dart';
+import 'package:zolo_smart_school_staff/ui/widgets/readMoreTextButton.dart';
+import 'package:zolo_smart_school_staff/ui/widgets/textWithFadedBackgroundContainer.dart';
+import 'package:zolo_smart_school_staff/utils/constants.dart';
+import 'package:zolo_smart_school_staff/utils/labelKeys.dart';
+import 'package:zolo_smart_school_staff/utils/utils.dart';
 
 import 'package:flutter/material.dart';
 

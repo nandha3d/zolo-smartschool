@@ -1,5 +1,5 @@
-import 'package:eschool/data/models/subject.dart';
-import 'package:eschool/ui/screens/home/widgets/examContainer.dart';
+import 'package:zolo_smart_school/data/models/subject.dart';
+import 'package:zolo_smart_school/ui/screens/home/widgets/examContainer.dart';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

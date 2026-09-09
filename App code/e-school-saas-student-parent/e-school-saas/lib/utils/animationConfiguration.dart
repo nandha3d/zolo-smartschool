@@ -1,4 +1,4 @@
-import 'package:eschool/utils/constants.dart';
+import 'package:zolo_smart_school/utils/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 

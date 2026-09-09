@@ -1,6 +1,6 @@
-import 'package:eschool/data/models/medium.dart';
-import 'package:eschool/data/models/shift.dart';
-import 'package:eschool/data/models/streamDetails.dart';
+import 'package:zolo_smart_school/data/models/medium.dart';
+import 'package:zolo_smart_school/data/models/shift.dart';
+import 'package:zolo_smart_school/data/models/streamDetails.dart';
 
 class ClassDetails {
   final int? id;

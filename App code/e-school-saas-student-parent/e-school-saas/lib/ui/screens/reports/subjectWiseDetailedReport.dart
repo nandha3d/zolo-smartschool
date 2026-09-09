@@ -1,21 +1,21 @@
-import 'package:eschool/cubits/assignmentReportCubit.dart';
-import 'package:eschool/cubits/authCubit.dart';
-import 'package:eschool/cubits/onlineExamReportCubit.dart';
-import 'package:eschool/ui/widgets/customCircularProgressIndicator.dart';
-import 'package:eschool/ui/widgets/noDataContainer.dart';
-import 'package:eschool/utils/errorMessageKeysAndCodes.dart';
-import 'package:eschool/utils/systemModules.dart';
+import 'package:zolo_smart_school/cubits/assignmentReportCubit.dart';
+import 'package:zolo_smart_school/cubits/authCubit.dart';
+import 'package:zolo_smart_school/cubits/onlineExamReportCubit.dart';
+import 'package:zolo_smart_school/ui/widgets/customCircularProgressIndicator.dart';
+import 'package:zolo_smart_school/ui/widgets/noDataContainer.dart';
+import 'package:zolo_smart_school/utils/errorMessageKeysAndCodes.dart';
+import 'package:zolo_smart_school/utils/systemModules.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:eschool/cubits/reportTabSelectionCubit.dart';
-import 'package:eschool/data/models/subject.dart';
-import 'package:eschool/ui/widgets/customBackButton.dart';
-import 'package:eschool/ui/widgets/customTabBarContainer.dart';
-import 'package:eschool/ui/widgets/errorContainer.dart';
-import 'package:eschool/ui/widgets/screenTopBackgroundContainer.dart';
-import 'package:eschool/ui/widgets/tabBarBackgroundContainer.dart';
-import 'package:eschool/utils/labelKeys.dart';
-import 'package:eschool/utils/utils.dart';
+import 'package:zolo_smart_school/cubits/reportTabSelectionCubit.dart';
+import 'package:zolo_smart_school/data/models/subject.dart';
+import 'package:zolo_smart_school/ui/widgets/customBackButton.dart';
+import 'package:zolo_smart_school/ui/widgets/customTabBarContainer.dart';
+import 'package:zolo_smart_school/ui/widgets/errorContainer.dart';
+import 'package:zolo_smart_school/ui/widgets/screenTopBackgroundContainer.dart';
+import 'package:zolo_smart_school/ui/widgets/tabBarBackgroundContainer.dart';
+import 'package:zolo_smart_school/utils/labelKeys.dart';
+import 'package:zolo_smart_school/utils/utils.dart';
 import 'package:get/get.dart';
 
 class SubjectWiseDetailedReport extends StatefulWidget {

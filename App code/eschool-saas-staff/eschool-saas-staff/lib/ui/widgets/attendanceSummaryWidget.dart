@@ -1,7 +1,7 @@
-import 'package:eschool_saas_staff/data/models/teacherAttendance.dart';
-import 'package:eschool_saas_staff/ui/widgets/customTextContainer.dart';
-import 'package:eschool_saas_staff/utils/labelKeys.dart';
-import 'package:eschool_saas_staff/utils/utils.dart';
+import 'package:zolo_smart_school_staff/data/models/teacherAttendance.dart';
+import 'package:zolo_smart_school_staff/ui/widgets/customTextContainer.dart';
+import 'package:zolo_smart_school_staff/utils/labelKeys.dart';
+import 'package:zolo_smart_school_staff/utils/utils.dart';
 import 'package:flutter/material.dart';
 
 class AttendanceSummaryWidget extends StatelessWidget {

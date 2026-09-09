@@ -1,7 +1,7 @@
-import 'package:eschool_saas_staff/data/models/leaveRequest.dart';
-import 'package:eschool_saas_staff/data/models/payRoll.dart';
-import 'package:eschool_saas_staff/data/models/staffSalary.dart';
-import 'package:eschool_saas_staff/data/models/userDetails.dart';
+import 'package:zolo_smart_school_staff/data/models/leaveRequest.dart';
+import 'package:zolo_smart_school_staff/data/models/payRoll.dart';
+import 'package:zolo_smart_school_staff/data/models/staffSalary.dart';
+import 'package:zolo_smart_school_staff/data/models/userDetails.dart';
 
 class StaffPayRoll {
   final int? id;

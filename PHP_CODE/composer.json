@@ -1,10 +1,11 @@
 {
-    "name": "zoloschools/platform",
+    "name": "animazon/zolo-smart-school",
     "type": "project",
-    "description": "Zolo Schools - School Management Platform",
+    "description": "Zolo Smart School \u2014 multi-tenant school management platform by Animazon.",
     "keywords": [
+        "animazon",
         "zolo",
-        "schools",
+        "zolo-smart-school",
         "school-management"
     ],
     "repositories": [
@@ -98,5 +99,11 @@
         }
     },
     "minimum-stability": "dev",
-    "prefer-stable": true
+    "prefer-stable": true,
+    "authors": [
+        {
+            "name": "Animazon",
+            "role": "Owner"
+        }
+    ]
 }

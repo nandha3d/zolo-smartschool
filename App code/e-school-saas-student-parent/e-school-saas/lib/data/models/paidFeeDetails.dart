@@ -1,5 +1,5 @@
-import 'package:eschool/data/models/compulsoryPaidFee.dart';
-import 'package:eschool/data/models/optionalPaidFee.dart';
+import 'package:zolo_smart_school/data/models/compulsoryPaidFee.dart';
+import 'package:zolo_smart_school/data/models/optionalPaidFee.dart';
 
 class PaidFeeDetails {
   final int? id;

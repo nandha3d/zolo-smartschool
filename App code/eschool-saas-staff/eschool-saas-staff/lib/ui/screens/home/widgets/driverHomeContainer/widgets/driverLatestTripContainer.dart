@@ -1,11 +1,11 @@
-import 'package:eschool_saas_staff/cubits/transport/tripsCubit.dart';
-import 'package:eschool_saas_staff/ui/screens/home/widgets/myTripContainer/widgets/tripItemCard.dart';
-import 'package:eschool_saas_staff/ui/screens/home/widgets/homeContainer/widgets/contentTitleWithViewmoreButton.dart';
-import 'package:eschool_saas_staff/ui/widgets/customCircularProgressIndicator.dart';
-import 'package:eschool_saas_staff/ui/widgets/customTextContainer.dart';
-import 'package:eschool_saas_staff/ui/widgets/errorContainer.dart';
-import 'package:eschool_saas_staff/utils/constants.dart';
-import 'package:eschool_saas_staff/utils/labelKeys.dart';
+import 'package:zolo_smart_school_staff/cubits/transport/tripsCubit.dart';
+import 'package:zolo_smart_school_staff/ui/screens/home/widgets/myTripContainer/widgets/tripItemCard.dart';
+import 'package:zolo_smart_school_staff/ui/screens/home/widgets/homeContainer/widgets/contentTitleWithViewmoreButton.dart';
+import 'package:zolo_smart_school_staff/ui/widgets/customCircularProgressIndicator.dart';
+import 'package:zolo_smart_school_staff/ui/widgets/customTextContainer.dart';
+import 'package:zolo_smart_school_staff/ui/widgets/errorContainer.dart';
+import 'package:zolo_smart_school_staff/utils/constants.dart';
+import 'package:zolo_smart_school_staff/utils/labelKeys.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

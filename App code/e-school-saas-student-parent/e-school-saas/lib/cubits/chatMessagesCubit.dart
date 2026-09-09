@@ -1,6 +1,6 @@
-import 'package:eschool/data/models/chatMessage.dart';
-import 'package:eschool/data/models/chatMessagesResponse.dart';
-import 'package:eschool/data/repositories/chatRepository.dart';
+import 'package:zolo_smart_school/data/models/chatMessage.dart';
+import 'package:zolo_smart_school/data/models/chatMessagesResponse.dart';
+import 'package:zolo_smart_school/data/repositories/chatRepository.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

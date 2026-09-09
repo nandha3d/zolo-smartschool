@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:eschool_saas_staff/ui/widgets/customTextContainer.dart';
+import 'package:zolo_smart_school_staff/ui/widgets/customTextContainer.dart';
 
 class AttendanceStudentRow extends StatelessWidget {
   final String name;

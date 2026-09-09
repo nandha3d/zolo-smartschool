@@ -1,6 +1,6 @@
-import 'package:eschool/data/models/studentDiaryResponse.dart';
-import 'package:eschool/data/models/studentDiaryDetails.dart';
-import 'package:eschool/data/repositories/diaryRepository.dart';
+import 'package:zolo_smart_school/data/models/studentDiaryResponse.dart';
+import 'package:zolo_smart_school/data/models/studentDiaryDetails.dart';
+import 'package:zolo_smart_school/data/repositories/diaryRepository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 abstract class DiariesState {}

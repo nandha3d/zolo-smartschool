@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:eschool/data/models/resultOnlineDetails.dart';
-import 'package:eschool/data/repositories/resultRepository.dart';
+import 'package:zolo_smart_school/data/models/resultOnlineDetails.dart';
+import 'package:zolo_smart_school/data/repositories/resultRepository.dart';
 
 abstract class ResultOnlineState {}
 

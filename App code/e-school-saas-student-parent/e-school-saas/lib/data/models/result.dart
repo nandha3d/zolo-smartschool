@@ -1,4 +1,4 @@
-import 'package:eschool/data/models/subjectMark.dart';
+import 'package:zolo_smart_school/data/models/subjectMark.dart';
 
 class Result {
   Result({

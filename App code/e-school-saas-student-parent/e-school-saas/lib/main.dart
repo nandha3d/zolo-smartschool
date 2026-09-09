@@ -1,4 +1,4 @@
-import 'package:eschool/app/app.dart';
+import 'package:zolo_smart_school/app/app.dart';
 
 ///[V.1.8.0]
 

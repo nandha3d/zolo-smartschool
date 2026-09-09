@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
-import 'package:eschool/data/models/guardian.dart';
-import 'package:eschool/data/models/student.dart';
-import 'package:eschool/data/repositories/authRepository.dart';
+import 'package:zolo_smart_school/data/models/guardian.dart';
+import 'package:zolo_smart_school/data/models/student.dart';
+import 'package:zolo_smart_school/data/repositories/authRepository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 abstract class SignInState extends Equatable {}

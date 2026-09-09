@@ -1,17 +1,17 @@
-import 'package:eschool/ui/widgets/customAppbar.dart';
-import 'package:eschool/ui/widgets/customRoundedButton.dart';
-import 'package:eschool/ui/screens/parentTransportEnroll/selectTransport/widgets/inlineExpandableSelector.dart';
-import 'package:eschool/utils/constants.dart';
-import 'package:eschool/utils/labelKeys.dart';
-import 'package:eschool/utils/utils.dart';
+import 'package:zolo_smart_school/ui/widgets/customAppbar.dart';
+import 'package:zolo_smart_school/ui/widgets/customRoundedButton.dart';
+import 'package:zolo_smart_school/ui/screens/parentTransportEnroll/selectTransport/widgets/inlineExpandableSelector.dart';
+import 'package:zolo_smart_school/utils/constants.dart';
+import 'package:zolo_smart_school/utils/labelKeys.dart';
+import 'package:zolo_smart_school/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
-import 'package:eschool/app/routes.dart';
-import 'package:eschool/cubits/transport/pickupPointsCubit.dart';
-import 'package:eschool/cubits/transport/shiftsCubit.dart';
-import 'package:eschool/cubits/transport/feesCubit.dart';
-import 'package:eschool/cubits/transport/enrollFormCubit.dart';
+import 'package:zolo_smart_school/app/routes.dart';
+import 'package:zolo_smart_school/cubits/transport/pickupPointsCubit.dart';
+import 'package:zolo_smart_school/cubits/transport/shiftsCubit.dart';
+import 'package:zolo_smart_school/cubits/transport/feesCubit.dart';
+import 'package:zolo_smart_school/cubits/transport/enrollFormCubit.dart';
 
 class StaffTransportEnrollScreen extends StatelessWidget {
   final int? studentUserId;

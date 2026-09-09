@@ -1,4 +1,4 @@
-import 'package:eschool/data/models/diary.dart';
+import 'package:zolo_smart_school/data/models/diary.dart';
 
 class DiaryStudent {
   final int id;

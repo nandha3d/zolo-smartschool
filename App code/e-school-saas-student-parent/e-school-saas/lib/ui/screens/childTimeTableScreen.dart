@@ -1,6 +1,6 @@
-import 'package:eschool/cubits/timeTableCubit.dart';
-import 'package:eschool/data/repositories/studentRepository.dart';
-import 'package:eschool/ui/widgets/timetableContainer.dart';
+import 'package:zolo_smart_school/cubits/timeTableCubit.dart';
+import 'package:zolo_smart_school/data/repositories/studentRepository.dart';
+import 'package:zolo_smart_school/ui/widgets/timetableContainer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';

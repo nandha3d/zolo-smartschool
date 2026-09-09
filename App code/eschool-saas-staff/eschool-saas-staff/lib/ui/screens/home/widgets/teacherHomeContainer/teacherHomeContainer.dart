@@ -1,15 +1,15 @@
-import 'package:eschool_saas_staff/cubits/authentication/authCubit.dart';
-import 'package:eschool_saas_staff/cubits/homeScreenDataCubit.dart';
-import 'package:eschool_saas_staff/cubits/teacherAcademics/teacherMyTimetableCubit.dart';
-import 'package:eschool_saas_staff/cubits/userDetails/staffAllowedPermissionsAndModulesCubit.dart';
-import 'package:eschool_saas_staff/ui/screens/home/widgets/homeContainer/widgets/homeContainerAppbar.dart';
-import 'package:eschool_saas_staff/ui/screens/home/widgets/teacherHomeContainer/widgets/teacherHolidaysContainer.dart';
-import 'package:eschool_saas_staff/ui/screens/home/widgets/teacherHomeContainer/widgets/teacherHomeOverviewContainer.dart';
-import 'package:eschool_saas_staff/ui/screens/home/widgets/teacherHomeContainer/widgets/teacherLeavesContainer.dart';
-import 'package:eschool_saas_staff/ui/screens/home/widgets/teacherHomeContainer/widgets/teacherTodaysTimetableContainer.dart';
-import 'package:eschool_saas_staff/ui/widgets/customCircularProgressIndicator.dart';
-import 'package:eschool_saas_staff/ui/widgets/errorContainer.dart';
-import 'package:eschool_saas_staff/utils/systemModulesAndPermissions.dart';
+import 'package:zolo_smart_school_staff/cubits/authentication/authCubit.dart';
+import 'package:zolo_smart_school_staff/cubits/homeScreenDataCubit.dart';
+import 'package:zolo_smart_school_staff/cubits/teacherAcademics/teacherMyTimetableCubit.dart';
+import 'package:zolo_smart_school_staff/cubits/userDetails/staffAllowedPermissionsAndModulesCubit.dart';
+import 'package:zolo_smart_school_staff/ui/screens/home/widgets/homeContainer/widgets/homeContainerAppbar.dart';
+import 'package:zolo_smart_school_staff/ui/screens/home/widgets/teacherHomeContainer/widgets/teacherHolidaysContainer.dart';
+import 'package:zolo_smart_school_staff/ui/screens/home/widgets/teacherHomeContainer/widgets/teacherHomeOverviewContainer.dart';
+import 'package:zolo_smart_school_staff/ui/screens/home/widgets/teacherHomeContainer/widgets/teacherLeavesContainer.dart';
+import 'package:zolo_smart_school_staff/ui/screens/home/widgets/teacherHomeContainer/widgets/teacherTodaysTimetableContainer.dart';
+import 'package:zolo_smart_school_staff/ui/widgets/customCircularProgressIndicator.dart';
+import 'package:zolo_smart_school_staff/ui/widgets/errorContainer.dart';
+import 'package:zolo_smart_school_staff/utils/systemModulesAndPermissions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

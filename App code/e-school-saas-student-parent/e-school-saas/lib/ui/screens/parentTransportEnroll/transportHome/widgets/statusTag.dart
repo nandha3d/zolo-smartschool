@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:eschool/ui/widgets/customTextContainer.dart';
+import 'package:zolo_smart_school/ui/widgets/customTextContainer.dart';
 
 class StatusTag extends StatelessWidget {
   final String text; // e.g., Pending, Rejected, Approved

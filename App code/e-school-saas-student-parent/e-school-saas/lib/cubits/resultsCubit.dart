@@ -1,5 +1,5 @@
-import 'package:eschool/data/models/result.dart';
-import 'package:eschool/data/repositories/studentRepository.dart';
+import 'package:zolo_smart_school/data/models/result.dart';
+import 'package:zolo_smart_school/data/repositories/studentRepository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 abstract class ResultsState {}

@@ -1,9 +1,9 @@
-import 'package:eschool/cubits/assignmentsCubit.dart';
-import 'package:eschool/cubits/examsOnlineCubit.dart';
-import 'package:eschool/cubits/resultsCubit.dart';
-import 'package:eschool/data/models/subject.dart';
-import 'package:eschool/utils/labelKeys.dart';
-import 'package:eschool/utils/utils.dart';
+import 'package:zolo_smart_school/cubits/assignmentsCubit.dart';
+import 'package:zolo_smart_school/cubits/examsOnlineCubit.dart';
+import 'package:zolo_smart_school/cubits/resultsCubit.dart';
+import 'package:zolo_smart_school/data/models/subject.dart';
+import 'package:zolo_smart_school/utils/labelKeys.dart';
+import 'package:zolo_smart_school/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

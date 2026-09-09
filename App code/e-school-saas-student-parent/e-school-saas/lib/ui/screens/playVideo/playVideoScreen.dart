@@ -1,10 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:eschool/data/models/studyMaterial.dart';
-import 'package:eschool/ui/screens/playVideo/widgets/videoControlsContainer.dart';
-import 'package:eschool/ui/screens/playVideo/widgets/playPauseButton.dart';
-import 'package:eschool/ui/widgets/customCircularProgressIndicator.dart';
-import 'package:eschool/ui/widgets/svgButton.dart';
-import 'package:eschool/utils/utils.dart';
+import 'package:zolo_smart_school/data/models/studyMaterial.dart';
+import 'package:zolo_smart_school/ui/screens/playVideo/widgets/videoControlsContainer.dart';
+import 'package:zolo_smart_school/ui/screens/playVideo/widgets/playPauseButton.dart';
+import 'package:zolo_smart_school/ui/widgets/customCircularProgressIndicator.dart';
+import 'package:zolo_smart_school/ui/widgets/svgButton.dart';
+import 'package:zolo_smart_school/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';

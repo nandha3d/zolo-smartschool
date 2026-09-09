@@ -1,16 +1,16 @@
-import 'package:eschool/app/routes.dart';
-import 'package:eschool/data/models/gallery.dart';
-import 'package:eschool/data/models/sessionYear.dart';
-import 'package:eschool/data/models/studyMaterial.dart';
-import 'package:eschool/ui/widgets/customAppbar.dart';
-import 'package:eschool/utils/labelKeys.dart';
-import 'package:eschool/utils/utils.dart';
+import 'package:zolo_smart_school/app/routes.dart';
+import 'package:zolo_smart_school/data/models/gallery.dart';
+import 'package:zolo_smart_school/data/models/sessionYear.dart';
+import 'package:zolo_smart_school/data/models/studyMaterial.dart';
+import 'package:zolo_smart_school/ui/widgets/customAppbar.dart';
+import 'package:zolo_smart_school/utils/labelKeys.dart';
+import 'package:zolo_smart_school/utils/utils.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
 import 'package:readmore/readmore.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
-import 'package:eschool/ui/widgets/networkImageHandler.dart';
+import 'package:zolo_smart_school/ui/widgets/networkImageHandler.dart';
 
 class GalleryDetailsScreen extends StatefulWidget {
   final Gallery gallery;

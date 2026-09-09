@@ -1,6 +1,6 @@
-import 'package:eschool/data/models/paymentGateway.dart';
-import 'package:eschool/data/models/paymentTransaction.dart';
-import 'package:eschool/data/repositories/transportationPaymentRepository.dart';
+import 'package:zolo_smart_school/data/models/paymentGateway.dart';
+import 'package:zolo_smart_school/data/models/paymentTransaction.dart';
+import 'package:zolo_smart_school/data/repositories/transportationPaymentRepository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 abstract class TransportationPrePaymentTasksState {}

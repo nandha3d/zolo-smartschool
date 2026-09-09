@@ -1,14 +1,14 @@
-import 'package:eschool_saas_staff/cubits/authentication/authCubit.dart';
-import 'package:eschool_saas_staff/cubits/homeScreenDataCubit.dart';
-import 'package:eschool_saas_staff/cubits/userDetails/staffAllowedPermissionsAndModulesCubit.dart';
-import 'package:eschool_saas_staff/ui/screens/home/widgets/homeContainer/widgets/holidaysContainer.dart';
-import 'package:eschool_saas_staff/ui/screens/home/widgets/homeContainer/widgets/homeOverviewContainer.dart';
-import 'package:eschool_saas_staff/ui/screens/home/widgets/homeContainer/widgets/leavesContainer.dart';
-import 'package:eschool_saas_staff/ui/screens/home/widgets/homeContainer/widgets/teachersTimeTableContainer.dart';
-import 'package:eschool_saas_staff/ui/screens/home/widgets/homeContainer/widgets/homeContainerAppbar.dart';
-import 'package:eschool_saas_staff/ui/widgets/customCircularProgressIndicator.dart';
-import 'package:eschool_saas_staff/ui/widgets/errorContainer.dart';
-import 'package:eschool_saas_staff/utils/systemModulesAndPermissions.dart';
+import 'package:zolo_smart_school_staff/cubits/authentication/authCubit.dart';
+import 'package:zolo_smart_school_staff/cubits/homeScreenDataCubit.dart';
+import 'package:zolo_smart_school_staff/cubits/userDetails/staffAllowedPermissionsAndModulesCubit.dart';
+import 'package:zolo_smart_school_staff/ui/screens/home/widgets/homeContainer/widgets/holidaysContainer.dart';
+import 'package:zolo_smart_school_staff/ui/screens/home/widgets/homeContainer/widgets/homeOverviewContainer.dart';
+import 'package:zolo_smart_school_staff/ui/screens/home/widgets/homeContainer/widgets/leavesContainer.dart';
+import 'package:zolo_smart_school_staff/ui/screens/home/widgets/homeContainer/widgets/teachersTimeTableContainer.dart';
+import 'package:zolo_smart_school_staff/ui/screens/home/widgets/homeContainer/widgets/homeContainerAppbar.dart';
+import 'package:zolo_smart_school_staff/ui/widgets/customCircularProgressIndicator.dart';
+import 'package:zolo_smart_school_staff/ui/widgets/errorContainer.dart';
+import 'package:zolo_smart_school_staff/utils/systemModulesAndPermissions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

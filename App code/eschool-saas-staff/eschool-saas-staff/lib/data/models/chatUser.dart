@@ -1,6 +1,6 @@
-import 'package:eschool_saas_staff/data/models/chatUserRole.dart';
-import 'package:eschool_saas_staff/data/models/classSection.dart';
-import 'package:eschool_saas_staff/data/models/subjectTeacher.dart';
+import 'package:zolo_smart_school_staff/data/models/chatUserRole.dart';
+import 'package:zolo_smart_school_staff/data/models/classSection.dart';
+import 'package:zolo_smart_school_staff/data/models/subjectTeacher.dart';
 
 class ChatUser {
   const ChatUser({

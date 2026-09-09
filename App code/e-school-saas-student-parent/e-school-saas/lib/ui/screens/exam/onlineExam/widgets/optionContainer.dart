@@ -1,5 +1,5 @@
-import 'package:eschool/data/models/answerOption.dart';
-import 'package:eschool/data/models/question.dart';
+import 'package:zolo_smart_school/data/models/answerOption.dart';
+import 'package:zolo_smart_school/data/models/question.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_tex/flutter_tex.dart';

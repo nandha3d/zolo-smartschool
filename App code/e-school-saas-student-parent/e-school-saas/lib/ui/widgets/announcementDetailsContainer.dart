@@ -1,8 +1,8 @@
-import 'package:eschool/data/models/announcement.dart';
-import 'package:eschool/ui/widgets/studyMaterialWithDownloadButtonContainer.dart';
-import 'package:eschool/utils/constants.dart';
-import 'package:eschool/utils/labelKeys.dart';
-import 'package:eschool/utils/utils.dart';
+import 'package:zolo_smart_school/data/models/announcement.dart';
+import 'package:zolo_smart_school/ui/widgets/studyMaterialWithDownloadButtonContainer.dart';
+import 'package:zolo_smart_school/utils/constants.dart';
+import 'package:zolo_smart_school/utils/labelKeys.dart';
+import 'package:zolo_smart_school/utils/utils.dart';
 import 'package:flutter/material.dart';
 
 class AnnouncementDetailsContainer extends StatefulWidget {

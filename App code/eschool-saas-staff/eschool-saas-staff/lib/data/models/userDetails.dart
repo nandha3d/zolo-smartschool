@@ -1,7 +1,7 @@
-import 'package:eschool_saas_staff/data/models/additionalUserDetails.dart';
-import 'package:eschool_saas_staff/data/models/role.dart';
-import 'package:eschool_saas_staff/data/models/school.dart';
-import 'package:eschool_saas_staff/utils/constants.dart';
+import 'package:zolo_smart_school_staff/data/models/additionalUserDetails.dart';
+import 'package:zolo_smart_school_staff/data/models/role.dart';
+import 'package:zolo_smart_school_staff/data/models/school.dart';
+import 'package:zolo_smart_school_staff/utils/constants.dart';
 
 class UserDetails {
   final int? id;

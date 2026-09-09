@@ -1,5 +1,5 @@
-import 'package:eschool/data/models/studyMaterial.dart';
-import 'package:eschool/data/models/subject.dart';
+import 'package:zolo_smart_school/data/models/studyMaterial.dart';
+import 'package:zolo_smart_school/data/models/subject.dart';
 
 class Assignment {
   Assignment({

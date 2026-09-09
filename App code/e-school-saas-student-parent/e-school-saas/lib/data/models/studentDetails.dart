@@ -1,6 +1,6 @@
-import 'package:eschool/data/models/offlineExamSubjectResult.dart';
-import 'package:eschool/data/models/paidFeeDetails.dart';
-import 'package:eschool/data/models/student.dart';
+import 'package:zolo_smart_school/data/models/offlineExamSubjectResult.dart';
+import 'package:zolo_smart_school/data/models/paidFeeDetails.dart';
+import 'package:zolo_smart_school/data/models/student.dart';
 
 class StudentDetails {
   final int? id;

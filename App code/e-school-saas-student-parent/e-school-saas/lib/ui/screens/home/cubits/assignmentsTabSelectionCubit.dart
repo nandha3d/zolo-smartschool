@@ -1,4 +1,4 @@
-import 'package:eschool/utils/labelKeys.dart';
+import 'package:zolo_smart_school/utils/labelKeys.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AssignmentsTabSelectionState {

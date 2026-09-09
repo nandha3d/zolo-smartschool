@@ -1,7 +1,7 @@
 import 'package:dotted_border/dotted_border.dart';
-import 'package:eschool/data/models/studyMaterial.dart';
-import 'package:eschool/ui/widgets/downloadFileButton.dart';
-import 'package:eschool/utils/utils.dart';
+import 'package:zolo_smart_school/data/models/studyMaterial.dart';
+import 'package:zolo_smart_school/ui/widgets/downloadFileButton.dart';
+import 'package:zolo_smart_school/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 

@@ -1,7 +1,7 @@
-import 'package:eschool/ui/widgets/customTextContainer.dart';
+import 'package:zolo_smart_school/ui/widgets/customTextContainer.dart';
 import 'package:flutter/material.dart';
-import 'package:eschool/data/models/liveRoute.dart';
-import 'package:eschool/ui/styles/colors.dart';
+import 'package:zolo_smart_school/data/models/liveRoute.dart';
+import 'package:zolo_smart_school/ui/styles/colors.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 // Live timeline stop status enum

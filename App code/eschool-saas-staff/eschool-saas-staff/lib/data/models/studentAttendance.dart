@@ -1,4 +1,4 @@
-import 'package:eschool_saas_staff/data/models/studentDetails.dart';
+import 'package:zolo_smart_school_staff/data/models/studentDetails.dart';
 
 class StudentAttendance {
   final int? id;

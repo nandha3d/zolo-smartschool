@@ -1,5 +1,5 @@
-import 'package:eschool/data/models/notificationDetails.dart';
-import 'package:eschool/data/repositories/notificationRepository.dart';
+import 'package:zolo_smart_school/data/models/notificationDetails.dart';
+import 'package:zolo_smart_school/data/repositories/notificationRepository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 abstract class NotificationsState {}

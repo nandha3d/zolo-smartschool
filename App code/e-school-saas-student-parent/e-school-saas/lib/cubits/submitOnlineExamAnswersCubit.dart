@@ -1,4 +1,4 @@
-import 'package:eschool/data/repositories/onlineExamRepository.dart';
+import 'package:zolo_smart_school/data/repositories/onlineExamRepository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 abstract class SubmitOnlineExamAnswersState {}

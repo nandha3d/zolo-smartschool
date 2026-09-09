@@ -1,8 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:eschool_saas_staff/data/models/transportUserAttendance.dart';
-import 'package:eschool_saas_staff/data/repositories/transportUserAttendanceRepository.dart';
-import 'package:eschool_saas_staff/utils/labelKeys.dart';
-import 'package:eschool_saas_staff/utils/utils.dart';
+import 'package:zolo_smart_school_staff/data/models/transportUserAttendance.dart';
+import 'package:zolo_smart_school_staff/data/repositories/transportUserAttendanceRepository.dart';
+import 'package:zolo_smart_school_staff/utils/labelKeys.dart';
+import 'package:zolo_smart_school_staff/utils/utils.dart';
 
 // States
 abstract class TransportUserAttendanceState {}

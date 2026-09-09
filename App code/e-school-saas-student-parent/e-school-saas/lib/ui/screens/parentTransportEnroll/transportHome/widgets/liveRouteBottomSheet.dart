@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:eschool/cubits/liveRouteCubit.dart';
-import 'package:eschool/cubits/authCubit.dart';
-import 'package:eschool/data/models/liveRoute.dart';
-import 'package:eschool/ui/widgets/customCircularProgressIndicator.dart';
-import 'package:eschool/ui/screens/parentTransportEnroll/transportHome/liveTimeline.dart';
-import 'package:eschool/utils/labelKeys.dart';
-import 'package:eschool/utils/utils.dart';
+import 'package:zolo_smart_school/cubits/liveRouteCubit.dart';
+import 'package:zolo_smart_school/cubits/authCubit.dart';
+import 'package:zolo_smart_school/data/models/liveRoute.dart';
+import 'package:zolo_smart_school/ui/widgets/customCircularProgressIndicator.dart';
+import 'package:zolo_smart_school/ui/screens/parentTransportEnroll/transportHome/liveTimeline.dart';
+import 'package:zolo_smart_school/utils/labelKeys.dart';
+import 'package:zolo_smart_school/utils/utils.dart';
 
 class LiveRouteBottomSheet extends StatefulWidget {
   final int userId;

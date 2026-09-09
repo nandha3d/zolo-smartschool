@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
-import 'package:eschool/data/models/assignment.dart';
-import 'package:eschool/utils/api.dart';
+import 'package:zolo_smart_school/data/models/assignment.dart';
+import 'package:zolo_smart_school/utils/api.dart';
 
 class AssignmentRepository {
   Future<Map<String, dynamic>> fetchAssignments({

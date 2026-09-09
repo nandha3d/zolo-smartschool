@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:eschool/data/repositories/feeRepository.dart';
-import 'package:eschool/utils/errorMessageKeysAndCodes.dart';
+import 'package:zolo_smart_school/data/repositories/feeRepository.dart';
+import 'package:zolo_smart_school/utils/errorMessageKeysAndCodes.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:path_provider/path_provider.dart';

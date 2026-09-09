@@ -1,11 +1,11 @@
-import 'package:eschool/data/models/transportDashboard.dart';
-import 'package:eschool/ui/widgets/customTextContainer.dart';
-import 'package:eschool/utils/utils.dart';
-import 'package:eschool/ui/screens/chat/chatScreen.dart';
+import 'package:zolo_smart_school/data/models/transportDashboard.dart';
+import 'package:zolo_smart_school/ui/widgets/customTextContainer.dart';
+import 'package:zolo_smart_school/utils/utils.dart';
+import 'package:zolo_smart_school/ui/screens/chat/chatScreen.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:eschool/app/routes.dart';
+import 'package:zolo_smart_school/app/routes.dart';
 
 class EnrollCard extends StatelessWidget {
   final String title;

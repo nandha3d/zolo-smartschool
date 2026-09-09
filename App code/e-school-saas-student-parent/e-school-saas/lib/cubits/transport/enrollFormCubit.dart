@@ -1,6 +1,6 @@
-import 'package:eschool/data/models/pickupPoint.dart';
-import 'package:eschool/data/models/transportFee.dart';
-import 'package:eschool/data/models/transportShift.dart';
+import 'package:zolo_smart_school/data/models/pickupPoint.dart';
+import 'package:zolo_smart_school/data/models/transportFee.dart';
+import 'package:zolo_smart_school/data/models/transportShift.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class TransportEnrollFormState {

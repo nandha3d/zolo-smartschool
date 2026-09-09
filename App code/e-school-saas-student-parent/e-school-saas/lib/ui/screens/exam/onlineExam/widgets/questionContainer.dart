@@ -1,12 +1,12 @@
-import 'package:eschool/data/models/question.dart';
+import 'package:zolo_smart_school/data/models/question.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tex/flutter_tex.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
-import 'package:eschool/ui/widgets/customCircularProgressIndicator.dart';
+import 'package:zolo_smart_school/ui/widgets/customCircularProgressIndicator.dart';
 
-import 'package:eschool/utils/labelKeys.dart';
-import 'package:eschool/utils/utils.dart';
+import 'package:zolo_smart_school/utils/labelKeys.dart';
+import 'package:zolo_smart_school/utils/utils.dart';
 
 class QuestionContainer extends StatelessWidget {
   final Question? question;

@@ -1,8 +1,8 @@
-import 'package:eschool/data/models/childUserDetails.dart';
-import 'package:eschool/data/models/classSection.dart';
-import 'package:eschool/data/models/guardian.dart';
-import 'package:eschool/data/models/school.dart';
-import 'package:eschool/data/models/studentProfileExtraDetails.dart';
+import 'package:zolo_smart_school/data/models/childUserDetails.dart';
+import 'package:zolo_smart_school/data/models/classSection.dart';
+import 'package:zolo_smart_school/data/models/guardian.dart';
+import 'package:zolo_smart_school/data/models/school.dart';
+import 'package:zolo_smart_school/data/models/studentProfileExtraDetails.dart';
 
 class Student {
   final int? id;

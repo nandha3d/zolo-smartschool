@@ -1,5 +1,5 @@
-import 'package:eschool/data/models/diaryCategory.dart';
-import 'package:eschool/data/models/subject.dart';
+import 'package:zolo_smart_school/data/models/diaryCategory.dart';
+import 'package:zolo_smart_school/data/models/subject.dart';
 
 class Diary {
   final int id;

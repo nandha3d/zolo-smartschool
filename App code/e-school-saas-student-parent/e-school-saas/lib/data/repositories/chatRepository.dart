@@ -1,10 +1,10 @@
 import 'package:dio/dio.dart';
-import 'package:eschool/data/models/chatMessage.dart';
-import 'package:eschool/data/models/chatMessagesResponse.dart';
-import 'package:eschool/data/models/chatUserRole.dart';
-import 'package:eschool/data/models/chatUsersResponse.dart';
-import 'package:eschool/data/models/userChatHistory.dart';
-import 'package:eschool/utils/api.dart';
+import 'package:zolo_smart_school/data/models/chatMessage.dart';
+import 'package:zolo_smart_school/data/models/chatMessagesResponse.dart';
+import 'package:zolo_smart_school/data/models/chatUserRole.dart';
+import 'package:zolo_smart_school/data/models/chatUsersResponse.dart';
+import 'package:zolo_smart_school/data/models/userChatHistory.dart';
+import 'package:zolo_smart_school/utils/api.dart';
 import 'package:image_picker/image_picker.dart';
 
 class ChatRepository {

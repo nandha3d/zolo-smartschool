@@ -1,7 +1,7 @@
-import 'package:eschool/data/models/coreSubject.dart';
-import 'package:eschool/data/models/electiveSubject.dart';
-import 'package:eschool/data/models/subjectTeacher.dart';
-import 'package:eschool/utils/api.dart';
+import 'package:zolo_smart_school/data/models/coreSubject.dart';
+import 'package:zolo_smart_school/data/models/electiveSubject.dart';
+import 'package:zolo_smart_school/data/models/subjectTeacher.dart';
+import 'package:zolo_smart_school/utils/api.dart';
 import 'package:flutter/foundation.dart';
 
 class ParentRepository {

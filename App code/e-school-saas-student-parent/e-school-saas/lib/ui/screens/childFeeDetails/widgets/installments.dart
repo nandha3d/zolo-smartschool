@@ -1,9 +1,9 @@
-import 'package:eschool/cubits/schoolConfigurationCubit.dart';
-import 'package:eschool/data/models/advanceFee.dart';
-import 'package:eschool/data/models/childFeeDetails.dart';
-import 'package:eschool/ui/screens/childFeeDetails/widgets/advanceInstallmentPaidAmountBottomsheet.dart';
-import 'package:eschool/utils/labelKeys.dart';
-import 'package:eschool/utils/utils.dart';
+import 'package:zolo_smart_school/cubits/schoolConfigurationCubit.dart';
+import 'package:zolo_smart_school/data/models/advanceFee.dart';
+import 'package:zolo_smart_school/data/models/childFeeDetails.dart';
+import 'package:zolo_smart_school/ui/screens/childFeeDetails/widgets/advanceInstallmentPaidAmountBottomsheet.dart';
+import 'package:zolo_smart_school/utils/labelKeys.dart';
+import 'package:zolo_smart_school/utils/utils.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

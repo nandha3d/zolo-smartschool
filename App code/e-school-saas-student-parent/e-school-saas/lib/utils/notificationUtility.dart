@@ -2,16 +2,16 @@ import 'dart:async';
 
 import 'package:awesome_notifications/awesome_notifications.dart';
 
-import 'package:eschool/app/routes.dart';
-import 'package:eschool/data/models/notificationDetails.dart';
-import 'package:eschool/data/repositories/authRepository.dart';
-import 'package:eschool/data/repositories/notificationRepository.dart';
-import 'package:eschool/ui/screens/home/homeScreen.dart';
-import 'package:eschool/utils/constants.dart';
-import 'package:eschool/utils/hiveBoxKeys.dart';
-import 'package:eschool/utils/labelKeys.dart';
-import 'package:eschool/utils/utils.dart';
-import 'package:eschool/utils/pushMessaging.dart';
+import 'package:zolo_smart_school/app/routes.dart';
+import 'package:zolo_smart_school/data/models/notificationDetails.dart';
+import 'package:zolo_smart_school/data/repositories/authRepository.dart';
+import 'package:zolo_smart_school/data/repositories/notificationRepository.dart';
+import 'package:zolo_smart_school/ui/screens/home/homeScreen.dart';
+import 'package:zolo_smart_school/utils/constants.dart';
+import 'package:zolo_smart_school/utils/hiveBoxKeys.dart';
+import 'package:zolo_smart_school/utils/labelKeys.dart';
+import 'package:zolo_smart_school/utils/utils.dart';
+import 'package:zolo_smart_school/utils/pushMessaging.dart';
 import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';

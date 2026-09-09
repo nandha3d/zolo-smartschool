@@ -1,8 +1,8 @@
-import 'package:eschool_saas_staff/data/models/studentDetails.dart';
-import 'package:eschool_saas_staff/ui/styles/themeExtensions/customColorsExtension.dart';
-import 'package:eschool_saas_staff/ui/widgets/customAttendanceToggleButton.dart';
-import 'package:eschool_saas_staff/ui/widgets/customTextContainer.dart';
-import 'package:eschool_saas_staff/utils/constants.dart';
+import 'package:zolo_smart_school_staff/data/models/studentDetails.dart';
+import 'package:zolo_smart_school_staff/ui/styles/themeExtensions/customColorsExtension.dart';
+import 'package:zolo_smart_school_staff/ui/widgets/customAttendanceToggleButton.dart';
+import 'package:zolo_smart_school_staff/ui/widgets/customTextContainer.dart';
+import 'package:zolo_smart_school_staff/utils/constants.dart';
 import 'package:flutter/material.dart';
 
 class StudentAttendanceItemContainer extends StatefulWidget {

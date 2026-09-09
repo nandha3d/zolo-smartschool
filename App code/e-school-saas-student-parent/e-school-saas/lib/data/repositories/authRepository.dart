@@ -1,8 +1,8 @@
-import 'package:eschool/data/models/guardian.dart';
-import 'package:eschool/data/models/student.dart';
-import 'package:eschool/utils/api.dart';
-import 'package:eschool/utils/hiveBoxKeys.dart';
-import 'package:eschool/utils/pushMessaging.dart';
+import 'package:zolo_smart_school/data/models/guardian.dart';
+import 'package:zolo_smart_school/data/models/student.dart';
+import 'package:zolo_smart_school/utils/api.dart';
+import 'package:zolo_smart_school/utils/hiveBoxKeys.dart';
+import 'package:zolo_smart_school/utils/pushMessaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';

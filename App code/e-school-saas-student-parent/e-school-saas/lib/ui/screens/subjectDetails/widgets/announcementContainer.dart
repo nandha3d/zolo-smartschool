@@ -1,14 +1,14 @@
-import 'package:eschool/cubits/authCubit.dart';
-import 'package:eschool/cubits/subjectAnnouncementsCubit.dart';
-import 'package:eschool/data/models/announcement.dart';
-import 'package:eschool/ui/widgets/announcementDetailsContainer.dart';
-import 'package:eschool/ui/widgets/errorContainer.dart';
-import 'package:eschool/ui/widgets/noDataContainer.dart';
-import 'package:eschool/ui/widgets/shimmerLoaders/announcementShimmerLoadingContainer.dart';
-import 'package:eschool/utils/animationConfiguration.dart';
+import 'package:zolo_smart_school/cubits/authCubit.dart';
+import 'package:zolo_smart_school/cubits/subjectAnnouncementsCubit.dart';
+import 'package:zolo_smart_school/data/models/announcement.dart';
+import 'package:zolo_smart_school/ui/widgets/announcementDetailsContainer.dart';
+import 'package:zolo_smart_school/ui/widgets/errorContainer.dart';
+import 'package:zolo_smart_school/ui/widgets/noDataContainer.dart';
+import 'package:zolo_smart_school/ui/widgets/shimmerLoaders/announcementShimmerLoadingContainer.dart';
+import 'package:zolo_smart_school/utils/animationConfiguration.dart';
 
-import 'package:eschool/utils/labelKeys.dart';
-import 'package:eschool/utils/utils.dart';
+import 'package:zolo_smart_school/utils/labelKeys.dart';
+import 'package:zolo_smart_school/utils/utils.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

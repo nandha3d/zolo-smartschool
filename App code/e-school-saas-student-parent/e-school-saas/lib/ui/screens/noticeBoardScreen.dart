@@ -1,4 +1,4 @@
-import 'package:eschool/ui/widgets/noticeBoardContainer.dart';
+import 'package:zolo_smart_school/ui/widgets/noticeBoardContainer.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

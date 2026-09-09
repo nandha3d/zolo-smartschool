@@ -1,7 +1,7 @@
-import 'package:eschool/cubits/appSettingsCubit.dart';
-import 'package:eschool/ui/widgets/customCircularProgressIndicator.dart';
-import 'package:eschool/ui/widgets/errorContainer.dart';
-import 'package:eschool/utils/utils.dart';
+import 'package:zolo_smart_school/cubits/appSettingsCubit.dart';
+import 'package:zolo_smart_school/ui/widgets/customCircularProgressIndicator.dart';
+import 'package:zolo_smart_school/ui/widgets/errorContainer.dart';
+import 'package:zolo_smart_school/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';

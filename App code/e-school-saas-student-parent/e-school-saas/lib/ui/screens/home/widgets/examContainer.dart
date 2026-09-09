@@ -1,13 +1,13 @@
-import 'package:eschool/cubits/authCubit.dart';
-import 'package:eschool/cubits/examTabSelectionCubit.dart';
-import 'package:eschool/data/models/subject.dart';
-import 'package:eschool/ui/widgets/customTabBarContainer.dart';
-import 'package:eschool/ui/widgets/examOfflineListContainer.dart';
-import 'package:eschool/ui/widgets/examOnlineListContainer.dart';
-import 'package:eschool/ui/widgets/screenTopBackgroundContainer.dart';
-import 'package:eschool/ui/widgets/tabBarBackgroundContainer.dart';
-import 'package:eschool/utils/labelKeys.dart';
-import 'package:eschool/utils/utils.dart';
+import 'package:zolo_smart_school/cubits/authCubit.dart';
+import 'package:zolo_smart_school/cubits/examTabSelectionCubit.dart';
+import 'package:zolo_smart_school/data/models/subject.dart';
+import 'package:zolo_smart_school/ui/widgets/customTabBarContainer.dart';
+import 'package:zolo_smart_school/ui/widgets/examOfflineListContainer.dart';
+import 'package:zolo_smart_school/ui/widgets/examOnlineListContainer.dart';
+import 'package:zolo_smart_school/ui/widgets/screenTopBackgroundContainer.dart';
+import 'package:zolo_smart_school/ui/widgets/tabBarBackgroundContainer.dart';
+import 'package:zolo_smart_school/utils/labelKeys.dart';
+import 'package:zolo_smart_school/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

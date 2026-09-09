@@ -1,4 +1,4 @@
-import 'package:eschool_saas_staff/data/models/chatMessage.dart';
+import 'package:zolo_smart_school_staff/data/models/chatMessage.dart';
 
 class ChatMessagesResponse {
   const ChatMessagesResponse({

@@ -1,21 +1,21 @@
-import 'package:eschool/cubits/authCubit.dart';
-import 'package:eschool/cubits/topicStudyMaterialCubit.dart';
-import 'package:eschool/data/models/studyMaterial.dart';
-import 'package:eschool/data/models/topic.dart';
-import 'package:eschool/data/repositories/subjectRepository.dart';
-import 'package:eschool/ui/widgets/customRefreshIndicator.dart';
-import 'package:eschool/ui/widgets/customShimmerContainer.dart';
-import 'package:eschool/ui/widgets/errorContainer.dart';
-import 'package:eschool/ui/widgets/filesContainer.dart';
-import 'package:eschool/ui/widgets/otherLinksContainer.dart';
+import 'package:zolo_smart_school/cubits/authCubit.dart';
+import 'package:zolo_smart_school/cubits/topicStudyMaterialCubit.dart';
+import 'package:zolo_smart_school/data/models/studyMaterial.dart';
+import 'package:zolo_smart_school/data/models/topic.dart';
+import 'package:zolo_smart_school/data/repositories/subjectRepository.dart';
+import 'package:zolo_smart_school/ui/widgets/customRefreshIndicator.dart';
+import 'package:zolo_smart_school/ui/widgets/customShimmerContainer.dart';
+import 'package:zolo_smart_school/ui/widgets/errorContainer.dart';
+import 'package:zolo_smart_school/ui/widgets/filesContainer.dart';
+import 'package:zolo_smart_school/ui/widgets/otherLinksContainer.dart';
 
-import 'package:eschool/ui/widgets/screenTopBackgroundContainer.dart';
-import 'package:eschool/ui/widgets/shimmerLoadingContainer.dart';
-import 'package:eschool/ui/widgets/svgButton.dart';
-import 'package:eschool/ui/widgets/videosContainer.dart';
+import 'package:zolo_smart_school/ui/widgets/screenTopBackgroundContainer.dart';
+import 'package:zolo_smart_school/ui/widgets/shimmerLoadingContainer.dart';
+import 'package:zolo_smart_school/ui/widgets/svgButton.dart';
+import 'package:zolo_smart_school/ui/widgets/videosContainer.dart';
 
-import 'package:eschool/utils/labelKeys.dart';
-import 'package:eschool/utils/utils.dart';
+import 'package:zolo_smart_school/utils/labelKeys.dart';
+import 'package:zolo_smart_school/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';

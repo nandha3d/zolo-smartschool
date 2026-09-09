@@ -1,10 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:eschool/app/routes.dart';
-import 'package:eschool/cubits/schoolConfigurationCubit.dart';
-import 'package:eschool/cubits/schoolGalleryCubit.dart';
-import 'package:eschool/data/models/student.dart';
-import 'package:eschool/utils/labelKeys.dart';
-import 'package:eschool/utils/utils.dart';
+import 'package:zolo_smart_school/app/routes.dart';
+import 'package:zolo_smart_school/cubits/schoolConfigurationCubit.dart';
+import 'package:zolo_smart_school/cubits/schoolGalleryCubit.dart';
+import 'package:zolo_smart_school/data/models/student.dart';
+import 'package:zolo_smart_school/utils/labelKeys.dart';
+import 'package:zolo_smart_school/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';

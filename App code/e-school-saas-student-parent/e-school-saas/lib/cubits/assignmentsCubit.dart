@@ -1,5 +1,5 @@
-import 'package:eschool/data/models/assignment.dart';
-import 'package:eschool/data/repositories/assignmentRepository.dart';
+import 'package:zolo_smart_school/data/models/assignment.dart';
+import 'package:zolo_smart_school/data/repositories/assignmentRepository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 abstract class AssignmentsState {}

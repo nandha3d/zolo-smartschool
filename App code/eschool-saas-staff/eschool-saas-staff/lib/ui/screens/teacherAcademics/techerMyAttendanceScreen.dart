@@ -1,13 +1,13 @@
-import 'package:eschool_saas_staff/cubits/teacherAttendanceCubit.dart';
-import 'package:eschool_saas_staff/data/models/sessionYear.dart';
-import 'package:eschool_saas_staff/ui/widgets/customAppbar.dart';
-import 'package:eschool_saas_staff/ui/widgets/errorContainer.dart';
-import 'package:eschool_saas_staff/ui/widgets/attendanceCalendarContainer.dart';
-import 'package:eschool_saas_staff/ui/widgets/attendanceSummaryWidget.dart';
-import 'package:eschool_saas_staff/ui/widgets/shimmerCalendarWidget.dart';
-import 'package:eschool_saas_staff/ui/widgets/shimmerSummaryWidget.dart';
+import 'package:zolo_smart_school_staff/cubits/teacherAttendanceCubit.dart';
+import 'package:zolo_smart_school_staff/data/models/sessionYear.dart';
+import 'package:zolo_smart_school_staff/ui/widgets/customAppbar.dart';
+import 'package:zolo_smart_school_staff/ui/widgets/errorContainer.dart';
+import 'package:zolo_smart_school_staff/ui/widgets/attendanceCalendarContainer.dart';
+import 'package:zolo_smart_school_staff/ui/widgets/attendanceSummaryWidget.dart';
+import 'package:zolo_smart_school_staff/ui/widgets/shimmerCalendarWidget.dart';
+import 'package:zolo_smart_school_staff/ui/widgets/shimmerSummaryWidget.dart';
 
-import 'package:eschool_saas_staff/utils/labelKeys.dart';
+import 'package:zolo_smart_school_staff/utils/labelKeys.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

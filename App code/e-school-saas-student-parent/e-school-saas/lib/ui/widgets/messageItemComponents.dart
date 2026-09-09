@@ -1,4 +1,4 @@
-import 'package:eschool/ui/styles/colors.dart';
+import 'package:zolo_smart_school/ui/styles/colors.dart';
 import 'package:flutter/material.dart';
 
 class TriangleContainer extends StatelessWidget {

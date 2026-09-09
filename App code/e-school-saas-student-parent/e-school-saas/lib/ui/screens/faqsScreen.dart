@@ -1,6 +1,6 @@
-import 'package:eschool/ui/widgets/customAppbar.dart';
-import 'package:eschool/utils/labelKeys.dart';
-import 'package:eschool/utils/utils.dart';
+import 'package:zolo_smart_school/ui/widgets/customAppbar.dart';
+import 'package:zolo_smart_school/utils/labelKeys.dart';
+import 'package:zolo_smart_school/utils/utils.dart';
 import 'package:flutter/material.dart';
 
 class FaqsScreen extends StatelessWidget {

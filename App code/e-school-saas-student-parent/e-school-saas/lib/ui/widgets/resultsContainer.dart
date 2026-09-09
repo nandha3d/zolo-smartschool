@@ -2,32 +2,32 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:eschool/app/routes.dart';
-import 'package:eschool/cubits/authCubit.dart';
-import 'package:eschool/cubits/resultTabSelectionCubit.dart';
-import 'package:eschool/cubits/resultsCubit.dart';
-import 'package:eschool/cubits/resultsOnlineCubit.dart';
-import 'package:eschool/cubits/studentSubjectAndSlidersCubit.dart';
+import 'package:zolo_smart_school/app/routes.dart';
+import 'package:zolo_smart_school/cubits/authCubit.dart';
+import 'package:zolo_smart_school/cubits/resultTabSelectionCubit.dart';
+import 'package:zolo_smart_school/cubits/resultsCubit.dart';
+import 'package:zolo_smart_school/cubits/resultsOnlineCubit.dart';
+import 'package:zolo_smart_school/cubits/studentSubjectAndSlidersCubit.dart';
 
-import 'package:eschool/data/models/result.dart';
-import 'package:eschool/data/models/resultOnline.dart';
-import 'package:eschool/data/models/subject.dart';
+import 'package:zolo_smart_school/data/models/result.dart';
+import 'package:zolo_smart_school/data/models/resultOnline.dart';
+import 'package:zolo_smart_school/data/models/subject.dart';
 
-import 'package:eschool/ui/widgets/assignmentsSubjectsContainer.dart';
-import 'package:eschool/ui/widgets/customBackButton.dart';
-import 'package:eschool/ui/widgets/customRefreshIndicator.dart';
-import 'package:eschool/ui/widgets/customShimmerContainer.dart';
-import 'package:eschool/ui/widgets/customTabBarContainer.dart';
-import 'package:eschool/ui/widgets/errorContainer.dart';
-import 'package:eschool/ui/widgets/listItemForExamAndResult.dart';
-import 'package:eschool/ui/widgets/listItemForOnlineExamAndOnlineResult.dart';
-import 'package:eschool/ui/widgets/noDataContainer.dart';
-import 'package:eschool/ui/widgets/screenTopBackgroundContainer.dart';
-import 'package:eschool/ui/widgets/shimmerLoadingContainer.dart';
-import 'package:eschool/ui/widgets/tabBarBackgroundContainer.dart';
+import 'package:zolo_smart_school/ui/widgets/assignmentsSubjectsContainer.dart';
+import 'package:zolo_smart_school/ui/widgets/customBackButton.dart';
+import 'package:zolo_smart_school/ui/widgets/customRefreshIndicator.dart';
+import 'package:zolo_smart_school/ui/widgets/customShimmerContainer.dart';
+import 'package:zolo_smart_school/ui/widgets/customTabBarContainer.dart';
+import 'package:zolo_smart_school/ui/widgets/errorContainer.dart';
+import 'package:zolo_smart_school/ui/widgets/listItemForExamAndResult.dart';
+import 'package:zolo_smart_school/ui/widgets/listItemForOnlineExamAndOnlineResult.dart';
+import 'package:zolo_smart_school/ui/widgets/noDataContainer.dart';
+import 'package:zolo_smart_school/ui/widgets/screenTopBackgroundContainer.dart';
+import 'package:zolo_smart_school/ui/widgets/shimmerLoadingContainer.dart';
+import 'package:zolo_smart_school/ui/widgets/tabBarBackgroundContainer.dart';
 
-import 'package:eschool/utils/labelKeys.dart';
-import 'package:eschool/utils/utils.dart';
+import 'package:zolo_smart_school/utils/labelKeys.dart';
+import 'package:zolo_smart_school/utils/utils.dart';
 import 'package:get/get.dart';
 
 class ResultsContainer extends StatefulWidget {

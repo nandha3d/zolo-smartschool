@@ -1,5 +1,5 @@
-import 'package:eschool/ui/widgets/customTextContainer.dart';
-import 'package:eschool/utils/constants.dart';
+import 'package:zolo_smart_school/ui/widgets/customTextContainer.dart';
+import 'package:zolo_smart_school/utils/constants.dart';
 import 'package:flutter/material.dart';
 
 class InlineExpandableSelector extends StatelessWidget {

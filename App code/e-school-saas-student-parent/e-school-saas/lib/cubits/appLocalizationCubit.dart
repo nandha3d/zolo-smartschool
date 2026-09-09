@@ -1,5 +1,5 @@
-import 'package:eschool/data/repositories/settingsRepository.dart';
-import 'package:eschool/utils/utils.dart';
+import 'package:zolo_smart_school/data/repositories/settingsRepository.dart';
+import 'package:zolo_smart_school/utils/utils.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';

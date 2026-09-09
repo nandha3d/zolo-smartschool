@@ -1,6 +1,6 @@
-import 'package:eschool/data/models/resultOnline.dart';
-import 'package:eschool/data/models/resultOnlineDetails.dart';
-import 'package:eschool/utils/api.dart';
+import 'package:zolo_smart_school/data/models/resultOnline.dart';
+import 'package:zolo_smart_school/data/models/resultOnlineDetails.dart';
+import 'package:zolo_smart_school/utils/api.dart';
 import 'package:flutter/foundation.dart';
 
 class ResultRepository {

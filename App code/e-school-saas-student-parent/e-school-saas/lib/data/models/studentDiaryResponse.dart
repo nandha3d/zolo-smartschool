@@ -1,4 +1,4 @@
-import 'package:eschool/data/models/studentDiaryDetails.dart';
+import 'package:zolo_smart_school/data/models/studentDiaryDetails.dart';
 
 class StudentDiaryResponse {
   final int currentPage;

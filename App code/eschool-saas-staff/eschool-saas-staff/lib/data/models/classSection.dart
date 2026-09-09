@@ -1,8 +1,8 @@
-import 'package:eschool_saas_staff/data/models/classDetails.dart';
-import 'package:eschool_saas_staff/data/models/classTeacher.dart';
-import 'package:eschool_saas_staff/data/models/medium.dart';
-import 'package:eschool_saas_staff/data/models/section.dart';
-import 'package:eschool_saas_staff/data/models/subjectTeacher.dart';
+import 'package:zolo_smart_school_staff/data/models/classDetails.dart';
+import 'package:zolo_smart_school_staff/data/models/classTeacher.dart';
+import 'package:zolo_smart_school_staff/data/models/medium.dart';
+import 'package:zolo_smart_school_staff/data/models/section.dart';
+import 'package:zolo_smart_school_staff/data/models/subjectTeacher.dart';
 // this is my model please correct the model
 class ClassSection {
   final int? id;

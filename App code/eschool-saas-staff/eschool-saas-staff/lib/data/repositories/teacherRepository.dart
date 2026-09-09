@@ -1,6 +1,6 @@
-import 'package:eschool_saas_staff/data/models/timeTableSlot.dart';
-import 'package:eschool_saas_staff/data/models/userDetails.dart';
-import 'package:eschool_saas_staff/utils/api.dart';
+import 'package:zolo_smart_school_staff/data/models/timeTableSlot.dart';
+import 'package:zolo_smart_school_staff/data/models/userDetails.dart';
+import 'package:zolo_smart_school_staff/utils/api.dart';
 
 class TeacherRepository {
   Future<List<UserDetails>> getTeachers({String? search}) async {

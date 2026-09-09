@@ -1,7 +1,7 @@
-import 'package:eschool/ui/widgets/customBottomsheet.dart';
-import 'package:eschool/ui/widgets/filterSelectionTile.dart';
-import 'package:eschool/utils/labelKeys.dart';
-import 'package:eschool/utils/utils.dart';
+import 'package:zolo_smart_school/ui/widgets/customBottomsheet.dart';
+import 'package:zolo_smart_school/ui/widgets/filterSelectionTile.dart';
+import 'package:zolo_smart_school/utils/labelKeys.dart';
+import 'package:zolo_smart_school/utils/utils.dart';
 import 'package:flutter/material.dart';
 
 class FilterSelectionBottomsheet<T> extends StatelessWidget {

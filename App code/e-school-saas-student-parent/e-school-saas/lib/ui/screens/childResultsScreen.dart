@@ -1,7 +1,7 @@
-import 'package:eschool/cubits/resultsCubit.dart';
-import 'package:eschool/data/models/subject.dart';
-import 'package:eschool/data/repositories/studentRepository.dart';
-import 'package:eschool/ui/widgets/resultsContainer.dart';
+import 'package:zolo_smart_school/cubits/resultsCubit.dart';
+import 'package:zolo_smart_school/data/models/subject.dart';
+import 'package:zolo_smart_school/data/repositories/studentRepository.dart';
+import 'package:zolo_smart_school/ui/widgets/resultsContainer.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

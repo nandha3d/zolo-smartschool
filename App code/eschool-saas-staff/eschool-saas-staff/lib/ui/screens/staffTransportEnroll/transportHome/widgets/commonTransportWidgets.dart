@@ -1,13 +1,13 @@
-import 'package:eschool_saas_staff/cubits/transport/transportDashboardCubit.dart';
-import 'package:eschool_saas_staff/cubits/transport/routeStopsCubit.dart';
-import 'package:eschool_saas_staff/data/models/transportDashboard.dart';
-import 'package:eschool_saas_staff/ui/widgets/customTextContainer.dart';
-import 'package:eschool_saas_staff/utils/labelKeys.dart';
-import 'package:eschool_saas_staff/utils/utils.dart';
+import 'package:zolo_smart_school_staff/cubits/transport/transportDashboardCubit.dart';
+import 'package:zolo_smart_school_staff/cubits/transport/routeStopsCubit.dart';
+import 'package:zolo_smart_school_staff/data/models/transportDashboard.dart';
+import 'package:zolo_smart_school_staff/ui/widgets/customTextContainer.dart';
+import 'package:zolo_smart_school_staff/utils/labelKeys.dart';
+import 'package:zolo_smart_school_staff/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
-import 'package:eschool_saas_staff/app/routes.dart';
+import 'package:zolo_smart_school_staff/app/routes.dart';
 
 class EnrollCard extends StatelessWidget {
   final String title;

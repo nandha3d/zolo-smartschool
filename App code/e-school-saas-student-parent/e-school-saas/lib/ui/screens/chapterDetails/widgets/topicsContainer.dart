@@ -1,9 +1,9 @@
-import 'package:eschool/app/routes.dart';
-import 'package:eschool/data/models/topic.dart';
-import 'package:eschool/ui/widgets/noDataContainer.dart';
-import 'package:eschool/utils/animationConfiguration.dart';
-import 'package:eschool/utils/labelKeys.dart';
-import 'package:eschool/utils/utils.dart';
+import 'package:zolo_smart_school/app/routes.dart';
+import 'package:zolo_smart_school/data/models/topic.dart';
+import 'package:zolo_smart_school/ui/widgets/noDataContainer.dart';
+import 'package:zolo_smart_school/utils/animationConfiguration.dart';
+import 'package:zolo_smart_school/utils/labelKeys.dart';
+import 'package:zolo_smart_school/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';

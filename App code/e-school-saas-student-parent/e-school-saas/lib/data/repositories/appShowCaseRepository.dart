@@ -1,4 +1,4 @@
-import 'package:eschool/utils/hiveBoxKeys.dart';
+import 'package:zolo_smart_school/utils/hiveBoxKeys.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 // ignore: avoid_classes_with_only_static_members

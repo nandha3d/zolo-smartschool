@@ -1,4 +1,4 @@
-import 'package:eschool/ui/widgets/settingsContainer.dart';
+import 'package:zolo_smart_school/ui/widgets/settingsContainer.dart';
 import 'package:flutter/material.dart';
 
 class SettingsScreen extends StatelessWidget {

@@ -1,5 +1,5 @@
-import 'package:eschool/data/models/announcement.dart';
-import 'package:eschool/data/repositories/announcementRepository.dart';
+import 'package:zolo_smart_school/data/models/announcement.dart';
+import 'package:zolo_smart_school/data/repositories/announcementRepository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 abstract class SubjectAnnouncementState {}

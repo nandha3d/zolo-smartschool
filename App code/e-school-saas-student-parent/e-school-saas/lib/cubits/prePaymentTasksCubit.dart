@@ -1,6 +1,6 @@
-import 'package:eschool/data/models/paymentGateway.dart';
-import 'package:eschool/data/models/paymentTransaction.dart';
-import 'package:eschool/data/repositories/feeRepository.dart';
+import 'package:zolo_smart_school/data/models/paymentGateway.dart';
+import 'package:zolo_smart_school/data/models/paymentTransaction.dart';
+import 'package:zolo_smart_school/data/repositories/feeRepository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/foundation.dart';
 

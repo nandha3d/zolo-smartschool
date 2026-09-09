@@ -1,4 +1,4 @@
-import 'package:eschool/data/models/electiveSubject.dart';
+import 'package:zolo_smart_school/data/models/electiveSubject.dart';
 
 class ElectiveSubjectGroup {
   late final int id;

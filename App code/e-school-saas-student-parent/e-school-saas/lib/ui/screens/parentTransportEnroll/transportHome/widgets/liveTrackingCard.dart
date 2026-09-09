@@ -1,10 +1,10 @@
-import 'package:eschool/data/models/transportDashboard.dart';
-import 'package:eschool/ui/screens/parentTransportEnroll/transportHome/widgets/commonTransportWidgets.dart';
-import 'package:eschool/ui/screens/parentTransportEnroll/transportHome/widgets/pickupTimeRow.dart';
-import 'package:eschool/ui/screens/parentTransportEnroll/transportHome/widgets/liveRouteBottomSheet.dart';
-import 'package:eschool/data/repositories/authRepository.dart';
-import 'package:eschool/utils/labelKeys.dart';
-import 'package:eschool/utils/utils.dart';
+import 'package:zolo_smart_school/data/models/transportDashboard.dart';
+import 'package:zolo_smart_school/ui/screens/parentTransportEnroll/transportHome/widgets/commonTransportWidgets.dart';
+import 'package:zolo_smart_school/ui/screens/parentTransportEnroll/transportHome/widgets/pickupTimeRow.dart';
+import 'package:zolo_smart_school/ui/screens/parentTransportEnroll/transportHome/widgets/liveRouteBottomSheet.dart';
+import 'package:zolo_smart_school/data/repositories/authRepository.dart';
+import 'package:zolo_smart_school/utils/labelKeys.dart';
+import 'package:zolo_smart_school/utils/utils.dart';
 import 'package:flutter/material.dart';
 
 class LiveTrackingCard extends StatelessWidget {

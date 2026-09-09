@@ -1,7 +1,7 @@
-import 'package:eschool_saas_staff/data/models/holiday.dart';
-import 'package:eschool_saas_staff/utils/api.dart';
-import 'package:eschool_saas_staff/utils/appLanguages.dart';
-import 'package:eschool_saas_staff/utils/hiveBoxKeys.dart';
+import 'package:zolo_smart_school_staff/data/models/holiday.dart';
+import 'package:zolo_smart_school_staff/utils/api.dart';
+import 'package:zolo_smart_school_staff/utils/appLanguages.dart';
+import 'package:zolo_smart_school_staff/utils/hiveBoxKeys.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 class SettingsRepository {

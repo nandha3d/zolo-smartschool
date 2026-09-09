@@ -1,4 +1,4 @@
-import 'package:eschool/data/models/chatUser.dart';
+import 'package:zolo_smart_school/data/models/chatUser.dart';
 
 class ChatUsersResponse {
   final int currentPage;

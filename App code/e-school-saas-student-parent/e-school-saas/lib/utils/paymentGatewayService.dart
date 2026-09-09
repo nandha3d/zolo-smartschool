@@ -1,10 +1,10 @@
-import 'package:eschool/app/routes.dart';
-import 'package:eschool/cubits/authCubit.dart';
-import 'package:eschool/cubits/schoolConfigurationCubit.dart';
-import 'package:eschool/cubits/transportationPrePaymentTasksCubit.dart';
-import 'package:eschool/utils/constants.dart';
-import 'package:eschool/utils/errorMessageKeysAndCodes.dart';
-import 'package:eschool/utils/utils.dart';
+import 'package:zolo_smart_school/app/routes.dart';
+import 'package:zolo_smart_school/cubits/authCubit.dart';
+import 'package:zolo_smart_school/cubits/schoolConfigurationCubit.dart';
+import 'package:zolo_smart_school/cubits/transportationPrePaymentTasksCubit.dart';
+import 'package:zolo_smart_school/utils/constants.dart';
+import 'package:zolo_smart_school/utils/errorMessageKeysAndCodes.dart';
+import 'package:zolo_smart_school/utils/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';

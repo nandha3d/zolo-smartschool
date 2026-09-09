@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
-import 'package:eschool/data/models/lesson.dart';
-import 'package:eschool/data/models/studyMaterial.dart';
-import 'package:eschool/utils/api.dart';
+import 'package:zolo_smart_school/data/models/lesson.dart';
+import 'package:zolo_smart_school/data/models/studyMaterial.dart';
+import 'package:zolo_smart_school/utils/api.dart';
 
 class SubjectRepository {
   Future<List<Lesson>> getLessons({

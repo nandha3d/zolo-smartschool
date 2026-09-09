@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $settings['school_name'] ?? 'School Name' }} {{ $result->session_year->name ?? 'Session Year' }} -
         {{ __('Result') }} </title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ asset('/assets/vendor/bootstrap5.3/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('/assets/vendor/fontawesome6/all.min.css') }}" rel="stylesheet">
     <style>
         @media print {
             @page {
@@ -658,8 +658,8 @@
 
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="{{ asset('/assets/vendor/bootstrap5.3/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ asset('/assets/vendor/jquery/jquery.min.js') }}"></script>
     <script>
         $(document).ready(function() {
             // Wait for fonts and CSS to load

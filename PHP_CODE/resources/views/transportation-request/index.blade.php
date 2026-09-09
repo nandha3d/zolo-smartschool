@@ -6,7 +6,7 @@
 
 @section('css')
     <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.14.0-beta3/css/bootstrap-select.min.css">
+        href="{{ asset('/assets/vendor/bootstrap-select/bootstrap-select.min.css') }}">
 @endsection
 
 @section('content')
@@ -172,7 +172,7 @@
     </div>
 @endsection
 @section('js')
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.14.0-beta3/js/bootstrap-select.min.js"></script>
+    <script src="{{ asset('/assets/vendor/bootstrap-select/bootstrap-select.min.js') }}"></script>
     <script>
         function updateUserStatus(tableId, buttonClass) {
             var selectedRows = $(tableId).bootstrapTable('getSelections');

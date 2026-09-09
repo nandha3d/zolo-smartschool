@@ -1,7 +1,7 @@
 // ignore: depend_on_referenced_packages
 import 'package:bloc/bloc.dart';
-import 'package:eschool/data/repositories/studentRepository.dart';
-import 'package:eschool/utils/stripeService.dart';
+import 'package:zolo_smart_school/data/repositories/studentRepository.dart';
+import 'package:zolo_smart_school/utils/stripeService.dart';
 import 'package:flutter/foundation.dart';
 
 abstract class PostFeesPaymentState {}

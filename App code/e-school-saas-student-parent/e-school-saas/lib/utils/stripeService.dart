@@ -1,5 +1,5 @@
 // import 'package:dio/dio.dart';
-import 'package:eschool/utils/errorMessageKeysAndCodes.dart';
+import 'package:zolo_smart_school/utils/errorMessageKeysAndCodes.dart';
 import 'package:flutter/material.dart';
 // import 'package:flutter/services.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';

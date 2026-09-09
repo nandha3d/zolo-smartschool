@@ -1,8 +1,8 @@
-import 'package:eschool_saas_staff/app/routes.dart';
-import 'package:eschool_saas_staff/cubits/appConfigurationCubit.dart';
-import 'package:eschool_saas_staff/cubits/authentication/authCubit.dart';
-import 'package:eschool_saas_staff/ui/widgets/errorContainer.dart';
-import 'package:eschool_saas_staff/utils/utils.dart';
+import 'package:zolo_smart_school_staff/app/routes.dart';
+import 'package:zolo_smart_school_staff/cubits/appConfigurationCubit.dart';
+import 'package:zolo_smart_school_staff/cubits/authentication/authCubit.dart';
+import 'package:zolo_smart_school_staff/ui/widgets/errorContainer.dart';
+import 'package:zolo_smart_school_staff/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/route_manager.dart';

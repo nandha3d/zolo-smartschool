@@ -1,5 +1,5 @@
-import 'package:eschool_saas_staff/ui/widgets/monthSelectorWidget.dart';
-import 'package:eschool_saas_staff/ui/widgets/weekdayHeadersWidget.dart';
+import 'package:zolo_smart_school_staff/ui/widgets/monthSelectorWidget.dart';
+import 'package:zolo_smart_school_staff/ui/widgets/weekdayHeadersWidget.dart';
 import 'package:flutter/material.dart';
 
 class ShimmerCalendarWidget extends StatelessWidget {

@@ -1,20 +1,20 @@
-import 'package:eschool_saas_staff/cubits/authentication/authCubit.dart';
-import 'package:eschool_saas_staff/cubits/transport/routeStopsCubit.dart';
-import 'package:eschool_saas_staff/data/models/routeStops.dart';
-import 'package:eschool_saas_staff/data/models/transportRequest.dart'
+import 'package:zolo_smart_school_staff/cubits/authentication/authCubit.dart';
+import 'package:zolo_smart_school_staff/cubits/transport/routeStopsCubit.dart';
+import 'package:zolo_smart_school_staff/data/models/routeStops.dart';
+import 'package:zolo_smart_school_staff/data/models/transportRequest.dart'
     as TransportRequestModel;
-import 'package:eschool_saas_staff/ui/screens/staffTransportEnroll/transportHome/widgets/commonTransportWidgets.dart';
-import 'package:eschool_saas_staff/ui/widgets/customAppbar.dart';
-import 'package:eschool_saas_staff/ui/widgets/customCircularProgressIndicator.dart';
-import 'package:eschool_saas_staff/ui/widgets/customRoundedButton.dart';
-import 'package:eschool_saas_staff/ui/widgets/customTextContainer.dart';
-import 'package:eschool_saas_staff/utils/constants.dart';
-import 'package:eschool_saas_staff/utils/labelKeys.dart';
-import 'package:eschool_saas_staff/utils/utils.dart';
+import 'package:zolo_smart_school_staff/ui/screens/staffTransportEnroll/transportHome/widgets/commonTransportWidgets.dart';
+import 'package:zolo_smart_school_staff/ui/widgets/customAppbar.dart';
+import 'package:zolo_smart_school_staff/ui/widgets/customCircularProgressIndicator.dart';
+import 'package:zolo_smart_school_staff/ui/widgets/customRoundedButton.dart';
+import 'package:zolo_smart_school_staff/ui/widgets/customTextContainer.dart';
+import 'package:zolo_smart_school_staff/utils/constants.dart';
+import 'package:zolo_smart_school_staff/utils/labelKeys.dart';
+import 'package:zolo_smart_school_staff/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
-import 'package:eschool_saas_staff/app/routes.dart';
+import 'package:zolo_smart_school_staff/app/routes.dart';
 
 class TransportPlanDetailsScreen extends StatefulWidget {
   const TransportPlanDetailsScreen({super.key});

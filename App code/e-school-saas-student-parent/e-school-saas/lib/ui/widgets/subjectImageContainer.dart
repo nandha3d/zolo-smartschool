@@ -1,7 +1,7 @@
-import 'package:eschool/data/models/subject.dart';
-import 'package:eschool/ui/widgets/networkImageHandler.dart';
-import 'package:eschool/ui/widgets/subjectFirstLetterContainer.dart';
-import 'package:eschool/utils/animationConfiguration.dart';
+import 'package:zolo_smart_school/data/models/subject.dart';
+import 'package:zolo_smart_school/ui/widgets/networkImageHandler.dart';
+import 'package:zolo_smart_school/ui/widgets/subjectFirstLetterContainer.dart';
+import 'package:zolo_smart_school/utils/animationConfiguration.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 

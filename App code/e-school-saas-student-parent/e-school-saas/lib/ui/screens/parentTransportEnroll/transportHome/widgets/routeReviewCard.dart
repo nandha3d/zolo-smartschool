@@ -1,4 +1,4 @@
-import 'package:eschool/ui/widgets/customTextContainer.dart';
+import 'package:zolo_smart_school/ui/widgets/customTextContainer.dart';
 import 'package:flutter/material.dart';
 
 class RouteReviewCard extends StatelessWidget {

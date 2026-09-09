@@ -1,8 +1,8 @@
-import 'package:eschool_saas_staff/data/models/payRoll.dart';
-import 'package:eschool_saas_staff/data/models/staffPayRoll.dart';
-import 'package:eschool_saas_staff/data/models/staffSalary.dart';
-import 'package:eschool_saas_staff/data/models/userDetails.dart';
-import 'package:eschool_saas_staff/utils/api.dart';
+import 'package:zolo_smart_school_staff/data/models/payRoll.dart';
+import 'package:zolo_smart_school_staff/data/models/staffPayRoll.dart';
+import 'package:zolo_smart_school_staff/data/models/staffSalary.dart';
+import 'package:zolo_smart_school_staff/data/models/userDetails.dart';
+import 'package:zolo_smart_school_staff/utils/api.dart';
 import 'package:flutter/foundation.dart';
 
 class PayRollRepository {

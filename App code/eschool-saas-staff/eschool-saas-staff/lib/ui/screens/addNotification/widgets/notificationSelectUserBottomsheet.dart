@@ -1,6 +1,6 @@
-import 'package:eschool_saas_staff/ui/widgets/customBottomsheet.dart';
-import 'package:eschool_saas_staff/ui/widgets/filterSelectionTile.dart';
-import 'package:eschool_saas_staff/utils/labelKeys.dart';
+import 'package:zolo_smart_school_staff/ui/widgets/customBottomsheet.dart';
+import 'package:zolo_smart_school_staff/ui/widgets/filterSelectionTile.dart';
+import 'package:zolo_smart_school_staff/utils/labelKeys.dart';
 import 'package:flutter/material.dart';
 
 class NotificationSelectUserBottomsheet extends StatelessWidget {

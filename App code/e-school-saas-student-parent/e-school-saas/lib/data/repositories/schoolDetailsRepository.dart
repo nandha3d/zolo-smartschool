@@ -1,5 +1,5 @@
-import 'package:eschool/data/models/schoolDetails.dart';
-import 'package:eschool/utils/api.dart';
+import 'package:zolo_smart_school/data/models/schoolDetails.dart';
+import 'package:zolo_smart_school/utils/api.dart';
 
 class Schooldetailsfetch {
   static Future<SchoolDetails> fetchSchoolDetails() async {

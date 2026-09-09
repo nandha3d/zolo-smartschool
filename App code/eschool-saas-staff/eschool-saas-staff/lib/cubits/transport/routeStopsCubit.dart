@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:eschool_saas_staff/data/models/routeStops.dart';
-import 'package:eschool_saas_staff/data/repositories/routeStopsRepository.dart';
+import 'package:zolo_smart_school_staff/data/models/routeStops.dart';
+import 'package:zolo_smart_school_staff/data/repositories/routeStopsRepository.dart';
 
 // States
 abstract class RouteStopsState {}

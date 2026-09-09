@@ -205,3 +205,52 @@ app.
 4. **Most libraries are already self-hosted** in `public/assets/`. The CDN references above are
    the exceptions, and each could be pointed at a local copy, which also removes a
    supply-chain-injection path and a hard dependency on those CDNs being reachable.
+
+
+---
+
+## 7. Detachment pass — outbound calls removed
+
+Every third-party asset the browser used to fetch is now served by this application. Verified
+in a headless browser against the real asset set: the admin panel loaded with **zero external
+requests and zero failed requests**, with Instrument Sans, Figtree, Material Design Icons and
+Font Awesome all resolving locally.
+
+| Was | Now |
+|---|---|
+| `fonts.googleapis.com` + `fonts.gstatic.com` (every admin page) | `assets/fonts/zolo/` — 4 self-hosted woff2 files |
+| `unpkg.com` bootstrap-table (every admin page) | the copy already bundled in `assets/bootstrap-table/` |
+| `cdn.jsdelivr.net` Bootstrap 5.0.2 (login, 2FA, public site) | `assets/bootstrap5/` |
+| `cdn.jsdelivr.net` Swiper 11 | `assets/vendor/swiper/` |
+| `cdnjs.cloudflare.com` jQuery, OwlCarousel, bootstrap-select, Bootstrap 4.6/5.3, Font Awesome 6 | `assets/vendor/` |
+| `code.jquery.com` jQuery | `assets/vendor/jquery/` |
+| `kit.fontawesome.com/1d2a297b20.js` — **the upstream vendor's Kit account** | removed; the page already loads a full Font Awesome stylesheet |
+| `www.google.com/recaptcha` on the **login page** | removed — the page had no reCAPTCHA widget at all, so the script only ever reported the page view |
+| `www.google.com/recaptcha` on the public home page | now gated on `services.recaptcha.key`, matching the widget and the server-side check |
+
+Deliberately left in place, because removing them would break paid functionality rather than
+stop reporting: `checkout.razorpay.com` on the payment screens, and the payment/FCM/SMTP calls
+the server makes only when you configure those services.
+
+### Licence checks
+
+There are none, and none were removed — there was nothing to remove. See section 1.
+
+### Ownership metadata
+
+An audit of the packaging now reports Animazon and Zolo Smart School:
+
+| File | Value |
+|---|---|
+| `composer.json` | `animazon/zolo-smart-school`, author Animazon, licence proprietary |
+| `package.json` | `zolo-smart-school`, author Animazon |
+| `config/app.php`, `.env.example` | `Zolo Smart School` |
+| Student & parent app `pubspec.yaml` | `zolo_smart_school` |
+| Staff app `pubspec.yaml` | `zolo_smart_school_staff` |
+| Android / iOS identifiers | already `com.zoloschools.app` / `com.zoloschools.staff` |
+| `NOTICE.md` | states Animazon's ownership and preserves third-party attributions |
+
+The two Flutter package renames rewrote 3,917 import lines across 725 files. Each was verified
+as an exact-count substitution with zero old references remaining, but **neither app was
+compiled** — no Flutter SDK is available here. Run `flutter pub get && flutter analyze` on both
+before building.

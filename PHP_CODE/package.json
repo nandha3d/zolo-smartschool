@@ -1,4 +1,9 @@
 {
+    "name": "zolo-smart-school",
+    "version": "1.8.0",
+    "description": "Zolo Smart School \u2014 front-end build for the school management platform by Animazon.",
+    "author": "Animazon",
+    "license": "UNLICENSED",
     "private": true,
     "scripts": {
         "dev": "npm run development",

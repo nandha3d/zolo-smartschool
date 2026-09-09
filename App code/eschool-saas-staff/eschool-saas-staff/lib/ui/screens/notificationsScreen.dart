@@ -1,10 +1,10 @@
-import 'package:eschool_saas_staff/cubits/announcement/localNotificationsCubit.dart';
-import 'package:eschool_saas_staff/ui/widgets/customAppbar.dart';
-import 'package:eschool_saas_staff/ui/widgets/errorContainer.dart';
-import 'package:eschool_saas_staff/ui/widgets/noDataContainer.dart';
-import 'package:eschool_saas_staff/ui/widgets/notificationItemContainer.dart';
-import 'package:eschool_saas_staff/utils/labelKeys.dart';
-import 'package:eschool_saas_staff/utils/utils.dart';
+import 'package:zolo_smart_school_staff/cubits/announcement/localNotificationsCubit.dart';
+import 'package:zolo_smart_school_staff/ui/widgets/customAppbar.dart';
+import 'package:zolo_smart_school_staff/ui/widgets/errorContainer.dart';
+import 'package:zolo_smart_school_staff/ui/widgets/noDataContainer.dart';
+import 'package:zolo_smart_school_staff/ui/widgets/notificationItemContainer.dart';
+import 'package:zolo_smart_school_staff/utils/labelKeys.dart';
+import 'package:zolo_smart_school_staff/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

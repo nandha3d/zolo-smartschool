@@ -1,6 +1,6 @@
-import 'package:eschool/utils/labelKeys.dart';
-import 'package:eschool/utils/systemModules.dart';
-import 'package:eschool/utils/utils.dart';
+import 'package:zolo_smart_school/utils/labelKeys.dart';
+import 'package:zolo_smart_school/utils/systemModules.dart';
+import 'package:zolo_smart_school/utils/utils.dart';
 
 class Menu {
   final String title;

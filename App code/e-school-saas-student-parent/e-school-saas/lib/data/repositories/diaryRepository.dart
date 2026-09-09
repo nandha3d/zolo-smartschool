@@ -1,5 +1,5 @@
-import 'package:eschool/data/models/studentDiaryResponse.dart';
-import 'package:eschool/utils/api.dart';
+import 'package:zolo_smart_school/data/models/studentDiaryResponse.dart';
+import 'package:zolo_smart_school/utils/api.dart';
 
 class DiaryRepository {
   Future<StudentDiaryResponse> getDiaries({

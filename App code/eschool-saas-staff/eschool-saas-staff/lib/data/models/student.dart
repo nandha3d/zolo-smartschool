@@ -1,5 +1,5 @@
-import 'package:eschool_saas_staff/data/models/classSection.dart';
-import 'package:eschool_saas_staff/data/models/guardian.dart';
+import 'package:zolo_smart_school_staff/data/models/classSection.dart';
+import 'package:zolo_smart_school_staff/data/models/guardian.dart';
 
 class Student {
   final int? id;

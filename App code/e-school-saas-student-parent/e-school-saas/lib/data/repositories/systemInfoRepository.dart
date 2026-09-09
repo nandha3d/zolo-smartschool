@@ -1,5 +1,5 @@
-import 'package:eschool/data/models/holiday.dart';
-import 'package:eschool/utils/api.dart';
+import 'package:zolo_smart_school/data/models/holiday.dart';
+import 'package:zolo_smart_school/utils/api.dart';
 
 class SystemRepository {
   Future<dynamic> fetchSettings({required String type}) async {

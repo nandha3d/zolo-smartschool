@@ -1,5 +1,5 @@
-import 'package:eschool/data/models/gallery.dart';
-import 'package:eschool/data/repositories/schoolRepository.dart';
+import 'package:zolo_smart_school/data/models/gallery.dart';
+import 'package:zolo_smart_school/data/repositories/schoolRepository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 abstract class SchoolGalleryState {}

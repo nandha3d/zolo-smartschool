@@ -1,5 +1,5 @@
-import 'package:eschool_saas_staff/data/models/driverDashboardResponse.dart';
-import 'package:eschool_saas_staff/utils/api.dart';
+import 'package:zolo_smart_school_staff/data/models/driverDashboardResponse.dart';
+import 'package:zolo_smart_school_staff/utils/api.dart';
 
 class DriverRepository {
   Future<DriverDashboardData> getDriverDashboard() async {

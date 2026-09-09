@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
-import 'package:eschool_saas_staff/data/models/chatMessage.dart';
-import 'package:eschool_saas_staff/data/models/models.dart';
-import 'package:eschool_saas_staff/utils/api.dart';
+import 'package:zolo_smart_school_staff/data/models/chatMessage.dart';
+import 'package:zolo_smart_school_staff/data/models/models.dart';
+import 'package:zolo_smart_school_staff/utils/api.dart';
 import 'package:image_picker/image_picker.dart';
 
 class ChatRepository {

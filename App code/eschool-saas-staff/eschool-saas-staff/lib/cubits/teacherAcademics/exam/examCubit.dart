@@ -1,7 +1,7 @@
 // ignore: depend_on_referenced_packages
 import 'package:bloc/bloc.dart';
-import 'package:eschool_saas_staff/data/models/exam.dart';
-import 'package:eschool_saas_staff/data/repositories/studentRepository.dart';
+import 'package:zolo_smart_school_staff/data/models/exam.dart';
+import 'package:zolo_smart_school_staff/data/repositories/studentRepository.dart';
 
 abstract class ExamsState {}
 

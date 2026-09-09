@@ -1,12 +1,12 @@
-import 'package:eschool/cubits/paymentTransactionsCubit.dart';
-import 'package:eschool/data/repositories/paymentRepository.dart';
-import 'package:eschool/ui/widgets/customAppbar.dart';
-import 'package:eschool/ui/widgets/customCircularProgressIndicator.dart';
-import 'package:eschool/ui/widgets/errorContainer.dart';
-import 'package:eschool/ui/widgets/noDataContainer.dart';
-import 'package:eschool/utils/constants.dart';
-import 'package:eschool/utils/labelKeys.dart';
-import 'package:eschool/utils/utils.dart';
+import 'package:zolo_smart_school/cubits/paymentTransactionsCubit.dart';
+import 'package:zolo_smart_school/data/repositories/paymentRepository.dart';
+import 'package:zolo_smart_school/ui/widgets/customAppbar.dart';
+import 'package:zolo_smart_school/ui/widgets/customCircularProgressIndicator.dart';
+import 'package:zolo_smart_school/ui/widgets/errorContainer.dart';
+import 'package:zolo_smart_school/ui/widgets/noDataContainer.dart';
+import 'package:zolo_smart_school/utils/constants.dart';
+import 'package:zolo_smart_school/utils/labelKeys.dart';
+import 'package:zolo_smart_school/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

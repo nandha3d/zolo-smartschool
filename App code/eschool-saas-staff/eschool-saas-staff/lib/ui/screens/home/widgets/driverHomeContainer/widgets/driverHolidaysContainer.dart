@@ -1,13 +1,13 @@
-import 'package:eschool_saas_staff/app/routes.dart';
-import 'package:eschool_saas_staff/data/models/driverDashboardResponse.dart'
+import 'package:zolo_smart_school_staff/app/routes.dart';
+import 'package:zolo_smart_school_staff/data/models/driverDashboardResponse.dart'
     as driver_models;
-import 'package:eschool_saas_staff/data/models/holiday.dart';
-import 'package:eschool_saas_staff/ui/screens/holidaysScreen.dart';
-import 'package:eschool_saas_staff/ui/screens/home/widgets/homeContainer/widgets/contentTitleWithViewmoreButton.dart';
-import 'package:eschool_saas_staff/ui/widgets/customTextContainer.dart';
-import 'package:eschool_saas_staff/ui/widgets/holidayContainer.dart';
-import 'package:eschool_saas_staff/utils/constants.dart';
-import 'package:eschool_saas_staff/utils/labelKeys.dart';
+import 'package:zolo_smart_school_staff/data/models/holiday.dart';
+import 'package:zolo_smart_school_staff/ui/screens/holidaysScreen.dart';
+import 'package:zolo_smart_school_staff/ui/screens/home/widgets/homeContainer/widgets/contentTitleWithViewmoreButton.dart';
+import 'package:zolo_smart_school_staff/ui/widgets/customTextContainer.dart';
+import 'package:zolo_smart_school_staff/ui/widgets/holidayContainer.dart';
+import 'package:zolo_smart_school_staff/utils/constants.dart';
+import 'package:zolo_smart_school_staff/utils/labelKeys.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

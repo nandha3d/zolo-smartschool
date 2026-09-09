@@ -1,12 +1,12 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
-import 'package:eschool_saas_staff/data/models/announcement.dart';
-import 'package:eschool_saas_staff/data/models/notificationDetails.dart';
-import 'package:eschool_saas_staff/data/repositories/authRepository.dart';
-import 'package:eschool_saas_staff/utils/api.dart';
-import 'package:eschool_saas_staff/utils/hiveBoxKeys.dart';
-import 'package:eschool_saas_staff/utils/labelKeys.dart';
+import 'package:zolo_smart_school_staff/data/models/announcement.dart';
+import 'package:zolo_smart_school_staff/data/models/notificationDetails.dart';
+import 'package:zolo_smart_school_staff/data/repositories/authRepository.dart';
+import 'package:zolo_smart_school_staff/utils/api.dart';
+import 'package:zolo_smart_school_staff/utils/hiveBoxKeys.dart';
+import 'package:zolo_smart_school_staff/utils/labelKeys.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:shared_preferences/shared_preferences.dart';

@@ -1,6 +1,6 @@
-import 'package:eschool/data/models/transportDashboard.dart';
-import 'package:eschool/ui/screens/parentTransportEnroll/transportHome/widgets/commonTransportWidgets.dart';
-import 'package:eschool/ui/widgets/customTextContainer.dart';
+import 'package:zolo_smart_school/data/models/transportDashboard.dart';
+import 'package:zolo_smart_school/ui/screens/parentTransportEnroll/transportHome/widgets/commonTransportWidgets.dart';
+import 'package:zolo_smart_school/ui/widgets/customTextContainer.dart';
 import 'package:flutter/material.dart';
 
 class BusInfoCard extends StatelessWidget {

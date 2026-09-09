@@ -1,14 +1,14 @@
-import 'package:eschool/cubits/schoolConfigurationCubit.dart';
+import 'package:zolo_smart_school/cubits/schoolConfigurationCubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:eschool/data/models/examOnline.dart';
+import 'package:zolo_smart_school/data/models/examOnline.dart';
 
-import 'package:eschool/cubits/onlineExamQuestionsCubit.dart';
-import 'package:eschool/ui/widgets/customRoundedButton.dart';
+import 'package:zolo_smart_school/cubits/onlineExamQuestionsCubit.dart';
+import 'package:zolo_smart_school/ui/widgets/customRoundedButton.dart';
 
-import 'package:eschool/utils/labelKeys.dart';
-import 'package:eschool/utils/utils.dart';
+import 'package:zolo_smart_school/utils/labelKeys.dart';
+import 'package:zolo_smart_school/utils/utils.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:get/get.dart';
 

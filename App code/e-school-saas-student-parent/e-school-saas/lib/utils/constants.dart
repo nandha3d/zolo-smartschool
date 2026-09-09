@@ -1,4 +1,4 @@
-import 'package:eschool/utils/labelKeys.dart';
+import 'package:zolo_smart_school/utils/labelKeys.dart';
 
 //database urls
 //Please add your admin panel url here and make sure you do not add '/' at the end of the url

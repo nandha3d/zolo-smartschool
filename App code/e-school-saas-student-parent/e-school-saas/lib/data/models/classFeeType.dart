@@ -1,4 +1,4 @@
-import 'package:eschool/data/models/feeType.dart';
+import 'package:zolo_smart_school/data/models/feeType.dart';
 
 class ClassFeeType {
   final int? id;

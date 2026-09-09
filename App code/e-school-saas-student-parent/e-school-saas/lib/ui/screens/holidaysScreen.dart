@@ -1,6 +1,6 @@
-import 'package:eschool/cubits/holidaysCubit.dart';
-import 'package:eschool/data/repositories/systemInfoRepository.dart';
-import 'package:eschool/ui/widgets/holidaysContainer.dart';
+import 'package:zolo_smart_school/cubits/holidaysCubit.dart';
+import 'package:zolo_smart_school/data/repositories/systemInfoRepository.dart';
+import 'package:zolo_smart_school/ui/widgets/holidaysContainer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';

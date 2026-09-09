@@ -1,4 +1,4 @@
-import 'package:eschool/utils/utils.dart';
+import 'package:zolo_smart_school/utils/utils.dart';
 
 class SessionYear {
   final int? id;

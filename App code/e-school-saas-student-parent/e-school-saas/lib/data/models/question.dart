@@ -1,4 +1,4 @@
-import 'package:eschool/data/models/answerOption.dart';
+import 'package:zolo_smart_school/data/models/answerOption.dart';
 
 class Question {
   final int? id;

@@ -1,6 +1,6 @@
-import 'package:eschool/data/models/chatUserRole.dart';
-import 'package:eschool/data/models/chatUsersResponse.dart';
-import 'package:eschool/data/repositories/chatRepository.dart';
+import 'package:zolo_smart_school/data/models/chatUserRole.dart';
+import 'package:zolo_smart_school/data/models/chatUsersResponse.dart';
+import 'package:zolo_smart_school/data/repositories/chatRepository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 enum ChatUsersFetchStatus { initial, loading, success, failure }

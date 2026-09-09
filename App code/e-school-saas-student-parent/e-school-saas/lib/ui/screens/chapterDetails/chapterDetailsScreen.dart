@@ -1,12 +1,12 @@
-import 'package:eschool/data/models/lesson.dart';
-import 'package:eschool/data/models/studyMaterial.dart';
-import 'package:eschool/ui/widgets/filesContainer.dart';
-import 'package:eschool/ui/widgets/otherLinksContainer.dart';
-import 'package:eschool/ui/screens/chapterDetails/widgets/topicsContainer.dart';
-import 'package:eschool/ui/widgets/videosContainer.dart';
-import 'package:eschool/ui/widgets/customAppbar.dart';
-import 'package:eschool/utils/labelKeys.dart';
-import 'package:eschool/utils/utils.dart';
+import 'package:zolo_smart_school/data/models/lesson.dart';
+import 'package:zolo_smart_school/data/models/studyMaterial.dart';
+import 'package:zolo_smart_school/ui/widgets/filesContainer.dart';
+import 'package:zolo_smart_school/ui/widgets/otherLinksContainer.dart';
+import 'package:zolo_smart_school/ui/screens/chapterDetails/widgets/topicsContainer.dart';
+import 'package:zolo_smart_school/ui/widgets/videosContainer.dart';
+import 'package:zolo_smart_school/ui/widgets/customAppbar.dart';
+import 'package:zolo_smart_school/utils/labelKeys.dart';
+import 'package:zolo_smart_school/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

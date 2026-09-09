@@ -1,10 +1,10 @@
-import 'package:eschool/cubits/schoolGalleryCubit.dart';
-import 'package:eschool/cubits/schoolSessionYearsCubit.dart';
+import 'package:zolo_smart_school/cubits/schoolGalleryCubit.dart';
+import 'package:zolo_smart_school/cubits/schoolSessionYearsCubit.dart';
 
-import 'package:eschool/data/models/student.dart';
-import 'package:eschool/data/repositories/schoolRepository.dart';
+import 'package:zolo_smart_school/data/models/student.dart';
+import 'package:zolo_smart_school/data/repositories/schoolRepository.dart';
 
-import 'package:eschool/ui/widgets/schoolGalleryWithSessionYearFilterContainer.dart';
+import 'package:zolo_smart_school/ui/widgets/schoolGalleryWithSessionYearFilterContainer.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

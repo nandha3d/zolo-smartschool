@@ -1,4 +1,4 @@
-import 'package:eschool/utils/labelKeys.dart';
+import 'package:zolo_smart_school/utils/labelKeys.dart';
 
 // ignore: avoid_classes_with_only_static_members
 class ErrorMessageKeysAndCode {

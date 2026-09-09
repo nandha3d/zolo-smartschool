@@ -1,14 +1,14 @@
 
-import 'package:eschool/app/routes.dart';
-import 'package:eschool/cubits/schoolDetailsCubit.dart';
-import 'package:eschool/utils/hiveBoxKeys.dart';
-import 'package:eschool/utils/utils.dart';
+import 'package:zolo_smart_school/app/routes.dart';
+import 'package:zolo_smart_school/cubits/schoolDetailsCubit.dart';
+import 'package:zolo_smart_school/utils/hiveBoxKeys.dart';
+import 'package:zolo_smart_school/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
-import 'package:eschool/ui/widgets/networkImageHandler.dart';
+import 'package:zolo_smart_school/ui/widgets/networkImageHandler.dart';
 
 class ParentOnbordingScreen extends StatefulWidget {
   const ParentOnbordingScreen({super.key});

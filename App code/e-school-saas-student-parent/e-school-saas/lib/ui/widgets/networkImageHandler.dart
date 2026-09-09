@@ -1,7 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:eschool/utils/stringExtensions.dart';
+import 'package:zolo_smart_school/utils/stringExtensions.dart';
 
-import 'package:eschool/utils/svgNetworkImage.dart';
+import 'package:zolo_smart_school/utils/svgNetworkImage.dart';
 import 'package:flutter/material.dart';
 
 /// A widget that properly handles different types of network images (including SVGs)

@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:eschool/data/models/studyMaterial.dart';
-import 'package:eschool/utils/utils.dart';
+import 'package:zolo_smart_school/data/models/studyMaterial.dart';
+import 'package:zolo_smart_school/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:path_provider/path_provider.dart';

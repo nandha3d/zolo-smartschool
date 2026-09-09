@@ -1,12 +1,12 @@
-import 'package:eschool/data/models/pickupPoint.dart';
-import 'package:eschool/data/models/transportFee.dart';
-import 'package:eschool/data/models/transportShift.dart';
-import 'package:eschool/data/models/transportDashboard.dart';
-import 'package:eschool/data/models/vehicleAssignmentStatus.dart';
-import 'package:eschool/data/models/transportPlanDetails.dart';
-import 'package:eschool/data/models/busRouteStops.dart';
-import 'package:eschool/data/models/transportAttendance.dart';
-import 'package:eschool/utils/api.dart';
+import 'package:zolo_smart_school/data/models/pickupPoint.dart';
+import 'package:zolo_smart_school/data/models/transportFee.dart';
+import 'package:zolo_smart_school/data/models/transportShift.dart';
+import 'package:zolo_smart_school/data/models/transportDashboard.dart';
+import 'package:zolo_smart_school/data/models/vehicleAssignmentStatus.dart';
+import 'package:zolo_smart_school/data/models/transportPlanDetails.dart';
+import 'package:zolo_smart_school/data/models/busRouteStops.dart';
+import 'package:zolo_smart_school/data/models/transportAttendance.dart';
+import 'package:zolo_smart_school/utils/api.dart';
 
 class TransportRepository {
   Future<List<PickupPoint>> getPickupPoints() async {

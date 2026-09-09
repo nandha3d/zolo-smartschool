@@ -1,6 +1,6 @@
-import 'package:eschool/data/models/classDetails.dart';
-import 'package:eschool/data/models/medium.dart';
-import 'package:eschool/data/models/section.dart';
+import 'package:zolo_smart_school/data/models/classDetails.dart';
+import 'package:zolo_smart_school/data/models/medium.dart';
+import 'package:zolo_smart_school/data/models/section.dart';
 
 class ClassSection {
   final int? id;

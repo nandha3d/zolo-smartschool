@@ -1,4 +1,4 @@
-import 'package:eschool/data/models/appLanguage.dart';
+import 'package:zolo_smart_school/data/models/appLanguage.dart';
 
 //by default language of the app
 const String defaultLanguageCode = "en";

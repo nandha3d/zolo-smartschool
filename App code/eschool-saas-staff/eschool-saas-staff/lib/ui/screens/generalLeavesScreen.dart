@@ -1,14 +1,14 @@
-import 'package:eschool_saas_staff/cubits/leave/generalLeavesCubit.dart';
-import 'package:eschool_saas_staff/ui/widgets/customAppbar.dart';
-import 'package:eschool_saas_staff/ui/widgets/customCircularProgressIndicator.dart';
-import 'package:eschool_saas_staff/ui/widgets/customTabContainer.dart';
-import 'package:eschool_saas_staff/ui/widgets/errorContainer.dart';
-import 'package:eschool_saas_staff/ui/widgets/leaveDetailsContainer.dart';
-import 'package:eschool_saas_staff/ui/widgets/noDataContainer.dart';
-import 'package:eschool_saas_staff/ui/widgets/tabBackgroundContainer.dart';
-import 'package:eschool_saas_staff/utils/constants.dart';
-import 'package:eschool_saas_staff/utils/labelKeys.dart';
-import 'package:eschool_saas_staff/utils/utils.dart';
+import 'package:zolo_smart_school_staff/cubits/leave/generalLeavesCubit.dart';
+import 'package:zolo_smart_school_staff/ui/widgets/customAppbar.dart';
+import 'package:zolo_smart_school_staff/ui/widgets/customCircularProgressIndicator.dart';
+import 'package:zolo_smart_school_staff/ui/widgets/customTabContainer.dart';
+import 'package:zolo_smart_school_staff/ui/widgets/errorContainer.dart';
+import 'package:zolo_smart_school_staff/ui/widgets/leaveDetailsContainer.dart';
+import 'package:zolo_smart_school_staff/ui/widgets/noDataContainer.dart';
+import 'package:zolo_smart_school_staff/ui/widgets/tabBackgroundContainer.dart';
+import 'package:zolo_smart_school_staff/utils/constants.dart';
+import 'package:zolo_smart_school_staff/utils/labelKeys.dart';
+import 'package:zolo_smart_school_staff/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

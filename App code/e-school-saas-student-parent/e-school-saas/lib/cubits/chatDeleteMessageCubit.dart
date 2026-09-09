@@ -1,4 +1,4 @@
-import 'package:eschool/data/repositories/chatRepository.dart';
+import 'package:zolo_smart_school/data/repositories/chatRepository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 enum ChatDeleteMessageStatus { initial, loading, success, failure }

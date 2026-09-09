@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:eschool_saas_staff/ui/widgets/customTextContainer.dart';
-import 'package:eschool_saas_staff/ui/screens/staffTransportEnroll/transportHome/widgets/attendanceStatusPill.dart';
+import 'package:zolo_smart_school_staff/ui/widgets/customTextContainer.dart';
+import 'package:zolo_smart_school_staff/ui/screens/staffTransportEnroll/transportHome/widgets/attendanceStatusPill.dart';
 
 class AttendanceTable extends StatelessWidget {
   final List<AttendanceRowData> rows;

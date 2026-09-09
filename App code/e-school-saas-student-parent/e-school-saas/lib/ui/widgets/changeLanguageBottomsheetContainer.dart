@@ -1,8 +1,8 @@
-import 'package:eschool/cubits/appLocalizationCubit.dart';
-import 'package:eschool/data/models/appLanguage.dart';
-import 'package:eschool/utils/appLanguages.dart';
-import 'package:eschool/utils/labelKeys.dart';
-import 'package:eschool/utils/utils.dart';
+import 'package:zolo_smart_school/cubits/appLocalizationCubit.dart';
+import 'package:zolo_smart_school/data/models/appLanguage.dart';
+import 'package:zolo_smart_school/utils/appLanguages.dart';
+import 'package:zolo_smart_school/utils/labelKeys.dart';
+import 'package:zolo_smart_school/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

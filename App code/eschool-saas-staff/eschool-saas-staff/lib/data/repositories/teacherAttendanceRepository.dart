@@ -1,7 +1,7 @@
-import 'package:eschool_saas_staff/data/models/holiday.dart';
-import 'package:eschool_saas_staff/data/models/sessionYear.dart';
-import 'package:eschool_saas_staff/data/models/teacherAttendance.dart';
-import 'package:eschool_saas_staff/utils/api.dart';
+import 'package:zolo_smart_school_staff/data/models/holiday.dart';
+import 'package:zolo_smart_school_staff/data/models/sessionYear.dart';
+import 'package:zolo_smart_school_staff/data/models/teacherAttendance.dart';
+import 'package:zolo_smart_school_staff/utils/api.dart';
 
 class TeacherAttendanceRepository {
   Future<

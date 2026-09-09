@@ -2,17 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:get/get.dart';
-import 'package:eschool/cubits/authCubit.dart';
-import 'package:eschool/cubits/transportAttendanceCubit.dart';
-import 'package:eschool/data/models/transportAttendance.dart';
-import 'package:eschool/ui/widgets/customShimmerContainer.dart';
-import 'package:eschool/ui/widgets/screenTopBackgroundContainer.dart';
-import 'package:eschool/ui/widgets/shimmerLoadingContainer.dart';
-import 'package:eschool/ui/widgets/changeCalendarMonthButton.dart';
-import 'package:eschool/ui/widgets/customBackButton.dart';
-import 'package:eschool/ui/widgets/customTabBarContainer.dart';
-import 'package:eschool/ui/widgets/tabBarBackgroundContainer.dart';
-import 'package:eschool/utils/utils.dart';
+import 'package:zolo_smart_school/cubits/authCubit.dart';
+import 'package:zolo_smart_school/cubits/transportAttendanceCubit.dart';
+import 'package:zolo_smart_school/data/models/transportAttendance.dart';
+import 'package:zolo_smart_school/ui/widgets/customShimmerContainer.dart';
+import 'package:zolo_smart_school/ui/widgets/screenTopBackgroundContainer.dart';
+import 'package:zolo_smart_school/ui/widgets/shimmerLoadingContainer.dart';
+import 'package:zolo_smart_school/ui/widgets/changeCalendarMonthButton.dart';
+import 'package:zolo_smart_school/ui/widgets/customBackButton.dart';
+import 'package:zolo_smart_school/ui/widgets/customTabBarContainer.dart';
+import 'package:zolo_smart_school/ui/widgets/tabBarBackgroundContainer.dart';
+import 'package:zolo_smart_school/utils/utils.dart';
 
 class TransportAttendanceScreen extends StatefulWidget {
   final int? userId;

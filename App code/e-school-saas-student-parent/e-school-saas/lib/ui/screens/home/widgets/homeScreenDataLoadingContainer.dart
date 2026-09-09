@@ -1,8 +1,8 @@
-import 'package:eschool/ui/widgets/customShimmerContainer.dart';
-import 'package:eschool/ui/widgets/shimmerLoaders/announcementShimmerLoadingContainer.dart';
-import 'package:eschool/ui/widgets/shimmerLoaders/subjectsShimmerLoadingContainer.dart';
-import 'package:eschool/ui/widgets/shimmerLoadingContainer.dart';
-import 'package:eschool/utils/utils.dart';
+import 'package:zolo_smart_school/ui/widgets/customShimmerContainer.dart';
+import 'package:zolo_smart_school/ui/widgets/shimmerLoaders/announcementShimmerLoadingContainer.dart';
+import 'package:zolo_smart_school/ui/widgets/shimmerLoaders/subjectsShimmerLoadingContainer.dart';
+import 'package:zolo_smart_school/ui/widgets/shimmerLoadingContainer.dart';
+import 'package:zolo_smart_school/utils/utils.dart';
 import 'package:flutter/material.dart';
 
 class HomeScreenDataLoadingContainer extends StatelessWidget {

@@ -839,7 +839,11 @@
 @endsection
 
 @section('script')
-    <script async src="https://www.google.com/recaptcha/api.js"></script>
+    @if (config('services.recaptcha.key') ?? '')
+        {{-- Only loaded when reCAPTCHA is actually configured, so an install that
+             doesn't use it never contacts Google. --}}
+        <script async src="https://www.google.com/recaptcha/api.js"></script>
+    @endif
     @foreach ($featureSections as $key => $section)
         <script>
             document.addEventListener('DOMContentLoaded', () => {

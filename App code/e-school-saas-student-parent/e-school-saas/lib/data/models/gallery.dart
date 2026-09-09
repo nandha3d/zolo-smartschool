@@ -1,4 +1,4 @@
-import 'package:eschool/data/models/galleryFile.dart';
+import 'package:zolo_smart_school/data/models/galleryFile.dart';
 
 class Gallery {
   final int? id;

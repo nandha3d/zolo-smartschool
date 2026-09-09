@@ -1,9 +1,9 @@
-import 'package:eschool/data/models/electiveSubject.dart';
-import 'package:eschool/data/models/sliderDetails.dart';
-import 'package:eschool/data/models/subject.dart';
-import 'package:eschool/data/repositories/parentRepository.dart';
-import 'package:eschool/data/repositories/schoolRepository.dart';
-import 'package:eschool/data/repositories/studentRepository.dart';
+import 'package:zolo_smart_school/data/models/electiveSubject.dart';
+import 'package:zolo_smart_school/data/models/sliderDetails.dart';
+import 'package:zolo_smart_school/data/models/subject.dart';
+import 'package:zolo_smart_school/data/repositories/parentRepository.dart';
+import 'package:zolo_smart_school/data/repositories/schoolRepository.dart';
+import 'package:zolo_smart_school/data/repositories/studentRepository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 abstract class StudentSubjectsAndSlidersState {}

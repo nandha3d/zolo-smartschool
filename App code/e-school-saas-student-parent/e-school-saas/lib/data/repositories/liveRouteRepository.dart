@@ -1,5 +1,5 @@
-import 'package:eschool/data/models/liveRoute.dart';
-import 'package:eschool/utils/api.dart';
+import 'package:zolo_smart_school/data/models/liveRoute.dart';
+import 'package:zolo_smart_school/utils/api.dart';
 
 class LiveRouteRepository {
   Future<LiveRouteResponse> getLiveRoute({required int userId}) async {

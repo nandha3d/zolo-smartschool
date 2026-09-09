@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:eschool/ui/widgets/customTextContainer.dart';
+import 'package:zolo_smart_school/ui/widgets/customTextContainer.dart';
 
 class AttendanceDropdown extends StatelessWidget {
   final String label;

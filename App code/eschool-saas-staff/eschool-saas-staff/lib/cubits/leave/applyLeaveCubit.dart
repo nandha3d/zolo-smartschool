@@ -1,5 +1,5 @@
-import 'package:eschool_saas_staff/data/repositories/leaveRepository.dart';
-import 'package:eschool_saas_staff/utils/constants.dart';
+import 'package:zolo_smart_school_staff/data/repositories/leaveRepository.dart';
+import 'package:zolo_smart_school_staff/utils/constants.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 abstract class ApplyLeaveState {}

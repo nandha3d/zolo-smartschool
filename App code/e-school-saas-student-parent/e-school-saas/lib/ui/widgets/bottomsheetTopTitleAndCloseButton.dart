@@ -1,5 +1,5 @@
-import 'package:eschool/ui/widgets/customCloseButton.dart';
-import 'package:eschool/utils/utils.dart';
+import 'package:zolo_smart_school/ui/widgets/customCloseButton.dart';
+import 'package:zolo_smart_school/utils/utils.dart';
 import 'package:flutter/material.dart';
 
 class BottomsheetTopTitleAndCloseButton extends StatelessWidget {

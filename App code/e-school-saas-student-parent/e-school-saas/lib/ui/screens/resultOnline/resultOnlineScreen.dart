@@ -1,21 +1,21 @@
-import 'package:eschool/cubits/authCubit.dart';
-import 'package:eschool/ui/widgets/customShimmerContainer.dart';
-import 'package:eschool/ui/widgets/errorContainer.dart';
-import 'package:eschool/ui/widgets/shimmerLoadingContainer.dart';
+import 'package:zolo_smart_school/cubits/authCubit.dart';
+import 'package:zolo_smart_school/ui/widgets/customShimmerContainer.dart';
+import 'package:zolo_smart_school/ui/widgets/errorContainer.dart';
+import 'package:zolo_smart_school/ui/widgets/shimmerLoadingContainer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:eschool/cubits/resultOnlineCubit.dart';
+import 'package:zolo_smart_school/cubits/resultOnlineCubit.dart';
 
-import 'package:eschool/data/models/resultOnlineDetails.dart';
-import 'package:eschool/data/repositories/resultRepository.dart';
+import 'package:zolo_smart_school/data/models/resultOnlineDetails.dart';
+import 'package:zolo_smart_school/data/repositories/resultRepository.dart';
 
-import 'package:eschool/ui/widgets/customBackButton.dart';
-import 'package:eschool/ui/widgets/customRoundedButton.dart';
-import 'package:eschool/ui/widgets/screenTopBackgroundContainer.dart';
+import 'package:zolo_smart_school/ui/widgets/customBackButton.dart';
+import 'package:zolo_smart_school/ui/widgets/customRoundedButton.dart';
+import 'package:zolo_smart_school/ui/widgets/screenTopBackgroundContainer.dart';
 
-import 'package:eschool/utils/labelKeys.dart';
-import 'package:eschool/utils/utils.dart';
+import 'package:zolo_smart_school/utils/labelKeys.dart';
+import 'package:zolo_smart_school/utils/utils.dart';
 import 'package:get/get.dart';
 
 class ResultOnlineScreen extends StatefulWidget {

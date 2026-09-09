@@ -2,7 +2,7 @@
 
 
 <!-- bootstrap  -->
-{{-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script> --}}
+{{-- <script src="{{ asset('/assets/vendor/jquery/jquery.min.js') }}"></script> --}}
 <!-- fontawesome icons   -->
 <script src="{{ asset('assets/home_page/js/1d2a297b20.js') }}"></script>
 <script src="{{ asset('/assets/home_page/js/custom/common.js') }}"></script>
@@ -29,10 +29,10 @@
 
 
 <!-- swiper  -->
-{{-- <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-element-bundle.min.js"></script> --}}
+{{-- <script src="{{ asset('/assets/vendor/swiper/swiper-element-bundle.min.js') }}"></script> --}}
 
 <!-- swiper  -->
-{{-- <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script> --}}
+{{-- <script src="{{ asset('/assets/vendor/swiper/swiper-bundle.min.js') }}"></script> --}}
 <script src="{{ asset('/assets/jquery-toast-plugin/jquery.toast.min.js') }}"></script>
 
 <script>

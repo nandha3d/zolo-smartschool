@@ -1,6 +1,6 @@
-import 'package:eschool_saas_staff/app/routes.dart';
-import 'package:eschool_saas_staff/ui/widgets/customMenuTile.dart';
-import 'package:eschool_saas_staff/utils/labelKeys.dart';
+import 'package:zolo_smart_school_staff/app/routes.dart';
+import 'package:zolo_smart_school_staff/ui/widgets/customMenuTile.dart';
+import 'package:zolo_smart_school_staff/utils/labelKeys.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

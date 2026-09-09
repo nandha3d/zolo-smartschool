@@ -1,5 +1,5 @@
-import 'package:eschool/data/models/announcement.dart';
-import 'package:eschool/utils/api.dart';
+import 'package:zolo_smart_school/data/models/announcement.dart';
+import 'package:zolo_smart_school/utils/api.dart';
 import 'package:flutter/foundation.dart';
 
 class AnnouncementRepository {

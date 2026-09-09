@@ -1,4 +1,4 @@
-import 'package:eschool_saas_staff/ui/screens/home/widgets/menuTile.dart';
+import 'package:zolo_smart_school_staff/ui/screens/home/widgets/menuTile.dart';
 import 'package:flutter/material.dart';
 
 class CustomMenuTile extends StatelessWidget {

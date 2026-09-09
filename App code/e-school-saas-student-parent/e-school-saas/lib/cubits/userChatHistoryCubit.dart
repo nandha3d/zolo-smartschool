@@ -1,6 +1,6 @@
-import 'package:eschool/data/models/chatUserRole.dart';
-import 'package:eschool/data/models/userChatHistory.dart';
-import 'package:eschool/data/repositories/chatRepository.dart';
+import 'package:zolo_smart_school/data/models/chatUserRole.dart';
+import 'package:zolo_smart_school/data/models/userChatHistory.dart';
+import 'package:zolo_smart_school/data/repositories/chatRepository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 abstract class UserChatHistoryState {}

@@ -1,20 +1,20 @@
 import 'dart:io';
 
 import 'package:awesome_notifications/awesome_notifications.dart';
-import 'package:eschool/app/appTranslation.dart';
-import 'package:eschool/cubits/assignmentReportCubit.dart';
-import 'package:eschool/cubits/assignmentsCubit.dart';
-import 'package:eschool/cubits/childFeeDetailsCubit.dart';
-import 'package:eschool/cubits/onlineExamReportCubit.dart';
-import 'package:eschool/cubits/resultsOnlineCubit.dart';
-import 'package:eschool/cubits/schoolConfigurationCubit.dart';
-import 'package:eschool/cubits/schoolDetailsCubit.dart';
-import 'package:eschool/cubits/socketSettingCubit.dart';
-import 'package:eschool/cubits/studentProfileCubit.dart';
-import 'package:eschool/data/repositories/assignmentRepository.dart';
-import 'package:eschool/data/repositories/feeRepository.dart';
-import 'package:eschool/data/repositories/resultRepository.dart';
-import 'package:eschool/data/repositories/schoolRepository.dart';
+import 'package:zolo_smart_school/app/appTranslation.dart';
+import 'package:zolo_smart_school/cubits/assignmentReportCubit.dart';
+import 'package:zolo_smart_school/cubits/assignmentsCubit.dart';
+import 'package:zolo_smart_school/cubits/childFeeDetailsCubit.dart';
+import 'package:zolo_smart_school/cubits/onlineExamReportCubit.dart';
+import 'package:zolo_smart_school/cubits/resultsOnlineCubit.dart';
+import 'package:zolo_smart_school/cubits/schoolConfigurationCubit.dart';
+import 'package:zolo_smart_school/cubits/schoolDetailsCubit.dart';
+import 'package:zolo_smart_school/cubits/socketSettingCubit.dart';
+import 'package:zolo_smart_school/cubits/studentProfileCubit.dart';
+import 'package:zolo_smart_school/data/repositories/assignmentRepository.dart';
+import 'package:zolo_smart_school/data/repositories/feeRepository.dart';
+import 'package:zolo_smart_school/data/repositories/resultRepository.dart';
+import 'package:zolo_smart_school/data/repositories/schoolRepository.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -23,34 +23,34 @@ import 'package:get/route_manager.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
-import 'package:eschool/app/routes.dart';
+import 'package:zolo_smart_school/app/routes.dart';
 
-import 'package:eschool/cubits/appConfigurationCubit.dart';
-import 'package:eschool/cubits/appLocalizationCubit.dart';
-import 'package:eschool/cubits/authCubit.dart';
-import 'package:eschool/cubits/examDetailsCubit.dart';
-import 'package:eschool/cubits/examsOnlineCubit.dart';
-import 'package:eschool/cubits/noticeBoardCubit.dart';
-import 'package:eschool/cubits/notificationSettingsCubit.dart';
-import 'package:eschool/cubits/postFeesPaymentCubit.dart';
-import 'package:eschool/cubits/reportTabSelectionCubit.dart';
-import 'package:eschool/cubits/resultTabSelectionCubit.dart';
-import 'package:eschool/cubits/studentSubjectAndSlidersCubit.dart';
-import 'package:eschool/cubits/examTabSelectionCubit.dart';
+import 'package:zolo_smart_school/cubits/appConfigurationCubit.dart';
+import 'package:zolo_smart_school/cubits/appLocalizationCubit.dart';
+import 'package:zolo_smart_school/cubits/authCubit.dart';
+import 'package:zolo_smart_school/cubits/examDetailsCubit.dart';
+import 'package:zolo_smart_school/cubits/examsOnlineCubit.dart';
+import 'package:zolo_smart_school/cubits/noticeBoardCubit.dart';
+import 'package:zolo_smart_school/cubits/notificationSettingsCubit.dart';
+import 'package:zolo_smart_school/cubits/postFeesPaymentCubit.dart';
+import 'package:zolo_smart_school/cubits/reportTabSelectionCubit.dart';
+import 'package:zolo_smart_school/cubits/resultTabSelectionCubit.dart';
+import 'package:zolo_smart_school/cubits/studentSubjectAndSlidersCubit.dart';
+import 'package:zolo_smart_school/cubits/examTabSelectionCubit.dart';
 
-import 'package:eschool/data/repositories/announcementRepository.dart';
-import 'package:eschool/data/repositories/authRepository.dart';
-import 'package:eschool/data/repositories/onlineExamRepository.dart';
-import 'package:eschool/data/repositories/settingsRepository.dart';
-import 'package:eschool/data/repositories/studentRepository.dart';
-import 'package:eschool/data/repositories/systemInfoRepository.dart';
+import 'package:zolo_smart_school/data/repositories/announcementRepository.dart';
+import 'package:zolo_smart_school/data/repositories/authRepository.dart';
+import 'package:zolo_smart_school/data/repositories/onlineExamRepository.dart';
+import 'package:zolo_smart_school/data/repositories/settingsRepository.dart';
+import 'package:zolo_smart_school/data/repositories/studentRepository.dart';
+import 'package:zolo_smart_school/data/repositories/systemInfoRepository.dart';
 
-import 'package:eschool/cubits/onlineExamQuestionsCubit.dart';
-import 'package:eschool/data/repositories/reportRepository.dart';
-import 'package:eschool/ui/styles/colors.dart';
+import 'package:zolo_smart_school/cubits/onlineExamQuestionsCubit.dart';
+import 'package:zolo_smart_school/data/repositories/reportRepository.dart';
+import 'package:zolo_smart_school/ui/styles/colors.dart';
 
-import 'package:eschool/utils/hiveBoxKeys.dart';
-import 'package:eschool/utils/notificationUtility.dart';
+import 'package:zolo_smart_school/utils/hiveBoxKeys.dart';
+import 'package:zolo_smart_school/utils/notificationUtility.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 //to avoid handshake error on some devices

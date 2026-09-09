@@ -1,9 +1,9 @@
 import 'package:dio/dio.dart';
-import 'package:eschool_saas_staff/data/models/leaveDetails.dart';
-import 'package:eschool_saas_staff/data/models/leaveRequest.dart';
-import 'package:eschool_saas_staff/data/models/leaveSettings.dart';
-import 'package:eschool_saas_staff/utils/api.dart';
-import 'package:eschool_saas_staff/utils/constants.dart';
+import 'package:zolo_smart_school_staff/data/models/leaveDetails.dart';
+import 'package:zolo_smart_school_staff/data/models/leaveRequest.dart';
+import 'package:zolo_smart_school_staff/data/models/leaveSettings.dart';
+import 'package:zolo_smart_school_staff/utils/api.dart';
+import 'package:zolo_smart_school_staff/utils/constants.dart';
 
 class LeaveRepository {
   Future<List<LeaveDetails>> getLeaves(

@@ -1,6 +1,6 @@
-import 'package:eschool/data/models/examOnline.dart';
-import 'package:eschool/data/models/question.dart';
-import 'package:eschool/utils/api.dart';
+import 'package:zolo_smart_school/data/models/examOnline.dart';
+import 'package:zolo_smart_school/data/models/question.dart';
+import 'package:zolo_smart_school/utils/api.dart';
 import 'package:flutter/foundation.dart';
 
 class OnlineExamRepository {

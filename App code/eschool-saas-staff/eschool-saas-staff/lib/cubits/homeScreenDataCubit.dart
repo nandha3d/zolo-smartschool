@@ -1,11 +1,11 @@
-import 'package:eschool_saas_staff/data/models/holiday.dart';
-import 'package:eschool_saas_staff/data/models/leaveDetails.dart';
-import 'package:eschool_saas_staff/data/models/userDetails.dart';
-import 'package:eschool_saas_staff/data/repositories/leaveRepository.dart';
-import 'package:eschool_saas_staff/data/repositories/settingsRepository.dart';
-import 'package:eschool_saas_staff/data/repositories/statisticsRepository.dart';
-import 'package:eschool_saas_staff/data/repositories/teacherRepository.dart';
-import 'package:eschool_saas_staff/utils/constants.dart';
+import 'package:zolo_smart_school_staff/data/models/holiday.dart';
+import 'package:zolo_smart_school_staff/data/models/leaveDetails.dart';
+import 'package:zolo_smart_school_staff/data/models/userDetails.dart';
+import 'package:zolo_smart_school_staff/data/repositories/leaveRepository.dart';
+import 'package:zolo_smart_school_staff/data/repositories/settingsRepository.dart';
+import 'package:zolo_smart_school_staff/data/repositories/statisticsRepository.dart';
+import 'package:zolo_smart_school_staff/data/repositories/teacherRepository.dart';
+import 'package:zolo_smart_school_staff/utils/constants.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 abstract class HomeScreenDataState {}

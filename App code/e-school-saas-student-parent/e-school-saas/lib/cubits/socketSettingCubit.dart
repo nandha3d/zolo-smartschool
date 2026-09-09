@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:eschool/data/models/chatMessage.dart';
-import 'package:eschool/utils/constants.dart';
+import 'package:zolo_smart_school/data/models/chatMessage.dart';
+import 'package:zolo_smart_school/utils/constants.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:web_socket_channel/io.dart';

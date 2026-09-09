@@ -1,5 +1,5 @@
-import 'package:eschool_saas_staff/data/models/studyMaterial.dart';
-import 'package:eschool_saas_staff/utils/utils.dart';
+import 'package:zolo_smart_school_staff/data/models/studyMaterial.dart';
+import 'package:zolo_smart_school_staff/utils/utils.dart';
 
 class TeacherAnnouncement {
   TeacherAnnouncement({

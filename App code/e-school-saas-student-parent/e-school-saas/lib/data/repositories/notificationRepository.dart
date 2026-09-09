@@ -1,10 +1,10 @@
 import 'dart:convert';
 
-import 'package:eschool/data/models/notificationDetails.dart';
-import 'package:eschool/data/repositories/authRepository.dart';
-import 'package:eschool/utils/api.dart';
-import 'package:eschool/utils/errorMessageKeysAndCodes.dart';
-import 'package:eschool/utils/hiveBoxKeys.dart';
+import 'package:zolo_smart_school/data/models/notificationDetails.dart';
+import 'package:zolo_smart_school/data/repositories/authRepository.dart';
+import 'package:zolo_smart_school/utils/api.dart';
+import 'package:zolo_smart_school/utils/errorMessageKeysAndCodes.dart';
+import 'package:zolo_smart_school/utils/hiveBoxKeys.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';

@@ -1,5 +1,5 @@
-import 'package:eschool/utils/appLanguages.dart';
-import 'package:eschool/utils/hiveBoxKeys.dart';
+import 'package:zolo_smart_school/utils/appLanguages.dart';
+import 'package:zolo_smart_school/utils/hiveBoxKeys.dart';
 import 'package:hive/hive.dart';
 
 class SettingsRepository {

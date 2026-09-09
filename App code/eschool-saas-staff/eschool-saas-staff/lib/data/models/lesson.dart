@@ -1,4 +1,4 @@
-import 'package:eschool_saas_staff/data/models/studyMaterial.dart';
+import 'package:zolo_smart_school_staff/data/models/studyMaterial.dart';
 
 class Lesson {
   Lesson({

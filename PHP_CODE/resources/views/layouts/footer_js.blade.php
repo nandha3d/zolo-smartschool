@@ -18,7 +18,7 @@
 
 {{--<script src="{{ asset('/assets/bootstrap-table/bootstrap-table.min.js') }}"></script>--}}
 
-<script src="https://unpkg.com/bootstrap-table@1.22.1/dist/bootstrap-table.min.js"></script>
+<script src="{{ asset('/assets/bootstrap-table/bootstrap-table.min.js') }}"></script>
 <script src="{{ asset('/assets/bootstrap-table/bootstrap-table-mobile.js') }}"></script>
 <script src="{{ asset('/assets/bootstrap-table/bootstrap-table-export.min.js') }}"></script>
 <script src="{{ asset('/assets/bootstrap-table/fixed-columns.min.js') }}"></script>

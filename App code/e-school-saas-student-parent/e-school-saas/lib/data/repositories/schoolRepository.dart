@@ -1,8 +1,8 @@
-import 'package:eschool/data/models/gallery.dart';
-import 'package:eschool/data/models/schoolConfiguration.dart';
-import 'package:eschool/data/models/sessionYear.dart';
-import 'package:eschool/data/models/sliderDetails.dart';
-import 'package:eschool/utils/api.dart';
+import 'package:zolo_smart_school/data/models/gallery.dart';
+import 'package:zolo_smart_school/data/models/schoolConfiguration.dart';
+import 'package:zolo_smart_school/data/models/sessionYear.dart';
+import 'package:zolo_smart_school/data/models/sliderDetails.dart';
+import 'package:zolo_smart_school/utils/api.dart';
 
 class SchoolRepository {
   Future<SchoolConfiguration> getSchoolSchoolSettingDetails(

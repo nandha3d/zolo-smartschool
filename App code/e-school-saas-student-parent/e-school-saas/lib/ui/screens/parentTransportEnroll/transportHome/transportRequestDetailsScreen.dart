@@ -1,10 +1,10 @@
-import 'package:eschool/ui/screens/parentTransportEnroll/transportHome/widgets/statusTag.dart';
-import 'package:eschool/ui/widgets/customAppbar.dart';
-import 'package:eschool/ui/widgets/customRoundedButton.dart';
-import 'package:eschool/ui/widgets/customTextContainer.dart';
-import 'package:eschool/utils/constants.dart';
-import 'package:eschool/utils/utils.dart';
-import 'package:eschool/data/models/transportDashboard.dart';
+import 'package:zolo_smart_school/ui/screens/parentTransportEnroll/transportHome/widgets/statusTag.dart';
+import 'package:zolo_smart_school/ui/widgets/customAppbar.dart';
+import 'package:zolo_smart_school/ui/widgets/customRoundedButton.dart';
+import 'package:zolo_smart_school/ui/widgets/customTextContainer.dart';
+import 'package:zolo_smart_school/utils/constants.dart';
+import 'package:zolo_smart_school/utils/utils.dart';
+import 'package:zolo_smart_school/data/models/transportDashboard.dart';
 import 'package:flutter/material.dart';
 
 class TransportRequestDetailsScreen extends StatelessWidget {

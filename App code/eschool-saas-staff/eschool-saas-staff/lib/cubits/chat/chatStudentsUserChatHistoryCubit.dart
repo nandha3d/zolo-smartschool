@@ -1,5 +1,5 @@
-import 'package:eschool_saas_staff/data/models/models.dart';
-import 'package:eschool_saas_staff/data/repositories/chatRepository.dart';
+import 'package:zolo_smart_school_staff/data/models/models.dart';
+import 'package:zolo_smart_school_staff/data/repositories/chatRepository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 abstract class StudentsUserChatHistoryState {}

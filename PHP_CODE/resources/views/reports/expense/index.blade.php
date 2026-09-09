@@ -6,7 +6,7 @@
 
 @section('css')
     <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.14.0-beta3/css/bootstrap-select.min.css">
+        href="{{ asset('/assets/vendor/bootstrap-select/bootstrap-select.min.css') }}">
 @endsection
 
 @section('content')

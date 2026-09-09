@@ -1,4 +1,4 @@
-import 'package:eschool_saas_staff/data/models/payRollSetting.dart';
+import 'package:zolo_smart_school_staff/data/models/payRollSetting.dart';
 
 class StaffSalary {
   final int? id;

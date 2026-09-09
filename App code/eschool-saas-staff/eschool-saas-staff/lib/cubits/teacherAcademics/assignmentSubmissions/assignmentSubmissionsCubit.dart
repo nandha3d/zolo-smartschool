@@ -1,7 +1,7 @@
 // ignore: depend_on_referenced_packages
 import 'package:bloc/bloc.dart';
-import 'package:eschool_saas_staff/data/models/assignmentSubmission.dart';
-import 'package:eschool_saas_staff/data/repositories/assignmentSubmissionsRepository.dart';
+import 'package:zolo_smart_school_staff/data/models/assignmentSubmission.dart';
+import 'package:zolo_smart_school_staff/data/repositories/assignmentSubmissionsRepository.dart';
 import 'package:flutter/foundation.dart';
 
 @immutable

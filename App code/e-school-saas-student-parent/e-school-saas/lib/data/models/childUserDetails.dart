@@ -1,4 +1,4 @@
-import 'package:eschool/data/models/school.dart';
+import 'package:zolo_smart_school/data/models/school.dart';
 
 class ChildUserDetails {
   final int? id;

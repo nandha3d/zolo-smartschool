@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:eschool_saas_staff/data/models/trip.dart';
-import 'package:eschool_saas_staff/ui/widgets/customTextContainer.dart';
-import 'package:eschool_saas_staff/ui/widgets/userAvatar.dart';
-import 'package:eschool_saas_staff/utils/constants.dart';
+import 'package:zolo_smart_school_staff/data/models/trip.dart';
+import 'package:zolo_smart_school_staff/ui/widgets/customTextContainer.dart';
+import 'package:zolo_smart_school_staff/ui/widgets/userAvatar.dart';
+import 'package:zolo_smart_school_staff/utils/constants.dart';
 
 class AttendanceBottomSheet extends StatefulWidget {
   final Stop stop;

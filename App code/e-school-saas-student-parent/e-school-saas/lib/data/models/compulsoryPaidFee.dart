@@ -1,4 +1,4 @@
-import 'package:eschool/data/models/advanceFee.dart';
+import 'package:zolo_smart_school/data/models/advanceFee.dart';
 
 class CompulsoryPaidFee {
   final int? id;

@@ -1,7 +1,7 @@
-import 'package:eschool_saas_staff/data/models/teacherAttendance.dart';
-import 'package:eschool_saas_staff/ui/widgets/monthSelectorWidget.dart';
-import 'package:eschool_saas_staff/ui/widgets/weekdayHeadersWidget.dart';
-import 'package:eschool_saas_staff/ui/widgets/calendarGridWidget.dart';
+import 'package:zolo_smart_school_staff/data/models/teacherAttendance.dart';
+import 'package:zolo_smart_school_staff/ui/widgets/monthSelectorWidget.dart';
+import 'package:zolo_smart_school_staff/ui/widgets/weekdayHeadersWidget.dart';
+import 'package:zolo_smart_school_staff/ui/widgets/calendarGridWidget.dart';
 import 'package:flutter/material.dart';
 
 class AttendanceCalendarContainer extends StatelessWidget {

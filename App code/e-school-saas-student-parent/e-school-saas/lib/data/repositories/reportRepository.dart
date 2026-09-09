@@ -1,8 +1,8 @@
-import 'package:eschool/data/models/assignmentList.dart';
-import 'package:eschool/data/models/examList.dart';
+import 'package:zolo_smart_school/data/models/assignmentList.dart';
+import 'package:zolo_smart_school/data/models/examList.dart';
 
-import 'package:eschool/utils/api.dart';
-import 'package:eschool/utils/errorMessageKeysAndCodes.dart';
+import 'package:zolo_smart_school/utils/api.dart';
+import 'package:zolo_smart_school/utils/errorMessageKeysAndCodes.dart';
 import 'package:flutter/foundation.dart';
 
 class ReportRepository {

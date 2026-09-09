@@ -2,9 +2,9 @@ import 'dart:io';
 
 import 'package:curl_logger_dio_interceptor/curl_logger_dio_interceptor.dart';
 import 'package:dio/dio.dart';
-import 'package:eschool/data/repositories/authRepository.dart';
-import 'package:eschool/utils/constants.dart';
-import 'package:eschool/utils/errorMessageKeysAndCodes.dart';
+import 'package:zolo_smart_school/data/repositories/authRepository.dart';
+import 'package:zolo_smart_school/utils/constants.dart';
+import 'package:zolo_smart_school/utils/errorMessageKeysAndCodes.dart';
 import 'package:flutter/foundation.dart';
 
 class ApiException implements Exception {

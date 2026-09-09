@@ -1,9 +1,9 @@
-import 'package:eschool/app/routes.dart';
-import 'package:eschool/cubits/appConfigurationCubit.dart';
-import 'package:eschool/cubits/authCubit.dart';
-import 'package:eschool/ui/widgets/errorContainer.dart';
-import 'package:eschool/utils/animationConfiguration.dart';
-import 'package:eschool/utils/utils.dart';
+import 'package:zolo_smart_school/app/routes.dart';
+import 'package:zolo_smart_school/cubits/appConfigurationCubit.dart';
+import 'package:zolo_smart_school/cubits/authCubit.dart';
+import 'package:zolo_smart_school/ui/widgets/errorContainer.dart';
+import 'package:zolo_smart_school/utils/animationConfiguration.dart';
+import 'package:zolo_smart_school/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

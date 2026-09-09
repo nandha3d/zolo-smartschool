@@ -1,5 +1,5 @@
-import 'package:eschool/data/models/subject.dart';
-import 'package:eschool/data/models/offlineExamTimetableSlot.dart';
+import 'package:zolo_smart_school/data/models/subject.dart';
+import 'package:zolo_smart_school/data/models/offlineExamTimetableSlot.dart';
 
 class OfflineExamSubjectResult {
   final int? id;

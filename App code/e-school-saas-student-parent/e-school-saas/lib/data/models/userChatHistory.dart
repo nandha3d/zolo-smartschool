@@ -1,4 +1,4 @@
-import 'package:eschool/data/models/chatContact.dart';
+import 'package:zolo_smart_school/data/models/chatContact.dart';
 
 class UserChatHistory {
   const UserChatHistory({

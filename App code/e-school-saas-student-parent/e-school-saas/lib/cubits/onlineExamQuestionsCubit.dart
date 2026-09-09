@@ -1,6 +1,6 @@
-import 'package:eschool/data/models/examOnline.dart';
-import 'package:eschool/data/models/question.dart';
-import 'package:eschool/data/repositories/onlineExamRepository.dart';
+import 'package:zolo_smart_school/data/models/examOnline.dart';
+import 'package:zolo_smart_school/data/models/question.dart';
+import 'package:zolo_smart_school/data/repositories/onlineExamRepository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 abstract class OnlineExamQuestionsState {}

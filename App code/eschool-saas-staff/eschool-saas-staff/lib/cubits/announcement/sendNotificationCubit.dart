@@ -1,6 +1,6 @@
-import 'package:eschool_saas_staff/data/repositories/announcementRepository.dart';
-import 'package:eschool_saas_staff/utils/constants.dart';
-import 'package:eschool_saas_staff/utils/labelKeys.dart';
+import 'package:zolo_smart_school_staff/data/repositories/announcementRepository.dart';
+import 'package:zolo_smart_school_staff/utils/constants.dart';
+import 'package:zolo_smart_school_staff/utils/labelKeys.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 abstract class SendNotificationState {}

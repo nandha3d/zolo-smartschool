@@ -1,32 +1,32 @@
 import 'dart:async';
-import 'package:eschool/app/routes.dart';
-import 'package:eschool/cubits/examTabSelectionCubit.dart';
-import 'package:eschool/cubits/examsOnlineCubit.dart';
-import 'package:eschool/cubits/submitOnlineExamAnswersCubit.dart';
-import 'package:eschool/data/models/answerOption.dart';
-import 'package:eschool/data/models/question.dart';
-import 'package:eschool/data/repositories/onlineExamRepository.dart';
-import 'package:eschool/ui/screens/home/homeScreen.dart';
-import 'package:eschool/ui/widgets/customRoundedButton.dart';
+import 'package:zolo_smart_school/app/routes.dart';
+import 'package:zolo_smart_school/cubits/examTabSelectionCubit.dart';
+import 'package:zolo_smart_school/cubits/examsOnlineCubit.dart';
+import 'package:zolo_smart_school/cubits/submitOnlineExamAnswersCubit.dart';
+import 'package:zolo_smart_school/data/models/answerOption.dart';
+import 'package:zolo_smart_school/data/models/question.dart';
+import 'package:zolo_smart_school/data/repositories/onlineExamRepository.dart';
+import 'package:zolo_smart_school/ui/screens/home/homeScreen.dart';
+import 'package:zolo_smart_school/ui/widgets/customRoundedButton.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 
-import 'package:eschool/utils/labelKeys.dart';
-import 'package:eschool/utils/utils.dart';
+import 'package:zolo_smart_school/utils/labelKeys.dart';
+import 'package:zolo_smart_school/utils/utils.dart';
 
-import 'package:eschool/cubits/onlineExamQuestionsCubit.dart';
-import 'package:eschool/ui/screens/exam/onlineExam/widgets/examQuestionStatusBottomSheetContainer.dart';
-import 'package:eschool/ui/screens/exam/onlineExam/widgets/examTimerContainer.dart';
-import 'package:eschool/ui/screens/exam/onlineExam/widgets/optionContainer.dart';
-import 'package:eschool/ui/screens/exam/onlineExam/widgets/questionContainer.dart';
+import 'package:zolo_smart_school/cubits/onlineExamQuestionsCubit.dart';
+import 'package:zolo_smart_school/ui/screens/exam/onlineExam/widgets/examQuestionStatusBottomSheetContainer.dart';
+import 'package:zolo_smart_school/ui/screens/exam/onlineExam/widgets/examTimerContainer.dart';
+import 'package:zolo_smart_school/ui/screens/exam/onlineExam/widgets/optionContainer.dart';
+import 'package:zolo_smart_school/ui/screens/exam/onlineExam/widgets/questionContainer.dart';
 
-import 'package:eschool/ui/widgets/customBackButton.dart';
-import 'package:eschool/ui/widgets/screenTopBackgroundContainer.dart';
+import 'package:zolo_smart_school/ui/widgets/customBackButton.dart';
+import 'package:zolo_smart_school/ui/widgets/screenTopBackgroundContainer.dart';
 
-import 'package:eschool/data/models/examOnline.dart';
+import 'package:zolo_smart_school/data/models/examOnline.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 class ExamOnlineScreen extends StatefulWidget {

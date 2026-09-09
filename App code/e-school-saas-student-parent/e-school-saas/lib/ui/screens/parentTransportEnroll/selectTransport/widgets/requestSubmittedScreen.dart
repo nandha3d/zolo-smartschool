@@ -1,10 +1,10 @@
-import 'package:eschool/app/routes.dart';
-import 'package:eschool/data/repositories/authRepository.dart';
-import 'package:eschool/ui/screens/parentTransportEnroll/selectTransport/widgets/successCheckAnimatedIcon.dart';
-import 'package:eschool/ui/widgets/customRoundedButton.dart';
-import 'package:eschool/ui/widgets/customTextContainer.dart';
-import 'package:eschool/utils/constants.dart';
-import 'package:eschool/utils/labelKeys.dart';
+import 'package:zolo_smart_school/app/routes.dart';
+import 'package:zolo_smart_school/data/repositories/authRepository.dart';
+import 'package:zolo_smart_school/ui/screens/parentTransportEnroll/selectTransport/widgets/successCheckAnimatedIcon.dart';
+import 'package:zolo_smart_school/ui/widgets/customRoundedButton.dart';
+import 'package:zolo_smart_school/ui/widgets/customTextContainer.dart';
+import 'package:zolo_smart_school/utils/constants.dart';
+import 'package:zolo_smart_school/utils/labelKeys.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

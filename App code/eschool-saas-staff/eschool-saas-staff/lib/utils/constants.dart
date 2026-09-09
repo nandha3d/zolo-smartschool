@@ -1,6 +1,6 @@
-import 'package:eschool_saas_staff/data/models/assignmentSubmission.dart';
-import 'package:eschool_saas_staff/data/models/studyMaterial.dart';
-import 'package:eschool_saas_staff/utils/labelKeys.dart';
+import 'package:zolo_smart_school_staff/data/models/assignmentSubmission.dart';
+import 'package:zolo_smart_school_staff/data/models/studyMaterial.dart';
+import 'package:zolo_smart_school_staff/utils/labelKeys.dart';
 import 'package:flutter/material.dart';
 
 ///[Do not add / at the end of the url]`

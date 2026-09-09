@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:eschool_saas_staff/utils/appLanguages.dart';
+import 'package:zolo_smart_school_staff/utils/appLanguages.dart';
 import 'package:flutter/services.dart';
 
 abstract class AppTranslation {

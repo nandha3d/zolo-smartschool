@@ -1,5 +1,5 @@
-import 'package:eschool/data/models/subject.dart';
-import 'package:eschool/data/models/teacher.dart';
+import 'package:zolo_smart_school/data/models/subject.dart';
+import 'package:zolo_smart_school/data/models/teacher.dart';
 
 class SubjectTeacher {
   final int? id;

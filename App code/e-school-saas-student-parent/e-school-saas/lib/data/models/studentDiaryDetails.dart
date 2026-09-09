@@ -1,5 +1,5 @@
-import 'package:eschool/data/models/diaryStudent.dart';
-import 'package:eschool/data/models/studentDetails.dart';
+import 'package:zolo_smart_school/data/models/diaryStudent.dart';
+import 'package:zolo_smart_school/data/models/studentDetails.dart';
 
 class StudentDiaryDetails extends StudentDetails {
   final List<DiaryStudent> diaryStudent;

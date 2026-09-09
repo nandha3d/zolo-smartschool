@@ -1,5 +1,5 @@
-import 'package:eschool/utils/constants.dart';
-import 'package:eschool/utils/utils.dart';
+import 'package:zolo_smart_school/utils/constants.dart';
+import 'package:zolo_smart_school/utils/utils.dart';
 import 'package:flutter/material.dart';
 
 class ExamFiltersContainer extends StatefulWidget {

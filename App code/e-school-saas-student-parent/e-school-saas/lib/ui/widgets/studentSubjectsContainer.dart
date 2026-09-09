@@ -1,8 +1,8 @@
-import 'package:eschool/app/routes.dart';
-import 'package:eschool/data/models/subject.dart';
-import 'package:eschool/ui/widgets/subjectImageContainer.dart';
-import 'package:eschool/utils/systemModules.dart';
-import 'package:eschool/utils/utils.dart';
+import 'package:zolo_smart_school/app/routes.dart';
+import 'package:zolo_smart_school/data/models/subject.dart';
+import 'package:zolo_smart_school/ui/widgets/subjectImageContainer.dart';
+import 'package:zolo_smart_school/utils/systemModules.dart';
+import 'package:zolo_smart_school/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

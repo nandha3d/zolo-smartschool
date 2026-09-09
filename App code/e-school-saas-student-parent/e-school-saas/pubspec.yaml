@@ -1,5 +1,5 @@
-name: eschool
-description: A new Flutter project.
+name: zolo_smart_school
+description: "Zolo Smart School — student and parent app by Animazon."
 
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.

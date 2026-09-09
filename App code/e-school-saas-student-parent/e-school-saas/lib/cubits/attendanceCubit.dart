@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
-import 'package:eschool/data/models/sessionYear.dart';
-import 'package:eschool/data/models/attendanceDay.dart';
-import 'package:eschool/data/repositories/studentRepository.dart';
+import 'package:zolo_smart_school/data/models/sessionYear.dart';
+import 'package:zolo_smart_school/data/models/attendanceDay.dart';
+import 'package:zolo_smart_school/data/repositories/studentRepository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 abstract class AttendanceState extends Equatable {}

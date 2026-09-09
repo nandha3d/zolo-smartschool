@@ -1,24 +1,22 @@
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="{{ asset('/assets/vendor/jquery/jquery.min.js') }}"></script>
 <script>
 //    let toast_position = 'top-right';
 </script>
 <script src="{{ asset('/assets/school/js/script.js') }}"></script>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
+<script src="{{ asset('/assets/vendor/owlcarousel/owl.carousel.min.js') }}"></script>
 
 <!-- bootstrap  -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+<script src="{{ asset('/assets/bootstrap5/bootstrap.bundle.min.js') }}"
     integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous">
 </script>
 
-<!-- fontawesome icons   -->
-<script src="https://kit.fontawesome.com/1d2a297b20.js" crossorigin="anonymous"></script>
 
 <!-- swiper  -->
-<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-element-bundle.min.js"></script>
+<script src="{{ asset('/assets/vendor/swiper/swiper-element-bundle.min.js') }}"></script>
 
 <!-- swiper  -->
-<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script src="{{ asset('/assets/vendor/swiper/swiper-bundle.min.js') }}"></script>
 
 
 {{-- <script src="{{ asset('/assets/js/ekko-lightbox.min.js') }}"></script> --}}

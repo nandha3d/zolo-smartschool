@@ -1,8 +1,8 @@
-import 'package:eschool/data/models/paymentGateway.dart';
-import 'package:eschool/data/models/schoolSettings.dart';
-import 'package:eschool/data/models/semesterDetails.dart';
-import 'package:eschool/data/models/sessionYear.dart';
-import 'package:eschool/utils/systemModules.dart';
+import 'package:zolo_smart_school/data/models/paymentGateway.dart';
+import 'package:zolo_smart_school/data/models/schoolSettings.dart';
+import 'package:zolo_smart_school/data/models/semesterDetails.dart';
+import 'package:zolo_smart_school/data/models/sessionYear.dart';
+import 'package:zolo_smart_school/utils/systemModules.dart';
 
 class SchoolConfiguration {
   final SessionYear sessionYear;
