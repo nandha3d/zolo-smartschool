@@ -202,6 +202,9 @@ return [
         App\Providers\ViewServiceProvider::class,
 
         App\Providers\CustomBladeDirectivesServiceProvider::class,
+
+        // Addons — self-contained; each loads its own routes, views and migrations.
+        App\Addons\PhotoBooth\PhotoBoothServiceProvider::class,
     ],
 
     /*
