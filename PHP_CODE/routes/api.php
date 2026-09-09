@@ -34,7 +34,10 @@ Route::group(['middleware' => ['APISwitchDatabase', 'auth:sanctum']], static fun
     Route::post('logout', [ApiController::class, 'logout']);
    
 });
-Route::get('fees-due-notification',[ApiController::class, 'sendFeeNotification']);
+// Driven by an external scheduler, not a signed-in user: it switches to the school
+// named by the school-code header and notifies that school's guardians, so leaving
+// it open let anyone spam a tenant's parents and probe which school codes exist.
+Route::get('fees-due-notification', [ApiController::class, 'sendFeeNotification'])->middleware('cron');
 /**
  * STUDENT APIs
  **/

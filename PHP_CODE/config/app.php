@@ -17,6 +17,9 @@ return [
 
     'name' => env('APP_NAME', 'Zolo Schools'),
 
+    // Shared secret for scheduler-driven endpoints (see VerifyCronSecret).
+    'cron_secret' => env('CRON_SECRET', ''),
+
     /*
     |--------------------------------------------------------------------------
     | Application Flags

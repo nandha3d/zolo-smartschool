@@ -1070,81 +1070,33 @@ Route::get('school-settings/{id}/refund-cancellation', [SchoolSettingsController
 
 
 
-Route::get('clear', static function () {
-    Artisan::call('view:clear');
-    Artisan::call('route:clear');
-    Artisan::call('config:clear');
-    Artisan::call('cache:clear');
-    Artisan::call('optimize:clear');
-    return redirect()->back();
-});
-
-Route::get('storage-link', static function () {
-    try {
-        Artisan::call('storage:link');
-        echo "storage link created";
-    } catch (Exception) {
-        echo "Storage Link already exists";
-    }
-    return redirect()->back();
-});
 
 
-Route::get('migrate', static function () {
-    Artisan::call('migrate');
-//    return redirect()->back();
-    echo "Done";
-    return false;
-});
 
-Route::get('migrate-school', static function () {
-    Artisan::call('migrate:school');
-//    return redirect()->back();
-    echo "Done";
-    return false;
-});
 
-Route::get('seeder-school', static function () {
-    Artisan::call('db:seed:school');
-    echo "Done";
-    return false;
-});
 
-Route::get('start-websocket', static function () {
-    Artisan::call('websocket:init');
-   return redirect()->back();
-    return false;
-});
 
-Route::get('migrate-rollback', static function () {
-    Artisan::call('migrate:rollback');
-    echo "Done";
-    return false;
-});
-Route::get('installation-seeder', static function () {
-    Artisan::call('db:seed --class=InstallationSeeder');
-    echo "Done";
-    return false;
-});
 
-Route::get('dummy-seeder', static function () {
-   Artisan::call('db:seed --class=DummyDataSeeder');
-    // Artisan::call('db:seed');
-    return redirect()->back();
-    return false;
-});
 
-Route::get('dummy-sample-seeder', static function () {
-    Artisan::call('db:seed --class=DummySampleDataSeeder');
-    echo "Done";
-    return false;
-});
 
-Route::get('AddSuperAdminSeeder-seeder', static function () {
-    Artisan::call('db:seed --class=AddSuperAdminSeeder');
-    echo "Done";
-    return false;
-});
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Maintenance endpoints (migrate, rollback, seeders, storage:link, cache clear,
+// websocket boot, demo API tokens) used to be registered here as unauthenticated
+// GET routes. Anyone who knew the path could roll back the database or mint
+// permanent API tokens for the demo accounts. They are artisan commands and are
+// now only reachable from the CLI.
 
 Route::get('/js/lang', static function () {
     //    https://medium.com/@serhii.matrunchyk/using-laravel-localization-with-javascript-and-vuejs-23064d0c210e
@@ -1158,9 +1110,7 @@ Route::get('/js/lang', static function () {
     exit();
 })->name('assets.lang');
 
-Route::get('test-code', static function () {
 
-});
 
 // Route::get('cache-flush', [Controller::class, 'cacheFlush']);
 
@@ -1169,27 +1119,8 @@ Route::get('cache-flush', static function () {
     Session::put('landing_locale', null);
     Session::save();
     return redirect()->back();
-});
+})->middleware('auth');
 
 
-Route::get('demo-tokens', static function () {
-    echo "<pre>";
 
-    $guardian = User::where('email', 'guardian@gmail.com')->first();
-    if (!empty($guardian)) {
-        echo "Demo Guardian Token<br>";
-        echo Cache::rememberForever('demoGuardianToken', static function () use ($guardian) {
-            return $guardian->createToken($guardian->first_name)->plainTextToken;
-        });
-    }
-
-
-    $student = User::where('email', 'student@gmail.com')->first();
-    if (!empty($student)) {
-        echo "<br><br>Demo Student Token<br>";
-        echo Cache::rememberForever('demoStudentToken', static function () use ($student) {
-            return $student->createToken($student->first_name)->plainTextToken;
-        });
-    }
-});
 
