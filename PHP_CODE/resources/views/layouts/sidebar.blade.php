@@ -979,7 +979,7 @@
 
         {{-- Certificate --}}
         @canany(['certificate-create', 'certificate-list', 'certificate-edit', 'certificate-delete', 'student-list',
-            'class-teacher', 'id-card-settings'])
+            'class-teacher', 'id-card-settings', 'student-edit'])
             <li class="nav-item">
                 <a class="nav-link" data-toggle="collapse" href="#certificate-menu" aria-expanded="false"
                     aria-controls="certificate-menu" data-access="@hasFeatureAccess('ID Card - Certificate Generation')">
@@ -1030,6 +1030,17 @@
                                     data-name="{{ Auth::user()->getRoleNames()[0] }}"
                                     data-access="@hasFeatureAccess('ID Card - Certificate Generation')">{{ __('student_id_card') }}</a></li>
                         @endcanany
+
+                        {{-- Photo Booth addon: only appears where the school actually holds the feature. --}}
+                        @can('student-edit')
+                            @hasFeature('ID Card Photo Booth')
+                                <li class="nav-item">
+                                    <a href="{{ route('photo-booth.index') }}" class="nav-link"
+                                        data-name="{{ Auth::user()->getRoleNames()[0] }}"
+                                        data-access="@hasFeatureAccess('ID Card Photo Booth')">{{ __('id_card_photo_booth') }}</a>
+                                </li>
+                            @endHasFeature
+                        @endcan
 
                         @can('staff-list')
                             <li class="nav-item">
