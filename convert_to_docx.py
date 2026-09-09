@@ -153,6 +153,6 @@ def convert_md_to_docx(md_path, docx_path):
     print(f"Document saved to {docx_path}")
 
 if __name__ == "__main__":
-    input_file = r"d:\PROJECTS\WEBSITES\eSchool SaaS v1.8.0\eschool_saas_security_audit_and_pricing.md.resolved"
-    output_file = r"d:\PROJECTS\WEBSITES\eSchool SaaS v1.8.0\eschool_saas_security_audit_and_pricing.docx"
+    input_file = r"d:\PROJECTS\WEBSITES\Zolo Smart School v1.8.0\zolo_smart_school_security_audit_and_pricing.md.resolved"
+    output_file = r"d:\PROJECTS\WEBSITES\Zolo Smart School v1.8.0\zolo_smart_school_security_audit_and_pricing.docx"
     convert_md_to_docx(input_file, output_file)

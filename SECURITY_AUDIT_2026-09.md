@@ -1,10 +1,12 @@
-# Zolo Schools — Security & Provenance Audit
+# Zolo Smart School — Security & Provenance Audit
+
+**Prepared by:** Animazon
 
 **Date:** 9 September 2026
 **Scope:** `PHP_CODE/` (Laravel backend) — routes, middleware, controllers, config, seeders, bundled assets.
 Flutter clients under `App code/` were checked only for references to the endpoints changed here.
 
-This audit **complements** the earlier `eschool_saas_security_audit_and_pricing.md.resolved`
+This audit **complements** the earlier `zolo_smart_school_security_audit_and_pricing.md.resolved`
 (April 2026). It re-checks that report's findings and adds what it missed.
 
 ---
@@ -26,10 +28,15 @@ seeders, views and the bundled packages turned up:
 
 The only `license` hits are dompdf's own config comments about the third-party PDFlib library.
 
-What remains is ordinary **upstream vendor naming**, not nulling: the product descends from
-eSchool SaaS, so that name still appears in code identifiers, comments, migration and seeder
-data. Those are cosmetic. The user-visible branding (logos, page titles, favicon, website copy)
-was switched to Zolo separately — see the branding commit on `redesign/phase-4-module-rollout`.
+What remains is ordinary **upstream vendor naming**, not nulling: the platform descends from a
+third-party product (eSchool SaaS), so that name still appears in code identifiers, comments,
+migration and seeder data. Those are cosmetic. The user-visible branding — logos, page titles,
+favicon, website copy — is Zolo Smart School; see the branding commit on
+`redesign/phase-4-module-rollout`.
+
+> The upstream name is stated once here **on purpose**. This section exists to record where the
+> code came from, and that record is only useful while it is accurate — it is the evidence
+> behind the "no nulling found" conclusion. Everywhere else the product is Zolo Smart School.
 
 ### A note on going further
 
@@ -137,3 +144,64 @@ exercised at runtime. Before merging, confirm on a real instance:
 - the admin topbar's "Cache Clear" still works (it now requires a session);
 - `/api/fees-due-notification` returns 404 without the secret and 200 with it;
 - nothing in your deployment tooling called the removed routes over HTTP.
+
+---
+
+## 6. Third-party contact inventory
+
+What this project talks to, split by **who** makes the request. The distinction matters: a
+server-side call happens under your control, while a browser-side one means every user's device
+contacts that company directly, exposing their IP address and user-agent.
+
+### 6.1 Browser-side — every user's browser contacts these
+
+| Host | Loaded on | Conditional? |
+|---|---|---|
+| `unpkg.com` | **Every admin page** (`layouts/include.blade.php` — bootstrap-table CSS) | Always |
+| `fonts.googleapis.com` / `fonts.gstatic.com` | **Every admin page** (Instrument Sans + Figtree) | Always — **added by the redesign** |
+| `www.google.com/recaptcha` | **Login page and public home page** | **Always — fires even when reCAPTCHA is not configured** |
+| `cdn.jsdelivr.net` | Login, 2FA, public site (Bootstrap, Swiper) | Always on those pages |
+| `cdnjs.cloudflare.com` | Public site, fee receipt, exam-result PDFs (jQuery, FontAwesome, OwlCarousel) | Always on those pages |
+| `code.jquery.com` | Exam-result PDF views | Always on those pages |
+| `kit.fontawesome.com/1d2a297b20.js` | Public school site | Always — **ID belongs to the upstream vendor's account** |
+| `checkout.razorpay.com` | Dashboard, addon plans | Always on those pages |
+
+### 6.2 Server-side — only when configured and triggered
+
+| Service | Purpose | Trigger |
+|---|---|---|
+| `api.stripe.com`, Razorpay SDK, `api.paystack.co`, `api.flutterwave.com` | Payments | Only the gateway that is configured, on a transaction |
+| `fcm.googleapis.com`, `www.googleapis.com` | Push notifications | Only when FCM credentials are set |
+| SMTP host of your choice | Email | On send |
+| `sqs.us-east-1.amazonaws.com` | Laravel's stock queue config default | Unused unless the SQS driver is selected |
+
+**No update phone-home.** `SystemUpdateController` applies an **uploaded zip**; it does not
+contact a vendor server for updates or licence checks. `mahesh-kerai/update-generator` is
+fetched from GitHub by Composer at install time only, not at runtime.
+
+### 6.3 Mobile apps
+
+Contact Google Fonts (runtime font download), Google Maps, Stripe/Razorpay checkout, YouTube
+(embedded video), and whatever image hosts your API returns.
+
+**No telemetry.** No Firebase config, analytics, Crashlytics or Sentry is present in either app.
+
+Two development tools are listed as production dependencies and should be reviewed before a
+store release: `curl_logger_dio_interceptor` (logs full HTTP requests, potentially including
+credentials and student data, to the device log) in both apps, and `device_preview` in the staff
+app.
+
+### 6.4 Privacy observations
+
+1. **reCAPTCHA is unconditional.** Every view of the login page contacts Google even on
+   installations that never enabled it. Should be gated on the setting.
+2. **The FontAwesome Kit ID is the upstream vendor's.** Requests from your public site are
+   attributed to their account, and it stops working if they revoke it. Should be replaced with
+   the self-hosted FontAwesome already bundled in `public/assets/fonts/`.
+3. **Google Fonts is a GDPR consideration.** German courts have held that embedding Google
+   Fonts via CDN transmits visitor IPs to Google without consent. For a platform holding
+   children's data this is worth taking seriously — self-hosting the two font files removes the
+   issue entirely.
+4. **Most libraries are already self-hosted** in `public/assets/`. The CDN references above are
+   the exceptions, and each could be pointed at a local copy, which also removes a
+   supply-chain-injection path and a hard dependency on those CDNs being reachable.

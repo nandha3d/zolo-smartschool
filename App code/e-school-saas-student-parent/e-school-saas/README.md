@@ -1,4 +1,4 @@
-# eschool
+# Zolo Smart School — Student & Parent app
 
 //to run the application
 ```shell

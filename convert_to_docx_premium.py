@@ -62,7 +62,7 @@ def create_premium_docx(md_path, docx_path):
     
     subtitle_p = doc.add_paragraph()
     subtitle_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    subtitle_run = subtitle_p.add_run("eSchool SaaS v1.8.0")
+    subtitle_run = subtitle_p.add_run("Zolo Smart School v1.8.0")
     subtitle_run.font.size = Pt(18)
     subtitle_run.font.color.rgb = BRAND_BLUE
     
@@ -70,7 +70,7 @@ def create_premium_docx(md_path, docx_path):
     
     info_p = doc.add_paragraph()
     info_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    info_run = info_p.add_run("Audit Date: 10 April 2026\nPrepared by: Antigravity Security Analysis Engine\nClassification: CONFIDENTIAL")
+    info_run = info_p.add_run("Audit Date: 10 April 2026\nPrepared by: Animazon\nClassification: CONFIDENTIAL")
     info_run.font.size = Pt(12)
     info_run.font.color.rgb = GRAY_TEXT
     
@@ -228,6 +228,6 @@ def create_premium_docx(md_path, docx_path):
     print(f"Premium DOCX saved to {docx_path}")
 
 if __name__ == "__main__":
-    input_file = r"d:\PROJECTS\WEBSITES\eSchool SaaS v1.8.0\eschool_saas_security_audit_and_pricing.md.resolved"
-    output_file = r"d:\PROJECTS\WEBSITES\eSchool SaaS v1.8.0\eSchool_SaaS_Audit_Report_2026.docx"
+    input_file = r"d:\PROJECTS\WEBSITES\Zolo Smart School v1.8.0\zolo_smart_school_security_audit_and_pricing.md.resolved"
+    output_file = r"d:\PROJECTS\WEBSITES\Zolo Smart School v1.8.0\Zolo_Smart_School_Audit_Report_2026.docx"
     create_premium_docx(input_file, output_file)

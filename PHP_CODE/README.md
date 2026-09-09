@@ -27,7 +27,7 @@ every command below starts by adding it:
 
 ```bash
 export PATH="/c/ServBay/packages/php/8.4:$PATH"
-cd "D:/PROJECTS/WEBSITES/eSchool SaaS v1.8.0/PHP_CODE"
+cd "D:/PROJECTS/WEBSITES/Zolo Smart School/PHP_CODE"
 ```
 
 ### 2. Serve it
