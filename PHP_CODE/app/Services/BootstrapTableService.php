@@ -4,7 +4,7 @@ namespace App\Services;
 
 class BootstrapTableService
 {
-    private static string $defaultClasses = "btn btn-xs btn-rounded btn-icon";
+    private static string $defaultClasses = "btn btn-xs btn-rounded btn-icon zolo-action-btn";
 
     /**
      * @param string $iconClass

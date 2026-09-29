@@ -34,16 +34,14 @@ class StaffAttendanceController extends Controller
 
     public function index()
     {
-        ResponseService::noPermissionThenRedirect('staff-attendance-list');
         ResponseService::noFeatureThenRedirect('Staff Attendance Management');
-        ResponseService::noAnyPermissionThenRedirect(['staff-attendance-list']);
+        ResponseService::noAnyPermissionThenRedirect(['staff-attendance-list', 'staff-attendance-create']);
 
         return view('staff-attendance.index');
     }
 
     public function view()
     {
-        ResponseService::noPermissionThenRedirect('staff-attendance-list');
         ResponseService::noFeatureThenRedirect('Staff Attendance Management');
         ResponseService::noAnyPermissionThenRedirect(['staff-attendance-list']);
 
@@ -52,17 +50,16 @@ class StaffAttendanceController extends Controller
 
     public function getAttendanceData(Request $request)
     {
-        ResponseService::noPermissionThenSendJson('staff-attendance-list');
         ResponseService::noFeatureThenRedirect('Staff Attendance Management');
+        ResponseService::noAnyPermissionThenSendJson(['staff-attendance-list', 'staff-attendance-create']);
         $response = $this->staffAttendance->builder()->select('type')->where(['date' => date('Y-m-d', strtotime($request->date))])->pluck('type')->first();
         return response()->json($response);
     }
 
     public function store(Request $request)
     {
-        ResponseService::noPermissionThenSendJson('staff-attendance-create');
         ResponseService::noFeatureThenRedirect('Staff Attendance Management');
-        ResponseService::noAnyPermissionThenRedirect(['staff-attendance-create', 'staff-attendance-edit']);
+        ResponseService::noAnyPermissionThenSendJson(['staff-attendance-create', 'staff-attendance-edit']);
 
         $request->validate([
             'date' => 'required',

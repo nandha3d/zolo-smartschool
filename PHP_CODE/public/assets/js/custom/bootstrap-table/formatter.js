@@ -1,6 +1,36 @@
 // Bootstrap Custom Column Formatters
 // noinspection JSUnusedGlobalSymbols
 
+// Ensure bootstrap-table never escapes operate/action HTML columns even when data-escape="true" is set on <table>
+(function ($) {
+    if ($ && $.fn && $.fn.bootstrapTable && $.fn.bootstrapTable.utils) {
+        var originalGetItemField = $.fn.bootstrapTable.utils.getItemField;
+        $.fn.bootstrapTable.utils.getItemField = function (item, field, escape) {
+            if (field === 'operate' || field === 'action' || field === 'actions') {
+                escape = false;
+            }
+            var val = originalGetItemField.call(this, item, field, escape);
+            if ((field === 'operate' || field === 'action' || field === 'actions') && typeof val === 'string' && val.indexOf('&lt;') !== -1) {
+                var txt = document.createElement('textarea');
+                txt.innerHTML = val;
+                val = txt.value;
+            }
+            return val;
+        };
+    }
+
+    $(document).on('post-body.bs.table', function (e, data) {
+        $(this).find('td[data-field="operate"], td.operate-column, td:last-child').each(function () {
+            var content = $(this).html();
+            if (content && typeof content === 'string' && content.indexOf('&lt;a ') !== -1) {
+                var txt = document.createElement('textarea');
+                txt.innerHTML = content;
+                $(this).html(txt.value);
+            }
+        });
+    });
+})(window.jQuery);
+
 function fileFormatter(value, row) {
     if (row.file && row.file.length) {
         let file_upload = "<br><h6>" + window.trans["File Upload"] + "</h6>";
@@ -80,6 +110,11 @@ function actionColumnFormatter(value, row, index) {
         $(".fixed-table-body").css("height", '280px');
     } else {
         $(".fixed-table-body").css("height", '100%');
+    }
+    if (typeof value === 'string' && value.indexOf('&lt;') !== -1) {
+        var txt = document.createElement('textarea');
+        txt.innerHTML = value;
+        value = txt.value;
     }
     return '<div class="action-column-menu">' + value + '</div>';
 }
@@ -657,30 +692,77 @@ function formFieldOtherValueFormatter(value, row) {
     return html;
 }
 
+function attendanceRollFormatter(value, row) {
+    let roll = value || row.roll_no || '-';
+    return '<span class="badge badge-outline-primary font-weight-bold" style="font-size: 13px; border-radius: 6px; padding: 4px 10px;">#' + roll + '</span>';
+}
+
 function addRadioInputAttendance(value, row) {
+    let currentVal = (row.type === 0 || row.type === '0') ? 0 : 1;
+    let isPresent = (currentVal === 1);
+    let isAbsent = (currentVal === 0);
+    let rowIdVal = (row.id ? row.id : '');
+    let studentIdVal = (row.student_id ? row.student_id : row.user_id);
+    let rowNo = row.no;
 
-    let html = "<input type='hidden' value=" + row.id + " name='attendance_data[" + row.no + "][id]'><input type='hidden' name='attendance_data[" + row.no + "][student_id]' value=" + row.user_id + ">"
-    if (row.type == 1) {
-        html += '<div class="d-flex"><div class="form-check mr-2"><label class="form-check-label"><input required type="radio" class="type form-check-input" name="attendance_data[' + row.no + '][type]" value="1" checked>Present<i class="input-helper"></i></label></div><div class="form-check mr-2"><label class="form-check-label"><input type="radio" class="type form-check-input" name="attendance_data[' + row.no + '][type]" value="0">Absent<i class="input-helper"></i></label></div></div>';
-    } else if (row.type == 0) {
-        html += '<div class="d-flex"><div class="form-check mr-2"><label class="form-check-label"><input required type="radio" class="type form-check-input" name="attendance_data[' + row.no + '][type]" value="1">Present<i class="input-helper"></i></label></div><div class="form-check mr-2"><label class="form-check-label"><input type="radio" class="type form-check-input" name="attendance_data[' + row.no + '][type]" value="0" checked>Absent<i class="input-helper"></i></label></div></div>';
-    } else {
+    let html = '<div class="zolo-att-btn-group" data-row="' + rowNo + '" data-student-id="' + studentIdVal + '">';
+    html += '  <input type="hidden" value="' + rowIdVal + '" name="attendance_data[' + rowNo + '][id]">';
+    html += '  <input type="hidden" name="attendance_data[' + rowNo + '][student_id]" value="' + studentIdVal + '">';
+    html += '  <input type="hidden" class="attendance-type-input" name="attendance_data[' + rowNo + '][type]" value="' + currentVal + '">';
+    html += '  <button type="button" class="zolo-att-btn zolo-att-btn-present ' + (isPresent ? 'is-active' : '') + '" data-val="1" title="Mark Present">';
+    html += '    <i class="fa fa-check-circle mr-1"></i> <span>Present</span>';
+    html += '  </button>';
+    html += '  <button type="button" class="zolo-att-btn zolo-att-btn-absent ' + (isAbsent ? 'is-active' : '') + '" data-val="0" title="Mark Absent">';
+    html += '    <i class="fa fa-times-circle mr-1"></i> <span>Absent</span>';
+    html += '  </button>';
+    html += '</div>';
 
-        html += '<div class="d-flex"><div class="form-check mr-2"><label class="form-check-label"><input data-id="' + row.user_id + '" required type="radio" class="type form-check-input" name="attendance_data[' + row.no + '][type]" value="1" checked>Present<i class="input-helper"></i></label></div><div class="form-check"><label class="form-check-label"><input type="radio" data-id="' + row.user_id + '" class="type form-check-input" name="attendance_data[' + row.no + '][type]" value="0">Absent<i class="input-helper"></i></label></div></div>';
-    }
     return html;
 }
 
 function addStaffRadioInputAttendance(value, row) {
-    
-    let html = "<input type='hidden' value=" + row.id + " name='attendance_data[" + row.no + "][id]'><input type='hidden' name='attendance_data[" + row.no + "][staff_id]' value=" + row.staff_id + ">"
-    if (row.type == 1) {
-        html += '<div class="d-flex"><div class="form-check mr-2"><label class="form-check-label"><input required type="radio" class="type form-check-input" name="attendance_data[' + row.no + '][type]" value="1" checked>Present<i class="input-helper"></i></label></div><div class="form-check mr-2"><label class="form-check-label"><input type="radio" class="type form-check-input" name="attendance_data[' + row.no + '][type]" value="0">Absent<i class="input-helper"></i></label></div></div>';
-    } else if (row.type == 0) {
-        html += '<div class="d-flex"><div class="form-check mr-2"><label class="form-check-label"><input required type="radio" class="type form-check-input" name="attendance_data[' + row.no + '][type]" value="1">Present<i class="input-helper"></i></label></div><div class="form-check mr-2"><label class="form-check-label"><input type="radio" class="type form-check-input" name="attendance_data[' + row.no + '][type]" value="0" checked>Absent<i class="input-helper"></i></label></div></div>';
-    } else {
-        html += '<div class="d-flex"><div class="form-check mr-2"><label class="form-check-label"><input data-id="' + row.staff_id + '" required type="radio" class="type form-check-input" name="attendance_data[' + row.no + '][type]" value="1" checked>Present<i class="input-helper"></i></label></div><div class="form-check"><label class="form-check-label text-danger"><input type="radio" data-id="' + row.staff_id + '" class="type form-check-input" name="attendance_data[' + row.no + '][type]" value="0">Absent<i class="input-helper"></i></label></div></div>';
+    let currentVal = (row.type === 0 || row.type === '0') ? 0 : 1;
+    let isPresent = (currentVal === 1);
+    let isAbsent = (currentVal === 0);
+    let rowIdVal = (row.id ? row.id : '');
+    let staffIdVal = (row.staff_id ? row.staff_id : row.user_id);
+    let rowNo = row.no;
+
+    let html = '<div class="zolo-att-btn-group" data-row="' + rowNo + '" data-staff-id="' + staffIdVal + '">';
+    html += '  <input type="hidden" value="' + rowIdVal + '" name="attendance_data[' + rowNo + '][id]">';
+    html += '  <input type="hidden" name="attendance_data[' + rowNo + '][staff_id]" value="' + staffIdVal + '">';
+    html += '  <input type="hidden" class="attendance-type-input" name="attendance_data[' + rowNo + '][type]" value="' + currentVal + '">';
+    html += '  <button type="button" class="zolo-att-btn zolo-att-btn-present ' + (isPresent ? 'is-active' : '') + '" data-val="1" title="Mark Present">';
+    html += '    <i class="fa fa-check-circle mr-1"></i> <span>Present</span>';
+    html += '  </button>';
+    html += '  <button type="button" class="zolo-att-btn zolo-att-btn-absent ' + (isAbsent ? 'is-active' : '') + '" data-val="0" title="Mark Absent">';
+    html += '    <i class="fa fa-times-circle mr-1"></i> <span>Absent</span>';
+    html += '  </button>';
+    html += '</div>';
+
+    return html;
+}
+
+function addRemarkInputAttendance(value, row) {
+    let remarkVal = (row.remark || '').replace(/"/g, '&quot;');
+    let rowNo = row.no;
+    return '<input type="text" class="form-control form-control-sm zolo-att-remark" name="attendance_data[' + rowNo + '][remark]" value="' + remarkVal + '" placeholder="Add note (e.g. sick, late)..." style="font-size: 12px; border-radius: 6px; min-width: 140px;">';
+}
+
+function attendanceStudentFormatter(value, row) {
+    let name = row.student_name || (row.user ? (row.user.first_name + ' ' + (row.user.last_name || '')) : (row.name || 'Student'));
+    let initials = name.split(' ').filter(Boolean).map(n => n[0]).slice(0, 2).join('').toUpperCase() || 'ST';
+    let adm = row.admission_no || (row.user && row.user.student ? row.user.student.admission_no : '');
+
+    let html = '<div class="d-flex align-items-center">';
+    html += '  <div class="zolo-att-avatar mr-2">' + initials + '</div>';
+    html += '  <div>';
+    html += '    <div style="font-weight: 600; font-size: 13.5px; color: #0F172A;">' + name + '</div>';
+    if (adm) {
+        html += '    <small class="text-muted" style="font-size: 11px;">Adm: ' + adm + '</small>';
     }
+    html += '  </div>';
+    html += '</div>';
     return html;
 }
 

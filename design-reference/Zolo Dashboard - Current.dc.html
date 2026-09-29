@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+<style>
+  body { margin:0; font-family:'Nunito', sans-serif; font-size:0.9rem; line-height:1.6; background:#f8fafc; color:#000; }
+  a { color:#35b74d; text-decoration:none; }
+  a:hover { color:#2a9740; }
+  .vsc::-webkit-scrollbar { width:6px; height:6px; }
+  .vsc::-webkit-scrollbar-thumb { background:#d9dde3; border-radius:3px; }
+</style>
+</helmet>
+<div style="display:flex; flex-direction:column; min-height:100vh; background:#f8fafc">
+
+  <div style="display:flex; align-items:stretch; height:70px; background:#fff; border-bottom:1px solid #e9e9e9; position:sticky; top:0; z-index:20">
+    <div style="width:250px; min-width:250px; display:flex; align-items:center; justify-content:center; border-right:1px solid #f2f2f2">
+      <div style="display:flex; align-items:center; gap:8px">
+        <div style="width:30px; height:30px; border-radius:6px; background:#35b74d; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:800; font-size:15px">Z</div>
+        <span style="font-weight:800; font-size:17px; letter-spacing:-0.2px">Zolo Schools</span>
+      </div>
+    </div>
+    <div style="flex:1; display:flex; align-items:center; gap:16px; padding:0 22px">
+      <button style="border:0; background:none; font-size:18px; color:#4a4a4a; cursor:pointer; padding:0"><i class="fa fa-bars"></i></button>
+      <a href="#" style="font-size:12px; font-weight:700; color:#0dcaf0; background:rgba(13,202,240,0.12); border-radius:4px; padding:6px 12px">Cache Clear</a>
+      <span style="font-size:13px; color:#3c3c3c">Demo Public School</span>
+      <div style="margin-left:auto; display:flex; align-items:center; gap:22px">
+        <div style="font-size:13px; color:#212529">Session Years : <span style="font-weight:600">2025-2026</span></div>
+        <i class="fa fa-language" style="font-size:17px; color:#4a4a4a"></i>
+        <div style="display:flex; align-items:center; gap:9px">
+          <div style="width:32px; height:32px; border-radius:50%; background:#dfe3e8; display:flex; align-items:center; justify-content:center; color:#7a828c; font-size:14px"><i class="fa fa-user"></i></div>
+          <span style="font-size:13px; color:#000">Admin</span>
+          <i class="fa fa-angle-down" style="color:#8a9099; font-size:13px"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex; align-items:flex-start">
+
+    <div class="vsc" style="width:250px; min-width:250px; background:#fff; border-right:1px solid #f0f0f0; padding:16px 0 40px; height:calc(100vh - 70px); overflow-y:auto; position:sticky; top:70px">
+      <div style="padding:0 24px 14px">
+        <input placeholder="Search Menu" style="width:100%; box-sizing:border-box; font-family:inherit; font-size:12px; padding:6px 10px; border:1px solid #35b74d; border-radius:4px; outline:none; color:#3c3c3c" />
+      </div>
+      <sc-for list="{{ nav }}" as="item" hint-placeholder-count="18">
+        <div style="display:flex; align-items:center; gap:14px; padding:11px 24px; cursor:pointer; color:#292929; font-size:13.5px; background:{{ item.bg }}; border-left:3px solid {{ item.bar }}" style-hover="background:#f7f9f8">
+          <i class="fa {{ item.icon }}" style="width:16px; text-align:center; font-size:14px; color:{{ item.ink }}"></i>
+          <span style="flex:1">{{ item.label }}</span>
+          <sc-if value="{{ item.arrow }}" hint-placeholder-val="{{ true }}">
+            <i class="fa fa-angle-right" style="font-size:13px; color:#a7adb5"></i>
+          </sc-if>
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="flex:1; min-width:0; padding:24px">
+
+      <div style="display:flex; align-items:center; margin-bottom:20px">
+        <h3 style="margin:0; font-size:22px; font-weight:600; display:flex; align-items:center; gap:12px; color:#000">
+          <span style="width:38px; height:38px; border-radius:4px; background:#35b74d; color:#fff; display:flex; align-items:center; justify-content:center; font-size:16px"><i class="fa fa-home"></i></span>
+          Dashboard
+        </h3>
+      </div>
+
+      <div style="display:grid; grid-template-columns:repeat(5, minmax(0,1fr)); gap:20px; margin-bottom:20px">
+        <sc-for list="{{ stats }}" as="s" hint-placeholder-count="5">
+          <div style="background:#fff; border-radius:6px; box-shadow:0 0 10px rgba(0,0,0,0.04); padding:18px 20px; display:flex; align-items:flex-start; gap:10px">
+            <div style="flex:1; min-width:0">
+              <div style="font-size:13px; color:#000">{{ s.label }}</div>
+              <h3 style="margin:2px 0 0; font-size:22px; font-weight:600; color:#000">{{ s.value }}</h3>
+            </div>
+            <img src="{{ s.img }}" alt="" style="width:38px; height:38px; flex:none" />
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="display:grid; grid-template-columns:2fr 1fr; gap:20px; margin-bottom:20px">
+        <div style="background:#fff; border-radius:6px; box-shadow:0 0 10px rgba(0,0,0,0.04); padding:20px">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px">
+            <h4 style="margin:0; font-size:16px; font-weight:600; color:#000">Expense</h4>
+            <select style="font-family:inherit; font-size:12px; padding:4px 8px; border:1px solid #ced4da; border-radius:4px; color:#495057"><option>2025-2026</option></select>
+          </div>
+          <div style="height:330px; display:flex; align-items:flex-end; gap:14px; padding:20px 4px 0; border-bottom:1px solid #eceff2">
+            <sc-for list="{{ expenseBars }}" as="b" hint-placeholder-count="12">
+              <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:6px">
+                <div style="width:100%; max-width:26px; height:{{ b.h }}; background:#35b74d; border-radius:2px 2px 0 0"></div>
+                <span style="font-size:10px; color:#8a9099">{{ b.m }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="background:#fff; border-radius:6px; box-shadow:0 0 10px rgba(0,0,0,0.04); padding:20px">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px">
+            <h3 style="margin:0; font-size:16px; font-weight:600; color:#000">Leaves</h3>
+            <select style="font-family:inherit; font-size:12px; padding:4px 8px; border:1px solid #ced4da; border-radius:4px; color:#495057"><option>Today</option><option>Tomorrow</option><option>Upcoming</option></select>
+          </div>
+          <div class="vsc" style="height:330px; overflow-y:auto">
+            <table style="width:100%; border-collapse:collapse; font-size:13px">
+              <tbody>
+                <sc-for list="{{ leaves }}" as="l" hint-placeholder-count="4">
+                  <tr>
+                    <td style="padding:10px 4px; border-bottom:1px solid #f1f3f5; color:#212529">{{ l.name }}</td>
+                    <td style="padding:10px 4px; border-bottom:1px solid #f1f3f5; text-align:right; color:#6c757d">{{ l.day }}</td>
+                  </tr>
+                </sc-for>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 2fr; gap:20px; margin-bottom:20px">
+        <div style="background:#fff; border-radius:6px; box-shadow:0 0 10px rgba(0,0,0,0.04); padding:20px">
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px">
+            <h3 style="margin:0; font-size:16px; font-weight:600; color:#000">Attendance</h3>
+            <select style="font-family:inherit; font-size:12px; padding:4px 8px; border:1px solid #ced4da; border-radius:4px; color:#495057"><option>Class 1 A</option></select>
+          </div>
+          <div style="display:flex; align-items:center; justify-content:center; height:250px">{{ donutAttendance }}</div>
+        </div>
+        <div style="background:#fff; border-radius:6px; box-shadow:0 0 10px rgba(0,0,0,0.04); padding:20px">
+          <h4 style="margin:0 0 10px; font-size:16px; font-weight:600; color:#000">Announcement</h4>
+          <div class="vsc" style="max-height:250px; overflow:auto">
+            <table style="width:100%; border-collapse:collapse; font-size:13px">
+              <thead>
+                <tr>
+                  <th style="text-align:left; padding:9px 6px; border-bottom:1px solid #e9ecef; font-weight:600; color:#212529">No.</th>
+                  <th style="text-align:left; padding:9px 6px; border-bottom:1px solid #e9ecef; font-weight:600; color:#212529">Title</th>
+                  <th style="text-align:left; padding:9px 6px; border-bottom:1px solid #e9ecef; font-weight:600; color:#212529">Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <sc-for list="{{ announcements }}" as="a" hint-placeholder-count="4">
+                  <tr>
+                    <td style="padding:9px 6px; border-bottom:1px solid #f1f3f5; color:#212529">{{ a.no }}</td>
+                    <td style="padding:9px 6px; border-bottom:1px solid #f1f3f5; color:#212529; max-width:100px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap">{{ a.title }}</td>
+                    <td style="padding:9px 6px; border-bottom:1px solid #f1f3f5; color:#6c757d">{{ a.desc }}</td>
+                  </tr>
+                </sc-for>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:20px; margin-bottom:20px">
+        <div style="background:#fff; border-radius:6px; box-shadow:0 0 10px rgba(0,0,0,0.04); padding:20px">
+          <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:10px">
+            <h3 style="margin:0; font-size:16px; font-weight:600; flex:1; color:#000">Exam Result</h3>
+            <select style="font-family:inherit; font-size:12px; padding:4px 6px; border:1px solid #ced4da; border-radius:4px; color:#495057"><option>2025-2026</option></select>
+            <select style="font-family:inherit; font-size:12px; padding:4px 6px; border:1px solid #ced4da; border-radius:4px; color:#495057"><option>Select Exam</option></select>
+          </div>
+          <div class="vsc" style="height:230px; overflow-y:auto">
+            <sc-for list="{{ examRows }}" as="e" hint-placeholder-count="4">
+              <div style="margin-bottom:14px">
+                <div style="display:flex; justify-content:space-between; font-size:12.5px; color:#212529"><span>{{ e.cls }}</span><span>{{ e.pct }}</span></div>
+                <div style="height:8px; background:#eef1f4; border-radius:4px; margin-top:5px"><div style="height:8px; width:{{ e.pct }}; background:#35b74d; border-radius:4px"></div></div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="background:#fff; border-radius:6px; box-shadow:0 0 10px rgba(0,0,0,0.04); padding:20px; display:flex; flex-direction:column">
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px">
+            <h3 style="margin:0; font-size:16px; font-weight:600; color:#000">Fees Over Due <i class="fa fa-exclamation-circle" style="color:#8a9099; font-size:13px; margin-left:6px"></i></h3>
+            <select style="font-family:inherit; font-size:12px; padding:4px 6px; border:1px solid #ced4da; border-radius:4px; color:#495057"><option>Class 1 A</option></select>
+          </div>
+          <div class="vsc" style="height:190px; overflow-y:auto">
+            <table style="width:100%; border-collapse:collapse; font-size:13px">
+              <tbody>
+                <sc-for list="{{ overdue }}" as="o" hint-placeholder-count="4">
+                  <tr>
+                    <td style="padding:9px 4px; border-bottom:1px solid #f1f3f5; color:#212529"><input type="checkbox" style="margin-right:8px" />{{ o.name }}</td>
+                    <td style="padding:9px 4px; border-bottom:1px solid #f1f3f5; text-align:right; color:#6c757d">{{ o.amt }}</td>
+                  </tr>
+                </sc-for>
+              </tbody>
+            </table>
+          </div>
+          <button style="align-self:flex-end; margin-top:10px; font-family:inherit; font-size:13px; padding:6px 16px; background:#28a745; color:#fff; border:0; border-radius:4px; cursor:pointer">Submit</button>
+        </div>
+        <div style="background:#fff; border-radius:6px; box-shadow:0 0 10px rgba(0,0,0,0.04); padding:20px">
+          <h3 style="margin:0 0 10px; font-size:16px; font-weight:600; color:#000">Fees Details</h3>
+          <div style="display:flex; align-items:center; justify-content:center; height:230px">{{ donutFees }}</div>
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:20px">
+        <div style="background:#fff; border-radius:6px; box-shadow:0 0 10px rgba(0,0,0,0.04); padding:20px">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px">
+            <h3 style="margin:0; font-size:16px; font-weight:600; color:#000">Birthday</h3>
+            <select style="font-family:inherit; font-size:12px; padding:4px 8px; border:1px solid #ced4da; border-radius:4px; color:#495057"><option>Today</option><option>This Month</option><option>Next Month</option></select>
+          </div>
+          <div class="vsc" style="height:190px; overflow-y:auto">
+            <table style="width:100%; border-collapse:collapse; font-size:13px">
+              <tbody>
+                <sc-for list="{{ birthdays }}" as="b" hint-placeholder-count="3">
+                  <tr>
+                    <td style="padding:9px 4px; border-bottom:1px solid #f1f3f5; color:#212529">{{ b.name }}</td>
+                    <td style="padding:9px 4px; border-bottom:1px solid #f1f3f5; text-align:right; color:#6c757d">{{ b.date }}</td>
+                  </tr>
+                </sc-for>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div style="background:#fff; border-radius:6px; box-shadow:0 0 10px rgba(0,0,0,0.04); padding:20px">
+          <h4 style="margin:0 0 10px; font-size:16px; font-weight:600; color:#000">Holiday</h4>
+          <div class="vsc" style="height:190px; overflow-y:auto">
+            <table style="width:100%; border-collapse:collapse; font-size:13px">
+              <tbody>
+                <sc-for list="{{ holidays }}" as="h" hint-placeholder-count="3">
+                  <tr>
+                    <td style="padding:9px 4px; border-bottom:1px solid #f1f3f5; color:#212529">{{ h.title }}</td>
+                    <td style="padding:9px 4px; border-bottom:1px solid #f1f3f5; text-align:right; color:#6c757d">{{ h.date }}</td>
+                  </tr>
+                </sc-for>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div style="background:#fff; border-radius:6px; box-shadow:0 0 10px rgba(0,0,0,0.04); padding:20px">
+          <h4 style="margin:0 0 10px; font-size:16px; font-weight:600; color:#000">Student Gender</h4>
+          <div style="display:flex; align-items:center; justify-content:center; height:190px">{{ donutGender }}</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const donut = (segs, label, sub) => {
+  let acc = 0;
+  const r = 54, C = 2 * Math.PI * r;
+  return React.createElement('div', { style: { position: 'relative', width: 150, height: 150 } },
+    React.createElement('svg', { width: 150, height: 150, viewBox: '0 0 150 150' },
+      segs.map((s, i) => {
+        const len = (s.v / 100) * C, off = -acc / 100 * C; acc += s.v;
+        return React.createElement('circle', { key: i, cx: 75, cy: 75, r, fill: 'none', stroke: s.c, strokeWidth: 22, strokeDasharray: `${len} ${C - len}`, strokeDashoffset: off, transform: 'rotate(-90 75 75)' });
+      })
+    ),
+    React.createElement('div', { style: { position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' } },
+      React.createElement('div', { style: { fontSize: 20, fontWeight: 700 } }, label),
+      React.createElement('div', { style: { fontSize: 11, color: '#8a9099' } }, sub)
+    )
+  );
+};
+
+class Component extends DCLogic {
+  renderVals() {
+    const nav = [
+      { label: 'Dashboard', icon: 'fa-home', arrow: false, bg: '#f4faf5', bar: '#35b74d', ink: '#35b74d' },
+      { label: 'Academics', icon: 'fa-university', arrow: true, bg: 'transparent', bar: 'transparent', ink: '#5a6169' },
+      { label: 'Custom Fields', icon: 'fa-list-alt', arrow: false, bg: 'transparent', bar: 'transparent', ink: '#5a6169' },
+      { label: 'Students', icon: 'fa-graduation-cap', arrow: true, bg: 'transparent', bar: 'transparent', ink: '#5a6169' },
+      { label: 'Teacher', icon: 'fa-user', arrow: true, bg: 'transparent', bar: 'transparent', ink: '#5a6169' },
+      { label: 'Student Diary', icon: 'fa-envelope-square', arrow: true, bg: 'transparent', bar: 'transparent', ink: '#5a6169' },
+      { label: 'Timetable', icon: 'fa-calendar', arrow: true, bg: 'transparent', bar: 'transparent', ink: '#5a6169' },
+      { label: 'Holiday List', icon: 'fa-calendar-check-o', arrow: false, bg: 'transparent', bar: 'transparent', ink: '#5a6169' },
+      { label: 'Subject Lesson', icon: 'fa-book', arrow: true, bg: 'transparent', bar: 'transparent', ink: '#5a6169' },
+      { label: 'Student Assignment', icon: 'fa-tasks', arrow: true, bg: 'transparent', bar: 'transparent', ink: '#5a6169' },
+      { label: 'Sliders', icon: 'fa-list', arrow: false, bg: 'transparent', bar: 'transparent', ink: '#5a6169' },
+      { label: 'Notification', icon: 'fa-bell', arrow: false, bg: 'transparent', bar: 'transparent', ink: '#5a6169' },
+      { label: 'Attendance', icon: 'fa-check', arrow: true, bg: 'transparent', bar: 'transparent', ink: '#5a6169' },
+      { label: 'Staff Attendance', icon: 'fa-users', arrow: true, bg: 'transparent', bar: 'transparent', ink: '#5a6169' },
+      { label: 'Announcement', icon: 'fa-bullhorn', arrow: false, bg: 'transparent', bar: 'transparent', ink: '#5a6169' },
+      { label: 'Offline Exam', icon: 'fa-book', arrow: true, bg: 'transparent', bar: 'transparent', ink: '#5a6169' },
+      { label: 'Online Exam', icon: 'fa-laptop', arrow: true, bg: 'transparent', bar: 'transparent', ink: '#5a6169' },
+      { label: 'Fees', icon: 'fa-dollar', arrow: true, bg: 'transparent', bar: 'transparent', ink: '#5a6169' },
+      { label: 'Transportations', icon: 'fa-bus', arrow: true, bg: 'transparent', bar: 'transparent', ink: '#5a6169' },
+      { label: 'Leave', icon: 'fa-plane', arrow: true, bg: 'transparent', bar: 'transparent', ink: '#5a6169' },
+      { label: 'Report', icon: 'fa-file-text', arrow: true, bg: 'transparent', bar: 'transparent', ink: '#5a6169' },
+      { label: 'Payroll Slips', icon: 'fa-money', arrow: false, bg: 'transparent', bar: 'transparent', ink: '#5a6169' },
+      { label: 'Expense', icon: 'fa-money', arrow: true, bg: 'transparent', bar: 'transparent', ink: '#5a6169' },
+      { label: 'Payroll', icon: 'fa-credit-card-alt', arrow: true, bg: 'transparent', bar: 'transparent', ink: '#5a6169' },
+      { label: 'Session Years', icon: 'fa-calendar-o', arrow: false, bg: 'transparent', bar: 'transparent', ink: '#5a6169' },
+      { label: 'Gallery', icon: 'fa-picture-o', arrow: false, bg: 'transparent', bar: 'transparent', ink: '#5a6169' },
+      { label: 'Certificate & ID Card', icon: 'fa-trophy', arrow: true, bg: 'transparent', bar: 'transparent', ink: '#5a6169' },
+      { label: 'Staff Management', icon: 'fa-user-secret', arrow: true, bg: 'transparent', bar: 'transparent', ink: '#5a6169' },
+      { label: 'Staff Leave', icon: 'fa-plane', arrow: true, bg: 'transparent', bar: 'transparent', ink: '#5a6169' },
+      { label: 'Web Settings', icon: 'fa-cogs', arrow: true, bg: 'transparent', bar: 'transparent', ink: '#5a6169' },
+      { label: 'System Settings', icon: 'fa-cog', arrow: true, bg: 'transparent', bar: 'transparent', ink: '#5a6169' },
+      { label: 'Database Backup', icon: 'fa-database', arrow: false, bg: 'transparent', bar: 'transparent', ink: '#5a6169' }
+    ];
+    const months = ['Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar'];
+    const hs = [120,180,90,240,160,300,210,140,260,190,120,170];
+    return {
+      nav,
+      stats: [
+        { label: 'Total Teachers', value: 24, img: 'assets/teachers.svg' },
+        { label: 'Total Students', value: 486, img: 'assets/students.svg' },
+        { label: 'Total Guardians', value: 402, img: 'assets/guardians.svg' },
+        { label: 'Total Classes', value: 12, img: 'assets/classes.svg' },
+        { label: 'Total Streams', value: 3, img: 'assets/stream.svg' }
+      ],
+      expenseBars: months.map((m, i) => ({ m, h: hs[i] + 'px' })),
+      leaves: [
+        { name: 'Priya Menon', day: 'Today' },
+        { name: 'Rahul Sharma', day: 'Today' },
+        { name: 'Anita Das', day: 'Today' }
+      ],
+      announcements: [
+        { no: 1, title: 'Annual Day', desc: 'Annual day rehearsal starts Monday.' },
+        { no: 2, title: 'Fee Reminder', desc: 'Term 2 fees due by 30th.' },
+        { no: 3, title: 'PTM', desc: 'Parent teacher meeting on Saturday.' },
+        { no: 4, title: 'Sports Week', desc: 'Trials for athletics this week.' }
+      ],
+      examRows: [
+        { cls: 'Class 1 A', pct: '82%' },
+        { cls: 'Class 2 A', pct: '76%' },
+        { cls: 'Class 3 B', pct: '68%' },
+        { cls: 'Class 4 A', pct: '91%' }
+      ],
+      overdue: [
+        { name: 'Aarav Nair', amt: '₹ 4,500' },
+        { name: 'Ishita Roy', amt: '₹ 2,000' },
+        { name: 'Kabir Shah', amt: '₹ 6,750' }
+      ],
+      birthdays: [
+        { name: 'Meera Iyer', date: '07 - Sep' },
+        { name: 'Dev Patel', date: '07 - Sep' }
+      ],
+      holidays: [
+        { title: 'Gandhi Jayanti', date: '02 - Oct' },
+        { title: 'Dussehra', date: '12 - Oct' },
+        { title: 'Diwali Break', date: '01 - Nov' }
+      ],
+      donutAttendance: donut([{ v: 88, c: '#35b74d' }, { v: 12, c: '#eef1f4' }], '88%', 'Present'),
+      donutFees: donut([{ v: 64, c: '#35b74d' }, { v: 22, c: '#ffc107' }, { v: 14, c: '#dc3545' }], '64%', 'Collected'),
+      donutGender: donut([{ v: 54, c: '#35b74d' }, { v: 46, c: '#0dcaf0' }], '486', 'Students')
+    };
+  }
+}
+</script>
+</body>
+</html>

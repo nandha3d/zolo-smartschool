@@ -1,8 +1,10 @@
 @php
     $lang = Session::get('language');
 @endphp
-{{-- Typefaces and icons are both served from this app: no font CDN is contacted,
-     so no user's browser reports a page view to a third party. --}}
+{{-- Google Fonts & Material Symbols Sharp for Claude Zolo Redesign --}}
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Sharp:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet" />
 <link rel="stylesheet" href="{{ asset('/assets/fonts/zolo/zolo-fonts.css') }}">
 <link rel="stylesheet" href="{{ asset('/assets/css/materialdesignicons.min.css') }}">
 <link rel="stylesheet" href="{{ asset('/assets/css/vendor.bundle.base.css') }}">

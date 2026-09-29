@@ -381,6 +381,16 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(ClassTeacher::class, 'teacher_id');
     }
 
+    /**
+     * Get all of the subject_teachers for the User
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function subject_teachers()
+    {
+        return $this->hasMany(SubjectTeacher::class, 'teacher_id');
+    }
+
     public function getConnectionName()
     {
         // Replace this with your logic to determine the connection name

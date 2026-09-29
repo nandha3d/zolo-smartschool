@@ -42,9 +42,9 @@
             @endforeach
 
             $(document).ready(function () {
-                teacherTimetable.setOption("slotMinTime", "{{$timetableSettingsData['timetable_start_time']??"00:00:00"}}");
-                teacherTimetable.setOption("slotMaxTime", "{{$timetableSettingsData['timetable_end_time']??"00:00:00"}}");
-                teacherTimetable.setOption("slotDuration", "{{$timetableSettingsData['timetable_duration']??"00:00:00"}}");
+                teacherTimetable.setOption("slotMinTime", "{{ !empty($timetableSettingsData['timetable_start_time']) && $timetableSettingsData['timetable_start_time'] !== '00:00:00' ? $timetableSettingsData['timetable_start_time'] : '08:00:00' }}");
+                teacherTimetable.setOption("slotMaxTime", "{{ !empty($timetableSettingsData['timetable_end_time']) && $timetableSettingsData['timetable_end_time'] !== '00:00:00' ? $timetableSettingsData['timetable_end_time'] : '18:00:00' }}");
+                teacherTimetable.setOption("slotDuration", "{{ !empty($timetableSettingsData['timetable_duration']) && $timetableSettingsData['timetable_duration'] !== '00:00:00' ? $timetableSettingsData['timetable_duration'] : '00:45:00' }}");
             })
 
         });

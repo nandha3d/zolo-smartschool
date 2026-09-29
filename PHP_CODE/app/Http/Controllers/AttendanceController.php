@@ -37,9 +37,8 @@ class AttendanceController extends Controller
 
     public function index()
     {
-        ResponseService::noPermissionThenRedirect('attendance-list');
         ResponseService::noFeatureThenRedirect('Attendance Management');
-        ResponseService::noAnyPermissionThenRedirect(['class-teacher', 'attendance-list']);
+        ResponseService::noAnyPermissionThenRedirect(['class-teacher', 'attendance-list', 'attendance-create']);
         $classSections = $this->classSection->builder()->ClassTeacher()->with('class', 'class.stream', 'section', 'medium')->get();
         return view('attendance.index', compact('classSections'));
     }
@@ -47,7 +46,6 @@ class AttendanceController extends Controller
 
     public function view()
     {
-        ResponseService::noPermissionThenRedirect('attendance-list');
         ResponseService::noFeatureThenRedirect('Attendance Management');
         ResponseService::noAnyPermissionThenRedirect(['class-teacher', 'attendance-list']);
         $class_sections = $this->classSection->builder()->ClassTeacher()->with('class', 'class.stream', 'section', 'medium')->get();
@@ -56,17 +54,16 @@ class AttendanceController extends Controller
 
     public function getAttendanceData(Request $request)
     {
-        ResponseService::noPermissionThenSendJson('attendance-list');
         ResponseService::noFeatureThenRedirect('Attendance Management');
+        ResponseService::noAnyPermissionThenSendJson(['class-teacher', 'attendance-list', 'attendance-create']);
         $response = $this->attendance->builder()->select('type')->where(['date' => date('Y-m-d', strtotime($request->date)), 'class_section_id' => $request->class_section_id])->pluck('type')->first();
         return response()->json($response);
     }
 
     public function store(Request $request)
     {
-        ResponseService::noPermissionThenSendJson('attendance-create');
         ResponseService::noFeatureThenRedirect('Attendance Management');
-        ResponseService::noAnyPermissionThenRedirect(['class-teacher', 'attendance-create', 'attendance-edit']);
+        ResponseService::noAnyPermissionThenSendJson(['class-teacher', 'attendance-create', 'attendance-edit']);
         $request->validate([
             'class_section_id' => 'required',
             'date' => 'required',
@@ -79,19 +76,20 @@ class AttendanceController extends Controller
             foreach ($request->attendance_data as $value) {
                 $data = (object) $value;
                 $attendanceData[] = array(
-                    "id" => $data->id,
+                    "id" => $data->id ?? null,
                     'class_section_id' => $request->class_section_id,
                     'student_id' => $data->student_id,
                     'session_year_id' => $sessionYear->id,
                     'type' => $request->holiday ?? $data->type,
                     'date' => date('Y-m-d', strtotime($request->date)),
+                    'remark' => $data->remark ?? null,
                 );
 
                 if ($data->type == 0) {
                     $student_ids[] = $data->student_id;
                 }
             }
-            $this->attendance->upsert($attendanceData, ["id"], ["class_section_id", "student_id", "session_year_id", "type", "date"]);
+            $this->attendance->upsert($attendanceData, ["id"], ["class_section_id", "student_id", "session_year_id", "type", "date", "remark"]);
 
             DB::commit();
 
@@ -133,6 +131,9 @@ class AttendanceController extends Controller
         //        $offset = $request->input('offset', 0);
         //        $limit = $request->input('limit', 10);
         $sort = $request->input('sort', 'roll_number');
+        if ($sort === 'roll_no') {
+            $sort = 'roll_number';
+        }
         $order = $request->input('order', 'ASC');
         $search = $request->input('search');
 
@@ -180,18 +181,39 @@ class AttendanceController extends Controller
         $rows = [];
         $no = 1;
 
+        $isExistingAttendance = ($attendanceQuery->count() > 0);
+
         foreach ($attendanceData as $row) {
             $type = $row->type ?? NULL;
-            // TODO : understand this code
+            $remark = $row->remark ?? '';
+            $userObj = $row->user ?? null;
+            $fullName = trim(($userObj->first_name ?? '') . ' ' . ($userObj->last_name ?? ''));
+            $image = $userObj->image ?? null;
+
+            if ($isExistingAttendance) {
+                $attId = $row->id;
+                $studentId = $row->student_id;
+                $admNo = $userObj?->student?->admission_no ?? '';
+                $rollNo = $userObj?->student?->roll_number ?? '';
+            } else {
+                $attId = null;
+                $studentId = $row->user_id;
+                $admNo = $row->admission_no ?? '';
+                $rollNo = $row->roll_number ?? '';
+            }
+
             $rows[] = [
-                'id' => $attendanceQuery->count() ? $row->id : null,
+                'id' => $attId,
                 'no' => $no,
-                'student_id' => $attendanceQuery->count() ? $row->student_id : $row->user_id,
-                'user_id' => $attendanceQuery->count() ? $row->student_id : $row->user_id,
-                'admission_no' => $row->user ? ($row->user->student->admission_no ?? '') : ($row->admission_no ?? ''),
-                'roll_no' => $row->user ? ($row->user->student->roll_number ?? '') : ($row->roll_number ?? ''),
-                'name' => '<input type="hidden" value="' . ($row->student_id ? $row->user_id : 'null') . '" name="attendance_data[' . $no . '][id]"><input type="hidden" value="' . ($row->student_id ?? $row->user_id) . '" name="attendance_data[' . $no . '][student_id]">' . ($row->user->first_name ?? '') . ' ' . ($row->user->last_name ?? ''),
+                'student_id' => $studentId,
+                'user_id' => $studentId,
+                'admission_no' => $admNo,
+                'roll_no' => $rollNo,
+                'student_name' => $fullName,
+                'image' => $image,
+                'name' => $fullName,
                 'type' => $type,
+                'remark' => $remark,
             ];
             $no++;
         }

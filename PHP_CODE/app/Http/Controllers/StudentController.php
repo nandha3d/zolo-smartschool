@@ -822,8 +822,9 @@ class StudentController extends Controller
 
         $class_sections = $this->classSection->all(['*'], ['class', 'class.stream', 'section', 'medium']);
         $sessionYears = $this->sessionYear->all();
+        $schoolSettings = $this->cache->getSchoolSettings();
 
-        return view('students.generate_id_card', compact('class_sections', 'sessionYears'));
+        return view('students.generate_id_card', compact('class_sections', 'sessionYears', 'schoolSettings'));
     }
 
     public function generate_id_card(Request $request)
@@ -857,30 +858,110 @@ class StudentController extends Controller
             $valid_until = date('F j, Y', strtotime($sessionYear->end_date));
             $height = $settings['page_height'] * 2.8346456693;
             $width = $settings['page_width'] * 2.8346456693;
-            // $customPaper = array(0,0,360,200);
             $customPaper = array(0, 0, $width, $height);
-            $students = $this->user->builder()->select('id', 'first_name', 'last_name', 'image', 'school_id', 'gender', 'dob')->with('student:id,user_id,class_section_id,school_id,guardian_id,roll_number', 'student.class_section.class', 'student.class_section.section', 'student.class_section.medium', 'student.class_section.class.stream', 'student.guardian:id,mobile,first_name,last_name')->whereHas('student', function ($q) use ($user_ids) {
-                $q->whereIn('id', $user_ids);
-            })->with([
-                        'extra_student_details' => function ($q) {
-                            $q->whereHas('form_field', function ($query) {
-                                $query->where('display_on_id', 1)->whereNull('deleted_at');
-                            })->with('form_field');
-                        }
-                    ])->get();
 
+            $students = $this->user->builder()->select('id', 'first_name', 'last_name', 'image', 'school_id', 'gender', 'dob')
+                ->with('student:id,user_id,class_section_id,school_id,guardian_id,roll_number,admission_no',
+                       'student.class_section.class',
+                       'student.class_section.section',
+                       'student.class_section.medium',
+                       'student.class_section.class.stream',
+                       'student.guardian:id,mobile,first_name,last_name')
+                ->whereHas('student', function ($q) use ($user_ids) {
+                    $q->whereIn('id', $user_ids);
+                })->with([
+                    'extra_student_details' => function ($q) {
+                        $q->whereHas('form_field', function ($query) {
+                            $query->where('display_on_id', 1)->whereNull('deleted_at');
+                        })->with('form_field');
+                    }
+                ])->get();
+
+            $template_design = $request->input('template_design', $request->input('template_id', (isset($settings['layout_type']) && $settings['layout_type'] == 'horizontal') ? 'h_split' : 'wave'));
+            $primary_color = $request->input('primary_color', '#1E293B');
+            $accent_color = $request->input('accent_color', '#06B6D4');
+            $print_format = $request->input('print_format', 'single'); // 'single', 'a4', 'a3'
+            $show_cut_guides = $request->input('show_cut_guides', 1);
 
             $settings['page_height'] = ($settings['page_height'] * 3.7795275591) . 'px';
 
-            $pdf = PDF::loadView('students.students_id_card', compact('students', 'sessionYear', 'valid_until', 'settings'));
-            $pdf->setPaper($customPaper);
+            $pdf = PDF::loadView('students.students_id_card', compact(
+                'students', 'sessionYear', 'valid_until', 'settings',
+                'template_design', 'primary_color', 'accent_color',
+                'print_format', 'show_cut_guides'
+            ));
 
+            if ($print_format === 'a4') {
+                $pdf->setPaper('a4', 'portrait');
+            } elseif ($print_format === 'a3') {
+                $pdf->setPaper('a3', 'portrait');
+            } else {
+                $pdf->setPaper($customPaper);
+            }
 
             return $pdf->stream();
-            return view('students.id_card_pdf');
         } catch (\Throwable $th) {
             ResponseService::logErrorResponse($th);
             ResponseService::errorResponse();
+        }
+    }
+
+    public function updatePhoto(Request $request, $id)
+    {
+        ResponseService::noAnyPermissionThenSendJson(['student-edit', 'class-teacher']);
+
+        try {
+            $user = $this->user->findById($id);
+            if (!$user) {
+                return response()->json([
+                    'error'   => true,
+                    'message' => 'Student user not found'
+                ], 404);
+            }
+
+            if ($request->has('image_data') && !empty($request->image_data)) {
+                $imageData = $request->image_data;
+                if (preg_match('/^data:image\/(\w+);base64,/', $imageData, $type)) {
+                    $imageData = substr($imageData, strpos($imageData, ',') + 1);
+                    $type = strtolower($type[1]);
+                    if ($type === 'jpeg') $type = 'jpg';
+                    $decodedImage = base64_decode($imageData);
+                    if ($decodedImage === false) {
+                        return response()->json(['error' => true, 'message' => 'Image decoding failed'], 422);
+                    }
+                } else {
+                    return response()->json(['error' => true, 'message' => 'Invalid image payload format'], 422);
+                }
+
+                $fileName = 'user_' . $user->id . '_' . time() . '.' . $type;
+                $filePath = 'user/' . $fileName;
+                \Illuminate\Support\Facades\Storage::disk('public')->put($filePath, $decodedImage);
+                $user->image = $filePath;
+                $user->save();
+
+                return response()->json([
+                    'error'     => false,
+                    'message'   => 'Photo captured and updated successfully!',
+                    'image_url' => asset('storage/' . $filePath),
+                ]);
+            } elseif ($request->hasFile('image')) {
+                $user->image = \App\Services\UploadService::upload($request->file('image'), 'user');
+                $user->save();
+
+                return response()->json([
+                    'error'     => false,
+                    'message'   => 'Photo uploaded and updated successfully!',
+                    'image_url' => asset('storage/' . $user->image),
+                ]);
+            }
+
+            return response()->json(['error' => true, 'message' => 'No image data provided'], 422);
+        } catch (\Throwable $e) {
+            ResponseService::logErrorResponse($e, "StudentController -> updatePhoto");
+            return response()->json([
+                'error'   => true,
+                'message' => 'Failed to update photo: ' . $e->getMessage()
+            ], 500);
         }
     }
 

@@ -12,15 +12,15 @@
             <span class="fa fa-bars"></span>
         </button>
 
-        <div class="align-items-stretch d-none d-md-block d-sm-block cache-clear">
+        <div class="align-items-stretch d-none d-md-block d-sm-block cache-clear ml-2">
             <a class="btn btn-sm btn-inverse-info align-self-center" href="{{ url('cache-flush') }}">
-                {{ __('cache_clear') }}
+                <i class="fa fa-refresh mr-1"></i>{{ __('cache_clear') }}
             </a>
         </div>
 
         @if ($schoolSettings['school_name'] ?? '')
-            <div class="align-items-stretch d-none d-md-block d-sm-block cache-clear">
-                <span class="ml-3">{{ $schoolSettings['school_name'] ?? '' }}</span>
+            <div class="align-items-stretch d-none d-md-flex d-sm-flex ml-3 align-items-center">
+                <span class="zolo-school-badge"><i class="fa fa-graduation-cap mr-2 text-primary"></i>{{ $schoolSettings['school_name'] ?? '' }}</span>
             </div>
         @endif  
         @if (isset($systemSettings['email_verified']) && !$systemSettings['email_verified'])
@@ -33,7 +33,7 @@
                 </div>
             @endcan
         @endif
-        <ul class="navbar-nav navbar-nav-right">
+        <ul class="navbar-nav navbar-nav-right align-items-center">
             @can('class-teacher')
                 <li class="nav-item">
                     {{-- TODO :: CLASS TEACHER CLASS NAME --}}
@@ -43,8 +43,15 @@
             @endcan
 
             @if (isset($sessionYear) && !Auth::user()->hasRole('Super Admin'))
-                <li class="d-none d-md-block d-sm-block nav-item">
-                    <div class="text-dark">{{ __('session_years') . ' : '}} <span id="sessionYearNameHeader">{{$sessionYear->name}}</span><span id="semesterNameHeader">{{ (isset($semester) ? ', '.$semester->name : null)}}</span></div>
+                <li class="d-none d-md-block d-sm-block nav-item mr-3">
+                    <div class="zolo-session-pill">
+                        <i class="fa fa-calendar mr-1 text-muted"></i>
+                        <span class="text-muted mr-1">{{ __('session_years') }}:</span>
+                        <span id="sessionYearNameHeader">{{$sessionYear->name}}</span>
+                        @if (isset($semester))
+                            <span id="semesterNameHeader" class="ml-1 text-muted">({{ $semester->name }})</span>
+                        @endif
+                    </div>
                 </li>
             @endif
 

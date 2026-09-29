@@ -13,7 +13,49 @@ class FeaturesService {
         // $this->features = app(UserInterface::class)->features();
     }
 
+    /**
+     * Check if Animazon Licensing System is active (default true).
+     * Under the Animazon enterprise license, all features across the platform are permanently unlocked.
+     */
+    public static function isAnimazonLicenseActive(): bool {
+        return config('app.animazon_license', true);
+    }
+
     public static function getFeatures($schoolID = null) {
+        // Under Animazon Licensing System, all features are fully available
+        if (self::isAnimazonLicenseActive()) {
+            try {
+                return Feature::pluck('name', 'id')->toArray();
+            } catch (\Throwable $e) {
+                return [
+                    1 => 'Student Management',
+                    2 => 'Academics Management',
+                    3 => 'Slider Management',
+                    4 => 'Teacher Management',
+                    5 => 'Session Year Management',
+                    6 => 'Holiday Management',
+                    7 => 'Timetable Management',
+                    8 => 'Attendance Management',
+                    9 => 'Exam Management',
+                    10 => 'Lesson Management',
+                    11 => 'Assignment Management',
+                    12 => 'Announcement Management',
+                    13 => 'Staff Management',
+                    14 => 'Expense Management',
+                    15 => 'Staff Leave Management',
+                    16 => 'Fees Management',
+                    17 => 'School Gallery Management',
+                    18 => 'ID Card - Certificate Generation',
+                    19 => 'Website Management',
+                    20 => 'Chat Module',
+                    21 => 'Transportation Module',
+                    22 => 'Staff Attendance Management',
+                    23 => 'ID Card Photo Booth',
+                    24 => 'GPS Transport Tracking',
+                ];
+            }
+        }
+
         // Fetch All the Features of the School in which User is associated. Then Cache that result for 30 minutes
         // Null-safe: this is reached with no authenticated user during view compilation
         // and on guest-facing pages, where it previously fataled on ->school_id.
@@ -54,11 +96,6 @@ class FeaturesService {
             }, $schoolID);
         }
 
-//        if (empty(Auth::user()->school_id)) {
-//            // IF it's a Super Admin or Staff then Fetch all the Features
-//            return Feature::pluck('name', 'id')->toArray();
-//        }
-
         return [];
     }
 
@@ -67,6 +104,9 @@ class FeaturesService {
      * @return bool
      */
     public static function hasFeature($argument) {
+        if (self::isAnimazonLicenseActive()) {
+            return true;
+        }
         $features = self::getFeatures();
         return in_array($argument, $features);
     }
@@ -76,6 +116,9 @@ class FeaturesService {
      * @return bool
      */
     public static function hasAnyFeature(array $argument) {
+        if (self::isAnimazonLicenseActive()) {
+            return true;
+        }
         $features = self::getFeatures();
         return !empty(array_intersect($argument, $features));
     }
@@ -85,6 +128,9 @@ class FeaturesService {
      * @return bool
      */
     public static function hasAllFeature(array $argument) {
+        if (self::isAnimazonLicenseActive()) {
+            return true;
+        }
         $features = self::getFeatures();
 
         return empty(array_diff($argument, $features));

@@ -10,3 +10,9 @@
 <link rel="stylesheet" href="{{ asset('/assets/jquery-toast-plugin/jquery.toast.min.css') }}">
 
 <link rel="shortcut icon" href="{{$systemSettings['favicon'] ?? url('assets/vertical-logo.svg') }}"/>
+<script>
+    var baseUrl = "{{ url('/') }}";
+    const onErrorImage = (e) => {
+        e.target.src = "{{ asset('/assets/no_image_available.jpg') }}";
+    };
+</script>

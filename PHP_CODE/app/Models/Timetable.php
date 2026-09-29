@@ -24,7 +24,7 @@ class Timetable extends Model {
         "school_id"
     ];
 
-    protected $appends = ['title'];
+    protected $appends = ['title', 'meta', 'primary_teacher_name', 'alternate_teacher_name', 'period_no'];
     protected $hidden = ['created_at','updated_at'];
 
 
@@ -69,24 +69,70 @@ class Timetable extends Model {
         return $query;
     }
 
+    public function getMetaAttribute() {
+        if (!empty($this->note) && str_starts_with(trim($this->note), '{')) {
+            $data = json_decode($this->note, true);
+            if (is_array($data)) {
+                return $data;
+            }
+        }
+        return [];
+    }
+
+    public function getPrimaryTeacherNameAttribute() {
+        if ($this->relationLoaded('teacher') && $this->teacher) {
+            return $this->teacher->full_name;
+        }
+        $meta = $this->meta;
+        if (!empty($meta['primary_teacher_name'])) {
+            return $meta['primary_teacher_name'];
+        }
+        return $this->subject_teacher?->teacher?->full_name ?? '';
+    }
+
+    public function getAlternateTeacherNameAttribute() {
+        $meta = $this->meta;
+        if (!empty($meta['alt_teacher_name'])) {
+            return $meta['alt_teacher_name'];
+        }
+        if (!empty($meta['alt_teacher_id'])) {
+            $user = User::find($meta['alt_teacher_id']);
+            return $user ? $user->full_name : '';
+        }
+        return '';
+    }
+
+    public function getPeriodNoAttribute() {
+        $meta = $this->meta;
+        return $meta['period_no'] ?? null;
+    }
+
     public function getTitleAttribute() {
         if ($this->type === "Lecture") {
-            if ($this->relationLoaded('subject') && $this->relationLoaded('teacher')) {
-                if (!isset($this->subject->name) && !isset($this->teacher->full_name)) {
-                    return $this->note;
-                }
-                $teacherName = $this->teacher->full_name ?? '';
-                return $this->subject->name . ' ( ' .$this->subject->type . ' ) ' . ' - ' . $teacherName;
-            }
+            $subjectName = $this->subject->name ?? 'Lecture';
+            $subjectType = $this->subject->type ?? '';
+            $typeStr = $subjectType ? " ($subjectType)" : "";
+            $teacher = $this->primary_teacher_name;
+            $alt = $this->alternate_teacher_name;
 
-            if ($this->relationLoaded('subject')) {
-                return $this->subject->name;
+            $title = $subjectName . $typeStr;
+            if ($teacher) {
+                $title .= ' - ' . $teacher;
             }
-
-            return $this->note;
+            if ($alt) {
+                $title .= ' [Alt: ' . $alt . ']';
+            }
+            return $title;
         }
 
         if ($this->type === "Break") {
+            $meta = $this->meta;
+            if (!empty($meta['note'])) {
+                return $meta['note'];
+            }
+            if (!empty($this->note) && !str_starts_with(trim($this->note), '{')) {
+                return $this->note;
+            }
             return trans("Break");
         }
         return $this->note;

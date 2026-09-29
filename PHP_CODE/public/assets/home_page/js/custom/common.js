@@ -910,6 +910,11 @@ $(document).on('click', '.no-feature-lock-menu,.no-feature-lock-menu-sub-item', 
 })
 
 $(document).ready(function () {
+    // Under Animazon Licensing System, all features are fully active and unlocked
+    if (typeof window.animazon_license === 'undefined' || window.animazon_license === true) {
+        $('.sidebar .nav-link').removeClass('no-feature-lock-menu no-feature-lock-menu-sub-item no-feature-lock-menu-without-alert');
+        return;
+    }
     $('.sidebar .nav-link').each(function (index, value) {
         if (typeof $(value).data('access') != "undefined" && !$(value).data('access')) {
             if ($(value).data('toggle') == "collapse") {

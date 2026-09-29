@@ -1678,12 +1678,12 @@ if (calendarEl !== null) {
             listWeek: {buttonText: 'List'},
             timeGridWeek: {buttonText: 'Calendar'}
         },
-        slotMinTime: "00:00:00",
-        slotMaxTime: "00:00:00",
+        slotMinTime: "08:00:00",
+        slotMaxTime: "18:00:00",
         allDaySlot: false,
         firstDay: 1,
         expandRows: true,
-        slotDuration: "01:00:00",
+        slotDuration: "00:45:00",
         snapDuration: "00:01:00",
         dayHeaderFormat: {
             weekday: 'short'

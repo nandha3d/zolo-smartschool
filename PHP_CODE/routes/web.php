@@ -505,6 +505,7 @@ Route::group(['middleware' => ['Role', 'checkSchoolStatus', 'status','SwitchData
 
             Route::get('generate-id-card', [StudentController::class, 'generate_id_card_index'])->name('students.generate-id-card-index');
             Route::post('generate-id-card', [StudentController::class, 'generate_id_card'])->name('students.generate-id-card');
+            Route::post('update-photo/{id}', [StudentController::class, 'updatePhoto'])->name('students.update-photo');
             Route::get('online-registration-index',[StudentController::class, 'onlineRegistrationIndex'])->name('online-registration.index');
             Route::get('online-registration-list',[StudentController::class, 'onlineRegistrationList'])->name('students.online-registration');
             Route::post('update-bulk-application-status',[StudentController::class, 'updateBulkApplicationStatus'])->name('update-bulk-application-status');
@@ -519,6 +520,10 @@ Route::group(['middleware' => ['Role', 'checkSchoolStatus', 'status','SwitchData
         /*** Timetable ***/
         Route::group(['prefix' => 'timetable'], static function () {
             Route::put('/settings', [TimetableController::class, 'updateTimetableSettings'])->name('timetable.settings');
+            Route::post('/auto-generate', [TimetableController::class, 'autoGenerate'])->name('timetable.auto-generate');
+            Route::post('/sync-teachers', [TimetableController::class, 'syncTeachers'])->name('timetable.sync-teachers');
+            Route::get('/get-matrix/{class_section_id}', [TimetableController::class, 'getMatrix'])->name('timetable.get-matrix');
+            Route::post('/quick-update', [TimetableController::class, 'quickUpdate'])->name('timetable.quick-update');
             Route::group(['prefix' => '/teacher'], static function () {
                 Route::get('/', [TimetableController::class, 'teacherIndex'])->name('timetable.teacher.index');
                 Route::get('/list', [TimetableController::class, 'teacherList'])->name('timetable.teacher.list');

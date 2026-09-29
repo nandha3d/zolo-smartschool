@@ -40,14 +40,14 @@
 <script src="{{ asset('/assets/color-picker/jquery-asColor.min.js') }}"></script>
 <script src="{{ asset('/assets/color-picker/color.min.js') }}"></script>
 
-<script src="{{ asset('/assets/js/custom/validate.js') }}"></script>
+<script src="{{ asset('/assets/js/custom/validate.js') }}?v={{ file_exists(public_path('assets/js/custom/validate.js')) ? filemtime(public_path('assets/js/custom/validate.js')) : '1.0' }}"></script>
 <script src="{{ asset('/assets/js/jquery-additional-methods.min.js')}}"></script>
-<script src="{{ asset('/assets/js/custom/function.js') }}"></script>
-<script src="{{ asset('/assets/js/custom/common.js') }}"></script>
-<script src="{{ asset('/assets/js/custom/custom.js') }}"></script>
-<script src="{{ asset('/assets/js/custom/bootstrap-table/actionEvents.js') }}"></script>
-<script src="{{ asset('/assets/js/custom/bootstrap-table/formatter.js') }}"></script>
-<script src="{{ asset('/assets/js/custom/bootstrap-table/queryParams.js') }}"></script>
+<script src="{{ asset('/assets/js/custom/function.js') }}?v={{ file_exists(public_path('assets/js/custom/function.js')) ? filemtime(public_path('assets/js/custom/function.js')) : '1.0' }}"></script>
+<script src="{{ asset('/assets/js/custom/common.js') }}?v={{ file_exists(public_path('assets/js/custom/common.js')) ? filemtime(public_path('assets/js/custom/common.js')) : '1.0' }}"></script>
+<script src="{{ asset('/assets/js/custom/custom.js') }}?v={{ file_exists(public_path('assets/js/custom/custom.js')) ? filemtime(public_path('assets/js/custom/custom.js')) : '1.0' }}"></script>
+<script src="{{ asset('/assets/js/custom/bootstrap-table/actionEvents.js') }}?v={{ file_exists(public_path('assets/js/custom/bootstrap-table/actionEvents.js')) ? filemtime(public_path('assets/js/custom/bootstrap-table/actionEvents.js')) : '1.0' }}"></script>
+<script src="{{ asset('/assets/js/custom/bootstrap-table/formatter.js') }}?v={{ file_exists(public_path('assets/js/custom/bootstrap-table/formatter.js')) ? filemtime(public_path('assets/js/custom/bootstrap-table/formatter.js')) : '1.0' }}"></script>
+<script src="{{ asset('/assets/js/custom/bootstrap-table/queryParams.js') }}?v={{ file_exists(public_path('assets/js/custom/bootstrap-table/queryParams.js')) ? filemtime(public_path('assets/js/custom/bootstrap-table/queryParams.js')) : '1.0' }}"></script>
 
 <script src="{{ asset('/assets/ckeditor-4/ckeditor.js') }}"></script>
 <script src="{{ asset('/assets/ckeditor-4/adapters/jquery.js') }}" async></script>

@@ -298,9 +298,65 @@
                                     </div>
                                 </div>
 
-                                
+                                <hr class="col-12 my-3">
+                                {{-- Class, Section & Subject Assignment Section --}}
+                                <div class="col-12 mb-4">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <h4 class="mb-0 text-dark font-weight-bold">
+                                            <i class="fa fa-graduation-cap text-primary mr-2"></i>{{ __('Class, Section & Subject Assignments') }}
+                                        </h4>
+                                        <button type="button" class="btn btn-inverse-primary btn-sm add-assignment-row-create">
+                                            <i class="fa fa-plus mr-1"></i> {{ __('Add Class & Subject') }}
+                                        </button>
+                                    </div>
+                                    <p class="text-muted small mb-3">{{ __('Assign which classes, sections, and subjects this teacher will teach, and designate whether they are the primary Class Teacher.') }}</p>
+
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered table-sm" id="createAssignmentsTable">
+                                            <thead class="bg-light">
+                                                <tr>
+                                                    <th style="width: 45%;">{{ __('Class & Section') }} <span class="text-danger">*</span></th>
+                                                    <th style="width: 35%;">{{ __('Subject') }} <span class="text-danger">*</span></th>
+                                                    <th style="width: 15%; text-align: center;">{{ __('Class Teacher?') }}</th>
+                                                    <th style="width: 5%; text-align: center;">{{ __('Action') }}</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="createAssignmentsBody">
+                                                <tr class="assignment-row" data-row-index="0">
+                                                    <td>
+                                                        <select name="teacher_assignments[0][class_section_id]" class="form-control form-control-sm class-section-select" data-row-index="0">
+                                                            <option value="">-- {{ __('Select Class & Section') }} --</option>
+                                                            @if(!empty($classSections))
+                                                                @foreach($classSections as $cs)
+                                                                    <option value="{{ $cs->id }}">{{ $cs->full_name }}</option>
+                                                                @endforeach
+                                                            @endif
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        <select name="teacher_assignments[0][subject_id]" class="form-control form-control-sm subject-select" data-row-index="0">
+                                                            <option value="">-- {{ __('Select Subject') }} --</option>
+                                                            @if(!empty($allSubjects))
+                                                                @foreach($allSubjects as $sub)
+                                                                    <option value="{{ $sub->id }}">{{ $sub->name }} ({{ $sub->type }})</option>
+                                                                @endforeach
+                                                            @endif
+                                                        </select>
+                                                    </td>
+                                                    <td class="text-center align-middle">
+                                                        <input type="checkbox" name="teacher_assignments[0][is_class_teacher]" value="1" class="form-check-input" style="position: static; margin: 0;">
+                                                    </td>
+                                                    <td class="text-center align-middle">
+                                                        <button type="button" class="btn btn-inverse-danger btn-icon btn-sm remove-assignment-row">
+                                                            <i class="fa fa-times"></i>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
                             </div>
-                            {{-- <input class="btn btn-theme" type="submit" value={{ __('submit') }}> --}}
                             <input class="btn btn-theme float-right ml-3" id="create-btn" type="submit" value={{ __('submit') }}>
                             <input class="btn btn-secondary float-right" type="reset" value={{ __('reset') }}>
                         </form>
@@ -346,6 +402,7 @@
                                         <th scope="col" data-field="staff.qualification">{{ __('qualification') }}</th>
                                         <th scope="col" data-field="current_address">{{ __('current_address') }}</th>
                                         <th scope="col" data-field="permanent_address">{{ __('permanent_address') }}</th>
+                                        <th scope="col" data-field="assigned_classes_subjects" data-escape="false">{{ __('Classes & Subjects') }}</th>
                                         <th scope="col" data-field="staff.salary" data-visible="false"> {{ __('Salary') }}</th>
                                         <th data-events="teacherEvents" scope="col" data-formatter="actionColumnFormatter" data-field="operate" data-escape="false">{{ __('action') }}</th>
                                     </tr>
@@ -572,6 +629,36 @@
                                 </div>
                             </div>
                     
+                        </div>
+
+                        <hr class="col-12 my-3">
+                        {{-- Class, Section & Subject Assignment Section for Edit Modal --}}
+                        <div class="col-12 mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h5 class="mb-0 text-dark font-weight-bold">
+                                    <i class="fa fa-graduation-cap text-primary mr-2"></i>{{ __('Class, Section & Subject Assignments') }}
+                                </h5>
+                                <button type="button" class="btn btn-inverse-primary btn-sm add-assignment-row-edit">
+                                    <i class="fa fa-plus mr-1"></i> {{ __('Add Class & Subject') }}
+                                </button>
+                            </div>
+                            <p class="text-muted small mb-2">{{ __('Update assigned classes, sections, and subjects for this teacher.') }}</p>
+
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-sm" id="editAssignmentsTable">
+                                    <thead class="bg-light">
+                                        <tr>
+                                            <th style="width: 45%;">{{ __('Class & Section') }} <span class="text-danger">*</span></th>
+                                            <th style="width: 35%;">{{ __('Subject') }} <span class="text-danger">*</span></th>
+                                            <th style="width: 15%; text-align: center;">{{ __('Class Teacher?') }}</th>
+                                            <th style="width: 5%; text-align: center;">{{ __('Action') }}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="editAssignmentsBody">
+                                        <!-- Dynamically populated via JS in teacherEvents edit-data -->
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
 
                     </div>
@@ -823,7 +910,139 @@
             });
         });
 
-        
+        // =========================================================================
+        // Teacher Class, Section & Subject Dynamic Assignments
+        // =========================================================================
+        var classSectionsData = {!! json_encode($classSections ?? []) !!};
+        var allSubjectsData = {!! json_encode($allSubjects ?? []) !!};
 
+        // Map class_section_id -> array of subjects
+        var classSectionSubjectsMap = {};
+        if (classSectionsData && classSectionsData.length) {
+            classSectionsData.forEach(function(cs) {
+                var subjects = [];
+                if (cs.class && cs.class.all_subjects && cs.class.all_subjects.length) {
+                    subjects = cs.class.all_subjects;
+                } else {
+                    subjects = allSubjectsData;
+                }
+                classSectionSubjectsMap[cs.id] = subjects;
+            });
+        }
+
+        function getSubjectOptionsHtml(classSectionId, selectedSubjectId) {
+            var subjects = (classSectionId && classSectionSubjectsMap[classSectionId]) ? classSectionSubjectsMap[classSectionId] : allSubjectsData;
+            var html = '<option value="">-- {{ __("Select Subject") }} --</option>';
+            if (subjects && subjects.length) {
+                subjects.forEach(function(sub) {
+                    var isSelected = (selectedSubjectId && String(sub.id) === String(selectedSubjectId)) ? 'selected' : '';
+                    var typeLabel = sub.type ? ' (' + sub.type + ')' : '';
+                    html += '<option value="' + sub.id + '" ' + isSelected + '>' + sub.name + typeLabel + '</option>';
+                });
+            }
+            return html;
+        }
+
+        function createAssignmentRow(rowIndex, data, isEdit) {
+            data = data || {};
+            var classSecId = data.class_section_id || '';
+            var subId = data.subject_id || '';
+            var isCt = data.is_class_teacher ? 'checked' : '';
+
+            var classOptions = '<option value="">-- {{ __("Select Class & Section") }} --</option>';
+            if (classSectionsData && classSectionsData.length) {
+                classSectionsData.forEach(function(cs) {
+                    var isSelected = (String(cs.id) === String(classSecId)) ? 'selected' : '';
+                    classOptions += '<option value="' + cs.id + '" ' + isSelected + '>' + cs.full_name + '</option>';
+                });
+            }
+
+            var subjectOptions = getSubjectOptionsHtml(classSecId, subId);
+
+            return '<tr class="assignment-row" data-row-index="' + rowIndex + '">' +
+                '<td>' +
+                    '<select name="teacher_assignments[' + rowIndex + '][class_section_id]" class="form-control form-control-sm class-section-select" data-row-index="' + rowIndex + '" required>' +
+                        classOptions +
+                    '</select>' +
+                '</td>' +
+                '<td>' +
+                    '<select name="teacher_assignments[' + rowIndex + '][subject_id]" class="form-control form-control-sm subject-select" data-row-index="' + rowIndex + '">' +
+                        subjectOptions +
+                    '</select>' +
+                '</td>' +
+                '<td class="text-center align-middle">' +
+                    '<input type="checkbox" name="teacher_assignments[' + rowIndex + '][is_class_teacher]" value="1" ' + isCt + ' class="form-check-input" style="position: static; margin: 0;">' +
+                '</td>' +
+                '<td class="text-center align-middle">' +
+                    '<button type="button" class="btn btn-inverse-danger btn-icon btn-sm remove-assignment-row">' +
+                        '<i class="fa fa-times"></i>' +
+                    '</button>' +
+                '</td>' +
+            '</tr>';
+        }
+
+        var createRowCounter = 1;
+        var editRowCounter = 0;
+
+        // Add row to Create Form
+        $(document).on('click', '.add-assignment-row-create', function() {
+            var newRow = createAssignmentRow(createRowCounter++, null, false);
+            $('#createAssignmentsBody').append(newRow);
+        });
+
+        // Add row to Edit Modal
+        $(document).on('click', '.add-assignment-row-edit', function() {
+            var newRow = createAssignmentRow(editRowCounter++, null, true);
+            $('#editAssignmentsBody').append(newRow);
+        });
+
+        // Remove row
+        $(document).on('click', '.remove-assignment-row', function() {
+            var $tbody = $(this).closest('tbody');
+            if ($tbody.children('tr').length > 1) {
+                $(this).closest('tr').remove();
+            } else {
+                // Clear fields if it's the last row
+                var $tr = $(this).closest('tr');
+                $tr.find('select').val('');
+                $tr.find('input[type="checkbox"]').prop('checked', false);
+            }
+        });
+
+        // Dynamic subject update on Class Section change
+        $(document).on('change', '.class-section-select', function() {
+            var classSecId = $(this).val();
+            var $subjectSelect = $(this).closest('tr').find('.subject-select');
+            $subjectSelect.html(getSubjectOptionsHtml(classSecId, null));
+        });
+
+        // Populate Edit Modal assignments from row data
+        function populateEditAssignments(row) {
+            var $tbody = $('#editAssignmentsBody');
+            $tbody.empty();
+            editRowCounter = 0;
+
+            if (row && row.teacher_assignments && row.teacher_assignments.length) {
+                row.teacher_assignments.forEach(function(item) {
+                    var html = createAssignmentRow(editRowCounter++, item, true);
+                    $tbody.append(html);
+                });
+            } else {
+                // Empty starter row
+                var html = createAssignmentRow(editRowCounter++, null, true);
+                $tbody.append(html);
+            }
+        }
+
+        // Hook into teacherEvents for editing
+        $(document).ready(function() {
+            if (window.teacherEvents && window.teacherEvents['click .edit-data']) {
+                var originalEditHandler = window.teacherEvents['click .edit-data'];
+                window.teacherEvents['click .edit-data'] = function(e, value, row) {
+                    originalEditHandler(e, value, row);
+                    populateEditAssignments(row);
+                };
+            }
+        });
     </script>
 @endsection

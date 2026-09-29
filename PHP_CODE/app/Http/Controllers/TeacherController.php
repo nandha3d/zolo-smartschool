@@ -69,7 +69,11 @@ class TeacherController extends Controller {
         } else {
             $extraFields = $this->formFields->defaultModel()->orderBy('rank')->get();
         }
-        return view('teacher.index',compact('allowances', 'deductions','extraFields'));
+
+        $classSections = \App\Models\ClassSection::with(['class.all_subjects', 'section', 'medium'])->get();
+        $allSubjects = \App\Models\Subject::get();
+
+        return view('teacher.index', compact('allowances', 'deductions', 'extraFields', 'classSections', 'allSubjects'));
     }
 
     public function store(Request $request) {
@@ -220,6 +224,63 @@ class TeacherController extends Controller {
                 $this->sessionYearsTrackingsService->storeSessionYearsTracking('App\Models\Teacher', $user->id, Auth::user()->id, $sessionYear->id, Auth::user()->school_id, null);
             }
 
+            // Process Class, Section & Subject Assignments
+            if (!empty($request->teacher_assignments) && is_array($request->teacher_assignments)) {
+                $schoolId = Auth::user()->school_id;
+                $hasSubjectPermission = false;
+                $hasClassTeacherPermission = false;
+
+                foreach ($request->teacher_assignments as $item) {
+                    $classSectionId = $item['class_section_id'] ?? null;
+                    $subjectId = $item['subject_id'] ?? null;
+                    $isClassTeacher = !empty($item['is_class_teacher']);
+
+                    if ($classSectionId && $subjectId) {
+                        $classSection = \App\Models\ClassSection::find($classSectionId);
+                        if ($classSection) {
+                            $classSubject = \App\Models\ClassSubject::where('class_id', $classSection->class_id)
+                                ->where('subject_id', $subjectId)
+                                ->first();
+                            if (!$classSubject) {
+                                $classSubject = \App\Models\ClassSubject::create([
+                                    'class_id'   => $classSection->class_id,
+                                    'subject_id' => $subjectId,
+                                    'school_id'  => $schoolId,
+                                    'type'       => 'Compulsory'
+                                ]);
+                            }
+
+                            \App\Models\SubjectTeacher::firstOrCreate([
+                                'class_section_id' => $classSectionId,
+                                'subject_id'       => $subjectId,
+                                'teacher_id'       => $user->id,
+                                'class_subject_id' => $classSubject->id,
+                            ], [
+                                'school_id'        => $schoolId,
+                            ]);
+                            $hasSubjectPermission = true;
+                        }
+                    }
+
+                    if ($classSectionId && $isClassTeacher) {
+                        \App\Models\ClassTeacher::firstOrCreate([
+                            'class_section_id' => $classSectionId,
+                            'teacher_id'       => $user->id,
+                        ], [
+                            'school_id'        => $schoolId,
+                        ]);
+                        $hasClassTeacherPermission = true;
+                    }
+                }
+
+                if ($hasSubjectPermission) {
+                    $user->givePermissionTo(['exam-upload-marks', 'exam-result']);
+                }
+                if ($hasClassTeacherPermission) {
+                    $user->givePermissionTo(['class-teacher', 'exam-upload-marks', 'exam-result', 'attendance-list']);
+                }
+            }
+
             DB::commit();
             $sendEmail = app(UserService::class);
             $sendEmail->sendStaffRegistrationEmail($user, $request->mobile);
@@ -245,7 +306,16 @@ class TeacherController extends Controller {
         $order = request('order', 'DESC');
         $search = request('search');
         $showDeleted = request('show_deactive');
-        $sql = $this->user->builder()->role('Teacher')->with('staff','staff.staffSalary','extra_student_details.form_field')
+        $sql = $this->user->builder()->role('Teacher')->with([
+            'staff',
+            'staff.staffSalary',
+            'extra_student_details.form_field',
+            'subject_teachers.class_section.class',
+            'subject_teachers.class_section.section',
+            'subject_teachers.subject',
+            'class_teacher.class_section.class',
+            'class_teacher.class_section.section',
+        ])
             ->where(function ($query) use ($search) {
                 $query->when($search, function ($query) use ($search) {
                 $query->where('id', 'LIKE', "%$search%")
@@ -295,6 +365,54 @@ class TeacherController extends Controller {
             $tempRow['no'] = $no++;
             $tempRow['dob_org'] = $row->getRawOriginal('dob');
             $tempRow['joining_date_org'] = $row->staff->getRawOriginal('joining_date');
+
+            // Format assignments for modal & list view
+            $assignments = [];
+            $badgeList = [];
+            $classTeacherSectionIds = $row->class_teacher ? $row->class_teacher->pluck('class_section_id')->toArray() : [];
+
+            if (!empty($row->subject_teachers)) {
+                foreach ($row->subject_teachers as $st) {
+                    $isCt = in_array($st->class_section_id, $classTeacherSectionIds);
+                    $className = $st->class_section ? ($st->class_section->full_name ?? '') : '';
+                    $subjectName = $st->subject ? ($st->subject->name ?? '') : '';
+
+                    $assignments[] = [
+                        'class_section_id' => $st->class_section_id,
+                        'subject_id'       => $st->subject_id,
+                        'is_class_teacher' => $isCt ? 1 : 0,
+                        'class_name'       => $className,
+                        'subject_name'     => $subjectName,
+                    ];
+
+                    $badgeText = "<b>" . ($className ?: 'Class') . "</b>: " . ($subjectName ?: 'Subject');
+                    if ($isCt) {
+                        $badgeText .= " <span class='badge badge-success' style='font-size:10px;'>Class Teacher</span>";
+                    }
+                    $badgeList[] = $badgeText;
+                }
+            }
+
+            // Also check class_teacher records where no subject_teacher was created
+            if (!empty($row->class_teacher)) {
+                $coveredSections = $row->subject_teachers ? $row->subject_teachers->pluck('class_section_id')->toArray() : [];
+                foreach ($row->class_teacher as $ct) {
+                    if (!in_array($ct->class_section_id, $coveredSections)) {
+                        $className = $ct->class_section ? ($ct->class_section->full_name ?? '') : '';
+                        $assignments[] = [
+                            'class_section_id' => $ct->class_section_id,
+                            'subject_id'       => '',
+                            'is_class_teacher' => 1,
+                            'class_name'       => $className,
+                            'subject_name'     => '',
+                        ];
+                        $badgeList[] = "<b>" . ($className ?: 'Class') . "</b>: <span class='badge badge-success' style='font-size:10px;'>Class Teacher</span>";
+                    }
+                }
+            }
+
+            $tempRow['teacher_assignments'] = $assignments;
+            $tempRow['assigned_classes_subjects'] = count($badgeList) ? implode('<br>', $badgeList) : '<span class="text-muted small">Not Assigned</span>';
             $tempRow['operate'] = BootstrapTableService::menuItem($operate);
             $rows[] = $tempRow;
         }
@@ -380,8 +498,65 @@ class TeacherController extends Controller {
             }
             $this->extraFormFields->upsert($extraDetails, ['id'], ['data']);
 
-            //Call store function of User Repository and get the User Data
-            $this->staff->update($user->staff->id, array('qualification' => $request->qualification, 'salary' => $request->salary,'joining_date'   => date('Y-m-d',strtotime($request->joining_date))));
+            // Sync Class, Section & Subject Assignments
+            if ($request->has('teacher_assignments')) {
+                $schoolId = Auth::user()->school_id;
+                \App\Models\SubjectTeacher::where('teacher_id', $user->id)->delete();
+                \App\Models\ClassTeacher::where('teacher_id', $user->id)->delete();
+
+                $hasSubjectPermission = false;
+                $hasClassTeacherPermission = false;
+
+                foreach ($request->teacher_assignments ?? [] as $item) {
+                    $classSectionId = $item['class_section_id'] ?? null;
+                    $subjectId = $item['subject_id'] ?? null;
+                    $isClassTeacher = !empty($item['is_class_teacher']);
+
+                    if ($classSectionId && $subjectId) {
+                        $classSection = \App\Models\ClassSection::find($classSectionId);
+                        if ($classSection) {
+                            $classSubject = \App\Models\ClassSubject::where('class_id', $classSection->class_id)
+                                ->where('subject_id', $subjectId)
+                                ->first();
+                            if (!$classSubject) {
+                                $classSubject = \App\Models\ClassSubject::create([
+                                    'class_id'   => $classSection->class_id,
+                                    'subject_id' => $subjectId,
+                                    'school_id'  => $schoolId,
+                                    'type'       => 'Compulsory'
+                                ]);
+                            }
+
+                            \App\Models\SubjectTeacher::firstOrCreate([
+                                'class_section_id' => $classSectionId,
+                                'subject_id'       => $subjectId,
+                                'teacher_id'       => $user->id,
+                                'class_subject_id' => $classSubject->id,
+                            ], [
+                                'school_id'        => $schoolId,
+                            ]);
+                            $hasSubjectPermission = true;
+                        }
+                    }
+
+                    if ($classSectionId && $isClassTeacher) {
+                        \App\Models\ClassTeacher::firstOrCreate([
+                            'class_section_id' => $classSectionId,
+                            'teacher_id'       => $user->id,
+                        ], [
+                            'school_id'        => $schoolId,
+                        ]);
+                        $hasClassTeacherPermission = true;
+                    }
+                }
+
+                if ($hasSubjectPermission) {
+                    $user->givePermissionTo(['exam-upload-marks', 'exam-result']);
+                }
+                if ($hasClassTeacherPermission) {
+                    $user->givePermissionTo(['class-teacher', 'exam-upload-marks', 'exam-result', 'attendance-list']);
+                }
+            }
 
             DB::commit();
             ResponseService::successResponse('Data Updated Successfully');

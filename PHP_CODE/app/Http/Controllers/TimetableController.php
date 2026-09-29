@@ -3,6 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Timetable;
+use App\Models\SubjectTeacher;
+use App\Models\User;
+use App\Models\ClassSubject;
+use App\Models\ClassSection;
+use App\Services\TimetableGeneratorService;
 use App\Repositories\ClassSchool\ClassSchoolInterface;
 use App\Repositories\ClassSection\ClassSectionInterface;
 use App\Repositories\Medium\MediumInterface;
@@ -60,14 +65,16 @@ class TimetableController extends Controller
             'timetable_duration'
         ]);
 
-        // Convert Timetable Duration time to number
-        $timetableData['timetable_duration'] = Carbon::parse($timetableData['timetable_duration'] ?? "00:00:00")->diffInMinutes(Carbon::parse('00:00:00'));
+        // Convert Timetable Duration time to number safely
+        $rawDuration = $timetableData['timetable_duration'] ?? "00:45:00";
+        $durationMinutes = abs((int)Carbon::parse($rawDuration)->diffInMinutes(Carbon::parse('00:00:00')));
+        $timetableData['timetable_duration'] = ($durationMinutes > 0 && $durationMinutes < 1440) ? $durationMinutes : 45;
 
         $classes = $this->class->builder()->with('stream')->get()->pluck('full_name', 'id');
         $mediums = $this->medium->builder()->pluck('name', 'id');
+        $classSections = $this->classSection->builder()->with(['class', 'section', 'medium'])->get();
 
-
-        return view('timetable.index', compact('timetableData', 'classes', 'mediums'));
+        return view('timetable.index', compact('timetableData', 'classes', 'mediums', 'classSections'));
     }
 
     public function store(Request $request)
@@ -180,13 +187,39 @@ class TimetableController extends Controller
             ->CurrentSemesterData()
             ->get();
 
-        // Get Timetable Settings Data
+        // Get Timetable Settings Data with safe defaults
         $timetableSettingsData = $this->schoolSettings->getBulkData([
             'timetable_start_time',
             'timetable_end_time',
             'timetable_duration'
         ]);
-        return view('timetable.edit', compact('subjectTeachers', 'subjectWithoutTeacherAssigned', 'classSection', 'timetables', 'timetableSettingsData', 'currentSemester'));
+        if (empty($timetableSettingsData['timetable_start_time'])) {
+            $timetableSettingsData['timetable_start_time'] = '08:30:00';
+        }
+        if (empty($timetableSettingsData['timetable_end_time'])) {
+            $timetableSettingsData['timetable_end_time'] = '16:30:00';
+        }
+        if (empty($timetableSettingsData['timetable_duration'])) {
+            $timetableSettingsData['timetable_duration'] = '00:45:00';
+        }
+
+        $allTeachers = $this->user->builder()->role('Teacher')->get(['id', 'first_name', 'last_name']);
+        $allClassSubjects = ClassSubject::where('class_id', $classSection->class_id)
+            ->with(['subject:id,name,type,bg_color'])
+            ->whereNull('deleted_at')
+            ->CurrentSemesterData()
+            ->get();
+
+        return view('timetable.edit', compact(
+            'subjectTeachers',
+            'subjectWithoutTeacherAssigned',
+            'classSection',
+            'timetables',
+            'timetableSettingsData',
+            'currentSemester',
+            'allTeachers',
+            'allClassSubjects'
+        ));
     }
 
     public function update(Request $request, $id)
@@ -204,8 +237,14 @@ class TimetableController extends Controller
         $end_time = Carbon::createFromFormat('H:i:s', $end_time)->format('H:i:s');
 
         $schoolSettings = $this->cache->getSchoolSettings();
-        $timetable_start_time = Carbon::createFromFormat('H:i:s', $schoolSettings['timetable_start_time'])->format('H:i:s');
-        $timetable_end_time = Carbon::createFromFormat('H:i:s', $schoolSettings['timetable_end_time'])->format('H:i:s');
+        $startTimeSetting = !empty($schoolSettings['timetable_start_time']) ? $schoolSettings['timetable_start_time'] : '08:00:00';
+        $endTimeSetting = !empty($schoolSettings['timetable_end_time']) ? $schoolSettings['timetable_end_time'] : '18:00:00';
+        $timetable_start_time = Carbon::parse($startTimeSetting)->format('H:i:s');
+        $timetable_end_time = Carbon::parse($endTimeSetting)->format('H:i:s');
+        if ($timetable_start_time >= $timetable_end_time) {
+            $timetable_start_time = '08:00:00';
+            $timetable_end_time = '18:00:00';
+        }
 
         try {
             if ($timetable_start_time <= $start_time && $timetable_end_time >= $end_time) {
@@ -236,28 +275,20 @@ class TimetableController extends Controller
             'timetable_duration'
         ]);
 
-        if ($schoolSettings->timetable_start_time ?? '' && $schoolSettings->timetable_end_time ?? '') {
-            $sql = $this->classSection->builder()->with([
-                'class:id,name,stream_id',
-                'class.stream',
-                'section:id,name',
-                'medium:id,name',
-                'timetable' => function ($query) use ($schoolSettings) {
-                    $query->CurrentSemesterData()
-                        ->where('start_time', '>=', $schoolSettings->timetable_start_time)->where('end_time', '<=', $schoolSettings->timetable_end_time)->with('subject:id,name,type');
-                }
-            ]);
-        } else {
-            $sql = $this->classSection->builder()->with([
-                'class:id,name,stream_id',
-                'class.stream',
-                'section:id,name',
-                'medium:id,name',
-                'timetable' => function ($query) {
-                    $query->CurrentSemesterData()->with('subject:id,name,type');
-                }
-            ]);
-        }
+        $timetableWith = [
+            'subject:id,name,type,bg_color',
+            'subject_teacher.teacher:id,first_name,last_name'
+        ];
+
+        $sql = $this->classSection->builder()->with([
+            'class:id,name,stream_id',
+            'class.stream',
+            'section:id,name',
+            'medium:id,name',
+            'timetable' => function ($query) use ($timetableWith) {
+                $query->CurrentSemesterData()->with($timetableWith);
+            }
+        ]);
 
 
         if (!empty($request->search)) {
@@ -325,7 +356,8 @@ class TimetableController extends Controller
         $rows = array();
         $no = 1;
         foreach ($res as $row) {
-            $operate = BootstrapTableService::editButton(route('timetable.edit', $row->id), false);
+            $operate = '<a href="' . route('timetable.edit', $row->id) . '?autogen=1" class="btn btn-xs btn-gradient-primary mr-1" title="' . trans("Auto-Generate Timetable") . '"><i class="fa fa-magic"></i> ' . trans("Generate") . '</a>';
+            $operate .= BootstrapTableService::editButton(route('timetable.edit', $row->id), false);
             $operate .= BootstrapTableService::button('fa fa-trash', '#', ['delete-class-timetable', 'btn-gradient-danger'], ['title' => trans("Delete Class Timetable"), 'data-id' => $row->id]);
             $tempRow = $row->toArray();
             $timetable = $row->timetable->groupBy('day')->sortBy('start_time');
@@ -499,11 +531,19 @@ class TimetableController extends Controller
             //     ResponseService::errorResponse("Updates are prohibited as there are pre-existing lectures scheduled after " . $request->time_table_end_time);
             // }
 
+            $durationMinutes = abs((int)($request->timetable_duration ?? 45));
+            if ($durationMinutes <= 0 || $durationMinutes > 300) {
+                $durationMinutes = 45;
+            }
+
             $data = array();
             foreach ($settings as $row) {
+                $val = $row == 'timetable_duration'
+                    ? Carbon::createFromTimestampUTC($durationMinutes * 60)->format('H:i:s')
+                    : date("H:i:s", strtotime($request->$row));
                 $data[] = [
                     "name" => $row,
-                    "data" => $row == 'timetable_duration' ? Carbon::createFromTimestampUTC($request->$row * 60)->format('H:i:s') : date("H:i:s", strtotime($request->$row)),
+                    "data" => $val,
                     "type" => 'time'
                 ];
             }
@@ -530,6 +570,269 @@ class TimetableController extends Controller
         } catch (Throwable $e) {
             ResponseService::logErrorResponse($e);
             ResponseService::errorResponse();
+        }
+    }
+
+    public function autoGenerate(Request $request)
+    {
+        ResponseService::noFeatureThenRedirect('Timetable Management');
+        ResponseService::noPermissionThenSendJson(['timetable-create', 'timetable-edit']);
+
+        $request->validate([
+            'class_section_id' => 'required|numeric',
+            'days'             => 'required|array',
+            'start_time'       => 'required',
+            'period_duration'  => 'required|numeric',
+            'total_periods'    => 'required|numeric',
+            'subjects'         => 'required|array',
+        ]);
+
+        try {
+            $generatorService = app(\App\Services\TimetableGeneratorService::class);
+            $result = $generatorService->generate($request->all());
+
+            if (!$result['status']) {
+                return response()->json([
+                    'error'   => true,
+                    'message' => $result['message'],
+                ], 422);
+            }
+
+            return response()->json([
+                'error'         => false,
+                'message'       => $result['message'],
+                'created_count' => $result['created_count'] ?? 0,
+                'has_conflicts' => $result['has_conflicts'] ?? false,
+                'conflicts'     => $result['conflicts'] ?? [],
+            ]);
+        } catch (\Throwable $e) {
+            ResponseService::logErrorResponse($e, "TimetableController -> autoGenerate");
+            return response()->json([
+                'error'   => true,
+                'message' => 'An error occurred during auto-generation: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function syncTeachers(Request $request)
+    {
+        ResponseService::noFeatureThenRedirect('Timetable Management');
+        ResponseService::noPermissionThenSendJson(['timetable-edit']);
+
+        $request->validate([
+            'class_section_id' => 'required|numeric',
+            'assignments'      => 'required|array',
+        ]);
+
+        try {
+            DB::beginTransaction();
+            $classSectionId = $request->class_section_id;
+            $classSection = $this->classSection->findById($classSectionId, ['*'], ['class']);
+            $schoolId = Auth::user()->school_id ?? $classSection->school_id;
+
+            foreach ($request->assignments as $item) {
+                $subjectId = $item['subject_id'] ?? null;
+                $teacherId = $item['teacher_id'] ?? null;
+
+                if ($subjectId && $teacherId) {
+                    $classSubject = \App\Models\ClassSubject::where('class_id', $classSection->class_id)
+                        ->where('subject_id', $subjectId)
+                        ->first();
+
+                    \App\Models\SubjectTeacher::updateOrCreate(
+                        [
+                            'class_section_id' => $classSectionId,
+                            'subject_id'       => $subjectId,
+                        ],
+                        [
+                            'teacher_id'       => $teacherId,
+                            'class_subject_id' => $classSubject?->id,
+                            'school_id'        => $schoolId,
+                        ]
+                    );
+                }
+            }
+
+            DB::commit();
+            return response()->json([
+                'error'   => false,
+                'message' => 'Teacher-Subject assignments synchronized successfully!'
+            ]);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            ResponseService::logErrorResponse($e, "TimetableController -> syncTeachers");
+            return response()->json([
+                'error'   => true,
+                'message' => 'Failed to sync assignments: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getMatrix($classSectionID)
+    {
+        ResponseService::noFeatureThenRedirect('Timetable Management');
+        ResponseService::noPermissionThenSendJson('timetable-list');
+
+        $schoolId = Auth::user()->school_id;
+        $timetables = $this->timetable->builder()
+            ->where('class_section_id', $classSectionID)
+            ->with([
+                'teacher:users.id,first_name,last_name',
+                'subject:id,name,type,bg_color',
+                'subject_teacher.teacher:id,first_name,last_name'
+            ])
+            ->orderBy('start_time', 'ASC')
+            ->CurrentSemesterData()
+            ->get();
+
+        $otherTimetables = $this->timetable->builder()
+            ->where('school_id', $schoolId)
+            ->where('class_section_id', '!=', $classSectionID)
+            ->with('subject_teacher.teacher:id,first_name,last_name')
+            ->CurrentSemesterData()
+            ->get();
+
+        $daysOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+        $activeDays = [];
+        $timeSlots = [];
+
+        foreach ($timetables as $slot) {
+            if (!in_array($slot->day, $activeDays)) {
+                $activeDays[] = $slot->day;
+            }
+            $timeKey = $slot->start_time . ' - ' . $slot->end_time;
+            if (!isset($timeSlots[$timeKey])) {
+                $timeSlots[$timeKey] = [
+                    'start_time' => $slot->start_time,
+                    'end_time'   => $slot->end_time,
+                    'period_no'  => $slot->period_no ?? null,
+                    'type'       => $slot->type,
+                    'title'      => $slot->title ?? ($slot->type === 'Break' ? 'Break' : null),
+                ];
+            }
+        }
+
+        if (empty($activeDays)) {
+            $activeDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+        } else {
+            usort($activeDays, function($a, $b) use ($daysOrder) {
+                return array_search($a, $daysOrder) <=> array_search($b, $daysOrder);
+            });
+        }
+
+        usort($timeSlots, function($a, $b) {
+            return strcmp($a['start_time'], $b['start_time']);
+        });
+
+        $matrix = [];
+        foreach ($timetables as $t) {
+            $primaryTeacherId = $t->subject_teacher?->teacher_id ?? $t->teacher?->id;
+            $primaryTeacherName = $t->primary_teacher_name ?? $t->teacher?->full_name ?? ($t->subject_teacher?->teacher ? $t->subject_teacher->teacher->first_name . ' ' . $t->subject_teacher->teacher->last_name : null);
+            $altTeacherName = $t->alternate_teacher_name;
+
+            // Real-time conflict checking
+            $conflict = null;
+            if ($primaryTeacherId && $t->type === 'Lecture') {
+                $clash = $otherTimetables->first(function($other) use ($t, $primaryTeacherId) {
+                    if ($other->day !== $t->day) return false;
+                    $otherTeacherId = $other->subject_teacher?->teacher_id;
+                    if ($otherTeacherId != $primaryTeacherId) return false;
+                    return ($other->start_time < $t->end_time && $other->end_time > $t->start_time);
+                });
+                if ($clash) {
+                    $otherClass = \App\Models\ClassSection::find($clash->class_section_id);
+                    $className = $otherClass ? $otherClass->full_name : 'another class';
+                    $conflict = "Conflict: {$primaryTeacherName} is scheduled in {$className} ({$clash->start_time} - {$clash->end_time})!";
+                }
+            }
+
+            $matrix[$t->day][$t->start_time] = [
+                'id'                   => $t->id,
+                'type'                 => $t->type,
+                'subject_id'           => $t->subject_id,
+                'subject_name'         => $t->subject?->name ?? ($t->type === 'Break' ? ($t->title ?? 'Break') : 'Lecture'),
+                'bg_color'             => $t->subject?->bg_color ?? '#4F46E5',
+                'start_time'           => $t->start_time,
+                'end_time'             => $t->end_time,
+                'primary_teacher_name' => $primaryTeacherName,
+                'primary_teacher_id'   => $primaryTeacherId,
+                'alt_teacher_name'     => $altTeacherName,
+                'alt_teacher_id'       => $t->alt_teacher_id,
+                'period_no'            => $t->period_no,
+                'conflict'             => $conflict,
+                'note'                 => $t->note,
+            ];
+        }
+
+        return response()->json([
+            'error'      => false,
+            'days'       => $activeDays,
+            'time_slots' => array_values($timeSlots),
+            'matrix'     => $matrix,
+        ]);
+    }
+
+    public function quickUpdate(Request $request)
+    {
+        ResponseService::noFeatureThenRedirect('Timetable Management');
+        ResponseService::noPermissionThenSendJson(['timetable-edit']);
+
+        $request->validate([
+            'id'                 => 'required|numeric',
+            'subject_id'         => 'nullable|numeric',
+            'teacher_id'         => 'nullable|numeric',
+            'alt_teacher_id'     => 'nullable|numeric',
+        ]);
+
+        try {
+            $timetable = Timetable::findOrFail($request->id);
+            $schoolId = Auth::user()->school_id ?? $timetable->school_id;
+
+            if ($request->filled('subject_id')) {
+                $timetable->subject_id = $request->subject_id;
+            }
+
+            if ($request->filled('teacher_id')) {
+                $classSubject = \App\Models\ClassSubject::where('class_id', $timetable->class_section?->class_id)
+                    ->where('subject_id', $timetable->subject_id)
+                    ->first();
+
+                $subjectTeacher = SubjectTeacher::firstOrCreate([
+                    'class_section_id' => $timetable->class_section_id,
+                    'subject_id'       => $timetable->subject_id,
+                    'teacher_id'       => $request->teacher_id,
+                ], [
+                    'class_subject_id' => $classSubject?->id,
+                    'school_id'        => $schoolId,
+                ]);
+                $timetable->subject_teacher_id = $subjectTeacher->id;
+            }
+
+            $currentMeta = is_array($timetable->meta) ? $timetable->meta : [];
+            if ($request->filled('teacher_id')) {
+                $primaryTeacher = User::find($request->teacher_id);
+                $currentMeta['primary_teacher_name'] = $primaryTeacher ? $primaryTeacher->first_name . ' ' . $primaryTeacher->last_name : null;
+            }
+            if ($request->has('alt_teacher_id')) {
+                $altTeacher = $request->alt_teacher_id ? User::find($request->alt_teacher_id) : null;
+                $currentMeta['alt_teacher_id'] = $request->alt_teacher_id;
+                $currentMeta['alt_teacher_name'] = $altTeacher ? $altTeacher->first_name . ' ' . $altTeacher->last_name : null;
+            }
+
+            $timetable->note = json_encode($currentMeta);
+            $timetable->save();
+
+            return response()->json([
+                'error'   => false,
+                'message' => 'Timetable slot updated successfully!',
+                'data'    => $timetable
+            ]);
+        } catch (\Throwable $e) {
+            ResponseService::logErrorResponse($e, "TimetableController -> quickUpdate");
+            return response()->json([
+                'error'   => true,
+                'message' => 'Update failed: ' . $e->getMessage()
+            ], 500);
         }
     }
 }

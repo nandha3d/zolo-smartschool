@@ -205,6 +205,7 @@ return [
 
         // Addons — self-contained; each loads its own routes, views and migrations.
         App\Addons\PhotoBooth\PhotoBoothServiceProvider::class,
+        App\Addons\GpsTransport\GpsTransportServiceProvider::class,
     ],
 
     /*
@@ -223,5 +224,13 @@ return [
         'Excel' => Maatwebsite\Excel\Facades\Excel::class,
         'PDF'   => Barryvdh\DomPDF\Facade\Pdf::class,
     ])->toArray(),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Animazon Enterprise Licensing
+    |--------------------------------------------------------------------------
+    */
+    'animazon_license' => env('ANIMAZON_LICENSE', true),
+    'license_type' => 'Animazon Unlimited Enterprise',
 
 ];

@@ -402,7 +402,10 @@ class ProceduralSchoolDataSeeder extends Seeder
 
             $csId = $flatClassSectionIds[$currCsIdx % count($flatClassSectionIds)];
             $csRow = $db->table('class_sections')->where('id', $csId)->first();
-            $rollNo = ($i % 25) + 1;
+            if (!isset($sectionRollCounter[$csId])) {
+                $sectionRollCounter[$csId] = 1;
+            }
+            $rollNo = $sectionRollCounter[$csId]++;
 
             $db->table('students')->insert([
                 'user_id' => $sUserId,
@@ -835,6 +838,35 @@ class ProceduralSchoolDataSeeder extends Seeder
                 'updated_at' => now(),
             ]);
         }
+
+        // 16. School Settings
+        echo "Seeding default school settings...\n";
+        $centralSchool = DB::connection('mysql')->table('schools')->where('id', $schoolId)->first();
+        $schoolName = $centralSchool ? $centralSchool->name : 'Zolo Demo School';
+        $schoolEmail = $centralSchool ? ($centralSchool->support_email ?? 'admin@demo.test') : 'admin@demo.test';
+        $schoolPhone = $centralSchool ? ($centralSchool->support_phone ?? '9000000000') : '9000000000';
+        $schoolAddress = $centralSchool ? ($centralSchool->address ?? '1 Demo Street') : '1 Demo Street';
+        $schoolTagline = $centralSchool ? ($centralSchool->tagline ?? 'Excellence in Education') : 'Excellence in Education';
+
+        $settingsData = [
+            ['name' => 'school_name', 'data' => $schoolName, 'type' => 'string', 'school_id' => $schoolId],
+            ['name' => 'school_email', 'data' => $schoolEmail, 'type' => 'string', 'school_id' => $schoolId],
+            ['name' => 'school_phone', 'data' => $schoolPhone, 'type' => 'number', 'school_id' => $schoolId],
+            ['name' => 'school_tagline', 'data' => $schoolTagline, 'type' => 'string', 'school_id' => $schoolId],
+            ['name' => 'school_address', 'data' => $schoolAddress, 'type' => 'string', 'school_id' => $schoolId],
+            ['name' => 'session_year', 'data' => (string)$sessionYear->id, 'type' => 'number', 'school_id' => $schoolId],
+            ['name' => 'horizontal_logo', 'data' => '', 'type' => 'file', 'school_id' => $schoolId],
+            ['name' => 'vertical_logo', 'data' => '', 'type' => 'file', 'school_id' => $schoolId],
+            ['name' => 'timetable_start_time', 'data' => '09:00:00', 'type' => 'time', 'school_id' => $schoolId],
+            ['name' => 'timetable_end_time', 'data' => '17:00:00', 'type' => 'time', 'school_id' => $schoolId],
+            ['name' => 'timetable_duration', 'data' => '00:45:00', 'type' => 'time', 'school_id' => $schoolId],
+            ['name' => 'currency_code', 'data' => 'INR', 'type' => 'string', 'school_id' => $schoolId],
+            ['name' => 'currency_symbol', 'data' => '₹', 'type' => 'string', 'school_id' => $schoolId],
+            ['name' => 'date_format', 'data' => 'd-m-Y', 'type' => 'string', 'school_id' => $schoolId],
+            ['name' => 'time_format', 'data' => 'h:i A', 'type' => 'string', 'school_id' => $schoolId],
+        ];
+
+        \App\Models\SchoolSetting::upsert($settingsData, ['name', 'school_id'], ['data', 'type']);
 
         $db->statement('SET FOREIGN_KEY_CHECKS=1;');
 

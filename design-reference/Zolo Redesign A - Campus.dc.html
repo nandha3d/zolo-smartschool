@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet" />
+<style>
+  body { margin:0; font-family:'Public Sans', sans-serif; background:#FBF8F1; color:#16241D; -webkit-font-smoothing:antialiased; }
+  a { color:#12503A; text-decoration:none; }
+  a:hover { color:#C4623F; }
+  .ms { font-family:'Material Symbols Rounded'; font-weight:400; font-style:normal; line-height:1; letter-spacing:normal; text-transform:none; display:inline-block; white-space:nowrap; word-wrap:normal; direction:ltr; }
+  .sc::-webkit-scrollbar { width:8px; height:8px; }
+  .sc::-webkit-scrollbar-thumb { background:#DDD5C4; border-radius:99px; }
+  .sc::-webkit-scrollbar-track { background:transparent; }
+  select { appearance:none; }
+</style>
+</helmet>
+<div style="display:flex; min-height:100vh; background:#FBF8F1">
+
+  <aside class="sc" style="width:264px; min-width:216px; background:#12503A; color:#EAF3ED; height:100vh; position:sticky; top:0; overflow-y:auto; padding-bottom:28px">
+    <div style="display:flex; align-items:center; gap:11px; padding:22px 22px 18px">
+      <div style="width:34px; height:34px; border-radius:10px; background:#C6E86F; color:#12503A; display:flex; align-items:center; justify-content:center; font-family:'Bricolage Grotesque'; font-weight:800; font-size:17px">Z</div>
+      <div style="min-width:0">
+        <div style="font-family:'Bricolage Grotesque'; font-weight:700; font-size:16px; letter-spacing:-0.2px; color:#fff">Zolo Schools</div>
+        <div style="font-size:11px; color:#8FB8A5; letter-spacing:0.04em; text-transform:uppercase">Demo Public School</div>
+      </div>
+    </div>
+
+    <div style="padding:0 16px 16px">
+      <div style="display:flex; align-items:center; gap:8px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.10); border-radius:10px; padding:8px 11px">
+        <span class="ms" style="font-size:17px; color:#8FB8A5">search</span>
+        <input value="{{ query }}" onChange="{{ onQuery }}" placeholder="Search menu" style="flex:1; min-width:0; background:none; border:0; outline:none; font-family:inherit; font-size:13px; color:#fff" />
+        <span style="font-size:10px; color:#8FB8A5; border:1px solid rgba(255,255,255,0.18); border-radius:5px; padding:1px 5px">⌘K</span>
+      </div>
+    </div>
+
+    <sc-for list="{{ groups }}" as="g" hint-placeholder-count="6">
+      <div style="padding:0 12px; margin-bottom:2px">
+        <div style="font-size:10.5px; letter-spacing:0.1em; text-transform:uppercase; color:#7BA894; padding:14px 10px 7px; font-weight:600">{{ g.title }}</div>
+        <sc-for list="{{ g.items }}" as="it" hint-placeholder-count="5">
+          <div onClick="{{ it.onClick }}" style="display:flex; align-items:center; gap:12px; padding:9px 10px; border-radius:9px; cursor:pointer; background:{{ it.bg }}; color:{{ it.ink }}; font-size:13.5px; font-weight:{{ it.weight }}; margin-bottom:1px" style-hover="background:rgba(255,255,255,0.07)">
+            <span class="ms" style="font-size:19px; width:20px; text-align:center">{{ it.icon }}</span>
+            <span style="flex:1; min-width:0">{{ it.label }}</span>
+            <sc-if value="{{ it.badge }}" hint-placeholder-val="{{ true }}">
+              <span style="font-size:10.5px; font-weight:700; background:#C4623F; color:#fff; border-radius:99px; padding:1px 7px">{{ it.badge }}</span>
+            </sc-if>
+            <sc-if value="{{ it.arrow }}" hint-placeholder-val="{{ true }}">
+              <span class="ms" style="font-size:17px; color:#7BA894">chevron_right</span>
+            </sc-if>
+          </div>
+        </sc-for>
+      </div>
+    </sc-for>
+  </aside>
+
+  <main style="flex:1; min-width:0">
+
+    <header style="display:flex; align-items:center; gap:18px; flex-wrap:wrap; padding:18px 30px; background:rgba(251,248,241,0.88); backdrop-filter:blur(10px); border-bottom:1px solid #EDE5D6; position:sticky; top:0; z-index:10">
+      <div style="min-width:0">
+        <div style="font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:#8A9490; font-weight:600">{{ crumb }}</div>
+        <h1 style="margin:1px 0 0; font-family:'Bricolage Grotesque'; font-size:24px; font-weight:700; letter-spacing:-0.5px">{{ heading }}</h1>
+      </div>
+      <div style="margin-left:auto; display:flex; align-items:center; flex-wrap:wrap; gap:10px">
+        <div style="display:flex; align-items:center; gap:8px; background:#fff; border:1px solid #EAE3D5; border-radius:10px; padding:7px 12px; font-size:13px">
+          <span class="ms" style="font-size:17px; color:#12503A">event</span>
+          <span style="font-weight:600">2025-2026</span>
+          <span style="color:#8A9490">· Term 2</span>
+        </div>
+        <button onClick="{{ onCache }}" style="display:flex; align-items:center; gap:7px; font-family:inherit; font-size:13px; font-weight:600; color:#12503A; background:#fff; border:1px solid #EAE3D5; border-radius:10px; padding:7px 12px; cursor:pointer" style-hover="background:#F3EFE5">
+          <span class="ms" style="font-size:17px">cached</span>{{ cacheLabel }}
+        </button>
+        <button style="width:38px; height:38px; display:flex; align-items:center; justify-content:center; background:#fff; border:1px solid #EAE3D5; border-radius:10px; cursor:pointer; position:relative" style-hover="background:#F3EFE5">
+          <span class="ms" style="font-size:19px; color:#16241D">translate</span>
+        </button>
+        <button style="width:38px; height:38px; display:flex; align-items:center; justify-content:center; background:#fff; border:1px solid #EAE3D5; border-radius:10px; cursor:pointer" style-hover="background:#F3EFE5">
+          <span class="ms" style="font-size:19px; color:#16241D">notifications</span>
+        </button>
+        <div style="display:flex; align-items:center; gap:9px; background:#fff; border:1px solid #EAE3D5; border-radius:10px; padding:5px 12px 5px 6px; cursor:pointer">
+          <div style="width:28px; height:28px; border-radius:8px; background:#12503A; color:#C6E86F; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700">AD</div>
+          <div style="line-height:1.25">
+            <div style="font-size:12.5px; font-weight:600">Admin</div>
+            <div style="font-size:10.5px; color:#8A9490">School Admin</div>
+          </div>
+          <span class="ms" style="font-size:17px; color:#8A9490">expand_more</span>
+        </div>
+      </div>
+    </header>
+
+    <div style="padding:24px 30px 44px; display:flex; flex-direction:column; gap:20px">
+
+      <div style="display:flex; align-items:flex-start; gap:14px; background:#FEF6E7; border:1px solid #F0DDB8; border-left:4px solid #E8A33D; border-radius:12px; padding:14px 18px">
+        <span class="ms" style="font-size:20px; color:#B87A1C; margin-top:1px">schedule</span>
+        <div style="flex:1; min-width:0; font-size:13.5px; line-height:1.6">
+          <strong style="font-weight:700">Your licence expires on October 04, 2026 — 11:59 PM.</strong>
+          <span style="color:#6B5F49"> Change your upcoming plan or remove add-ons before then. To activate or deactivate students, teachers or staff on the next plan, </span><a href="#" style="color:#B87A1C; font-weight:600; text-decoration:underline">manage user status</a>.
+        </div>
+        <button style="flex:none; font-family:inherit; font-size:12.5px; font-weight:700; background:#12503A; color:#fff; border:0; border-radius:9px; padding:8px 14px; cursor:pointer">Pay now</button>
+      </div>
+
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px,1fr)); gap:14px">
+        <sc-for list="{{ stats }}" as="s" hint-placeholder-count="5">
+          <div style="background:#fff; border:1px solid #EAE3D5; border-radius:14px; padding:16px 17px; display:flex; flex-direction:column; gap:12px; cursor:pointer" style-hover="border-color:#12503A">
+            <div style="display:flex; align-items:center; gap:10px">
+              <div style="width:34px; height:34px; border-radius:10px; background:{{ s.tint }}; display:flex; align-items:center; justify-content:center">
+                <span class="ms" style="font-size:19px; color:{{ s.ink }}">{{ s.icon }}</span>
+              </div>
+              <div style="font-size:12px; font-weight:600; color:#6E7B74; letter-spacing:0.01em">{{ s.label }}</div>
+            </div>
+            <div style="display:flex; align-items:flex-end; gap:9px">
+              <div style="font-family:'Bricolage Grotesque'; font-size:30px; font-weight:700; letter-spacing:-1px; line-height:1">{{ s.value }}</div>
+              <div style="font-size:11.5px; font-weight:700; color:{{ s.deltaInk }}; background:{{ s.deltaBg }}; border-radius:99px; padding:2px 7px; margin-bottom:3px">{{ s.delta }}</div>
+            </div>
+            <div style="display:flex; align-items:flex-end; gap:3px; height:26px">
+              <sc-for list="{{ s.spark }}" as="h" hint-placeholder-count="8">
+                <div style="flex:1; height:{{ h }}; background:{{ s.tint }}; border-radius:2px"></div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="display:flex; flex-wrap:wrap; gap:20px">
+
+        <div style="flex:1.85 1 420px; min-width:0; background:#fff; border:1px solid #EAE3D5; border-radius:16px; padding:20px 22px">
+          <div style="display:flex; align-items:flex-start; flex-wrap:wrap; gap:14px; margin-bottom:6px">
+            <div style="flex:1; min-width:0">
+              <h2 style="margin:0; font-family:'Bricolage Grotesque'; font-size:17px; font-weight:700">Expense</h2>
+              <div style="font-size:12.5px; color:#8A9490">Monthly spend across the session year</div>
+            </div>
+            <div style="display:flex; background:#F5F1E7; border-radius:9px; padding:3px">
+              <sc-for list="{{ expenseTabs }}" as="t" hint-placeholder-count="3">
+                <div onClick="{{ t.onClick }}" style="font-size:12px; font-weight:600; padding:5px 11px; border-radius:7px; cursor:pointer; background:{{ t.bg }}; color:{{ t.ink }}">{{ t.label }}</div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display:flex; align-items:baseline; gap:12px; margin-bottom:14px">
+            <div style="font-family:'Bricolage Grotesque'; font-size:26px; font-weight:700; letter-spacing:-0.6px">{{ expenseTotal }}</div>
+            <div style="font-size:12.5px; color:#4B7A62; font-weight:600">{{ expenseNote }}</div>
+          </div>
+          <div style="display:flex; align-items:flex-end; gap:10px; height:250px; border-bottom:1px solid #EFEAE0; padding-bottom:2px">
+            <sc-for list="{{ expenseBars }}" as="b" hint-placeholder-count="12">
+              <div onClick="{{ b.onClick }}" style="flex:1; display:flex; flex-direction:column; align-items:center; gap:8px; cursor:pointer">
+                <div style="font-size:10.5px; font-weight:700; color:{{ b.labelInk }}">{{ b.amount }}</div>
+                <div style="width:100%; max-width:30px; height:{{ b.h }}; background:{{ b.fill }}; border-radius:7px 7px 3px 3px"></div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:flex; gap:10px; padding-top:9px">
+            <sc-for list="{{ expenseBars }}" as="b" hint-placeholder-count="12">
+              <div style="flex:1; text-align:center; font-size:11px; color:#8A9490; font-weight:{{ b.mWeight }}">{{ b.m }}</div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="flex:1 1 300px; min-width:0; display:flex; flex-direction:column; gap:20px">
+          <div style="background:#12503A; color:#EAF3ED; border-radius:16px; padding:20px 22px">
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px">
+              <h2 style="margin:0; flex:1; font-family:'Bricolage Grotesque'; font-size:17px; font-weight:700; color:#fff">Attendance</h2>
+              <select value="{{ attClass }}" onChange="{{ onAttClass }}" style="font-family:inherit; font-size:12px; font-weight:600; color:#fff; background:rgba(255,255,255,0.10); border:1px solid rgba(255,255,255,0.16); border-radius:8px; padding:5px 9px; outline:none">
+                <sc-for list="{{ classOptions }}" as="c" hint-placeholder-count="3">
+                  <option value="{{ c }}" style="color:#16241D">{{ c }}</option>
+                </sc-for>
+              </select>
+            </div>
+            <div style="display:flex; align-items:center; gap:20px">
+              <div style="position:relative; width:118px; height:118px; flex:none">
+                <div style="position:absolute; inset:0; border-radius:50%; background:conic-gradient(#C6E86F 0 {{ attDeg }}, rgba(255,255,255,0.14) {{ attDeg }} 360deg)"></div>
+                <div style="position:absolute; inset:15px; border-radius:50%; background:#12503A; display:flex; flex-direction:column; align-items:center; justify-content:center">
+                  <div style="font-family:'Bricolage Grotesque'; font-size:25px; font-weight:700; color:#fff; line-height:1">{{ attPct }}</div>
+                  <div style="font-size:10.5px; color:#8FB8A5; letter-spacing:0.06em; text-transform:uppercase">Present</div>
+                </div>
+              </div>
+              <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:9px">
+                <sc-for list="{{ attRows }}" as="r" hint-placeholder-count="3">
+                  <div style="display:flex; align-items:center; gap:9px; font-size:13px">
+                    <span style="width:8px; height:8px; border-radius:50%; background:{{ r.c }}; flex:none"></span>
+                    <span style="flex:1; color:#CFE3D8">{{ r.label }}</span>
+                    <span style="font-weight:700; color:#fff">{{ r.value }}</span>
+                  </div>
+                </sc-for>
+                <button style="margin-top:4px; font-family:inherit; font-size:12.5px; font-weight:700; color:#12503A; background:#C6E86F; border:0; border-radius:9px; padding:8px 12px; cursor:pointer">Take attendance</button>
+              </div>
+            </div>
+          </div>
+
+          <div style="background:#fff; border:1px solid #EAE3D5; border-radius:16px; padding:20px 22px; flex:1">
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px">
+              <h2 style="margin:0; flex:1; font-family:'Bricolage Grotesque'; font-size:17px; font-weight:700">Leaves</h2>
+              <select value="{{ leaveFilter }}" onChange="{{ onLeaveFilter }}" style="font-family:inherit; font-size:12px; font-weight:600; background:#F5F1E7; border:1px solid #EAE3D5; border-radius:8px; padding:5px 9px; color:#16241D; outline:none">
+                <option value="Today">Today</option>
+                <option value="Tomorrow">Tomorrow</option>
+                <option value="Upcoming">Upcoming</option>
+              </select>
+            </div>
+            <div class="sc" style="display:flex; flex-direction:column; gap:2px; max-height:224px; overflow-y:auto">
+              <sc-for list="{{ leaves }}" as="l" hint-placeholder-count="4">
+                <div style="display:flex; align-items:center; gap:11px; padding:9px 6px; border-radius:9px" style-hover="background:#FAF7F0">
+                  <div style="width:32px; height:32px; border-radius:9px; background:#F0EDE3; color:#4B7A62; display:flex; align-items:center; justify-content:center; font-size:11.5px; font-weight:700; flex:none">{{ l.initials }}</div>
+                  <div style="flex:1; min-width:0">
+                    <div style="font-size:13px; font-weight:600">{{ l.name }}</div>
+                    <div style="font-size:11.5px; color:#8A9490">{{ l.role }}</div>
+                  </div>
+                  <span style="font-size:11px; font-weight:700; color:{{ l.ink }}; background:{{ l.bg }}; border-radius:99px; padding:3px 9px">{{ l.status }}</span>
+                </div>
+              </sc-for>
+              <sc-if value="{{ noLeaves }}" hint-placeholder-val="{{ false }}">
+                <div style="padding:26px 0; text-align:center; font-size:13px; color:#8A9490">No leave requests for {{ leaveFilter }}</div>
+              </sc-if>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex; flex-wrap:wrap; gap:20px">
+
+        <div style="flex:1 1 300px; min-width:0; background:#fff; border:1px solid #EAE3D5; border-radius:16px; padding:20px 22px">
+          <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px">
+            <h2 style="margin:0; flex:1; font-family:'Bricolage Grotesque'; font-size:17px; font-weight:700">Exam Result</h2>
+            <select value="{{ examName }}" onChange="{{ onExam }}" style="font-family:inherit; font-size:12px; font-weight:600; background:#F5F1E7; border:1px solid #EAE3D5; border-radius:8px; padding:5px 9px; color:#16241D; outline:none">
+              <sc-for list="{{ examOptions }}" as="e" hint-placeholder-count="2">
+                <option value="{{ e }}">{{ e }}</option>
+              </sc-for>
+            </select>
+          </div>
+          <div class="sc" style="display:flex; flex-direction:column; gap:14px; max-height:250px; overflow-y:auto">
+            <sc-for list="{{ examRows }}" as="r" hint-placeholder-count="5">
+              <div>
+                <div style="display:flex; align-items:baseline; gap:8px; margin-bottom:6px">
+                  <span style="font-size:13px; font-weight:600; flex:1">{{ r.cls }}</span>
+                  <span style="font-family:'Bricolage Grotesque'; font-size:14px; font-weight:700">{{ r.pct }}</span>
+                  <span style="font-size:11px; color:#8A9490">{{ r.count }}</span>
+                </div>
+                <div style="height:8px; background:#F0EDE3; border-radius:99px; overflow:hidden">
+                  <div style="height:8px; width:{{ r.pct }}; background:{{ r.fill }}; border-radius:99px"></div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="flex:1 1 300px; min-width:0; background:#fff; border:1px solid #EAE3D5; border-radius:16px; padding:20px 22px; display:flex; flex-direction:column">
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px">
+            <h2 style="margin:0; flex:1; font-family:'Bricolage Grotesque'; font-size:17px; font-weight:700">Fees Over Due</h2>
+            <select value="{{ overdueClass }}" onChange="{{ onOverdueClass }}" style="font-family:inherit; font-size:12px; font-weight:600; background:#F5F1E7; border:1px solid #EAE3D5; border-radius:8px; padding:5px 9px; color:#16241D; outline:none">
+              <sc-for list="{{ classOptions }}" as="c" hint-placeholder-count="3">
+                <option value="{{ c }}">{{ c }}</option>
+              </sc-for>
+            </select>
+          </div>
+          <div style="font-size:12px; color:#8A9490; margin-bottom:12px">Select students to deactivate their account</div>
+          <div class="sc" style="flex:1; display:flex; flex-direction:column; gap:2px; max-height:196px; overflow-y:auto">
+            <sc-for list="{{ overdue }}" as="o" hint-placeholder-count="4">
+              <div onClick="{{ o.onClick }}" style="display:flex; align-items:center; gap:11px; padding:8px 7px; border-radius:9px; cursor:pointer; background:{{ o.bg }}" style-hover="background:#FAF7F0">
+                <div style="width:17px; height:17px; border-radius:5px; border:1.5px solid {{ o.boxBorder }}; background:{{ o.boxBg }}; display:flex; align-items:center; justify-content:center; flex:none">
+                  <span class="ms" style="font-size:13px; color:#fff">{{ o.check }}</span>
+                </div>
+                <div style="flex:1; min-width:0">
+                  <div style="font-size:13px; font-weight:600">{{ o.name }}</div>
+                  <div style="font-size:11.5px; color:#8A9490">{{ o.meta }}</div>
+                </div>
+                <div style="font-size:13px; font-weight:700; color:#C4623F">{{ o.amt }}</div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:flex; align-items:center; gap:10px; margin-top:12px; padding-top:12px; border-top:1px solid #EFEAE0">
+            <div style="flex:1; min-width:0; font-size:12.5px; color:#8A9490">{{ overdueSummary }}</div>
+            <button onClick="{{ onOverdueSubmit }}" style="font-family:inherit; font-size:12.5px; font-weight:700; color:{{ submitInk }}; background:{{ submitBg }}; border:0; border-radius:9px; padding:8px 15px; cursor:pointer">Submit</button>
+          </div>
+        </div>
+
+        <div style="flex:1 1 300px; min-width:0; background:#fff; border:1px solid #EAE3D5; border-radius:16px; padding:20px 22px">
+          <h2 style="margin:0 0 4px; font-family:'Bricolage Grotesque'; font-size:17px; font-weight:700">Fees Details</h2>
+          <div style="font-size:12px; color:#8A9490; margin-bottom:16px">Session 2025-2026</div>
+          <div style="display:flex; align-items:center; gap:18px">
+            <div style="position:relative; width:112px; height:112px; flex:none">
+              <div style="position:absolute; inset:0; border-radius:50%; background:conic-gradient(#12503A 0 230deg, #E8A33D 230deg 309deg, #C4623F 309deg 360deg)"></div>
+              <div style="position:absolute; inset:15px; border-radius:50%; background:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center">
+                <div style="font-family:'Bricolage Grotesque'; font-size:22px; font-weight:700; line-height:1">64%</div>
+                <div style="font-size:10px; color:#8A9490; letter-spacing:0.06em; text-transform:uppercase">Collected</div>
+              </div>
+            </div>
+            <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:11px">
+              <sc-for list="{{ feeRows }}" as="f" hint-placeholder-count="3">
+                <div style="display:flex; align-items:center; gap:9px; font-size:13px">
+                  <span style="width:8px; height:8px; border-radius:50%; background:{{ f.c }}; flex:none"></span>
+                  <span style="flex:1; color:#6E7B74">{{ f.label }}</span>
+                  <span style="font-weight:700">{{ f.value }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex; flex-wrap:wrap; gap:20px">
+        <div style="flex:1.85 1 420px; min-width:0; background:#fff; border:1px solid #EAE3D5; border-radius:16px; padding:20px 22px">
+          <div style="display:flex; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px">
+            <h2 style="margin:0; flex:1; font-family:'Bricolage Grotesque'; font-size:17px; font-weight:700">Announcement</h2>
+            <a href="#" style="font-size:12.5px; font-weight:600; display:flex; align-items:center; gap:4px">New announcement <span class="ms" style="font-size:16px">add</span></a>
+          </div>
+          <div style="display:flex; flex-direction:column">
+            <sc-for list="{{ announcements }}" as="a" hint-placeholder-count="4">
+              <div onClick="{{ a.onClick }}" style="display:flex; align-items:flex-start; gap:13px; padding:13px 8px; border-top:1px solid #F2EEE4; cursor:pointer" style-hover="background:#FAF7F0">
+                <div style="width:36px; height:36px; border-radius:10px; background:{{ a.tint }}; color:{{ a.ink }}; display:flex; align-items:center; justify-content:center; flex:none">
+                  <span class="ms" style="font-size:19px">{{ a.icon }}</span>
+                </div>
+                <div style="flex:1; min-width:0">
+                  <div style="display:flex; align-items:baseline; gap:9px">
+                    <span style="font-size:13.5px; font-weight:700">{{ a.title }}</span>
+                    <span style="font-size:11px; color:#8A9490">{{ a.date }}</span>
+                  </div>
+                  <div style="font-size:12.5px; color:#6E7B74; line-height:1.55; margin-top:2px; text-wrap:pretty">{{ a.desc }}</div>
+                </div>
+                <span class="ms" style="font-size:18px; color:#B9C1BC; margin-top:9px">chevron_right</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="flex:1 1 300px; min-width:0; display:flex; flex-direction:column; gap:20px">
+          <div style="background:#fff; border:1px solid #EAE3D5; border-radius:16px; padding:20px 22px">
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px">
+              <h2 style="margin:0; flex:1; font-family:'Bricolage Grotesque'; font-size:17px; font-weight:700">Birthday</h2>
+              <select value="{{ bdayFilter }}" onChange="{{ onBday }}" style="font-family:inherit; font-size:12px; font-weight:600; background:#F5F1E7; border:1px solid #EAE3D5; border-radius:8px; padding:5px 9px; color:#16241D; outline:none">
+                <option value="Today">Today</option>
+                <option value="This Month">This Month</option>
+                <option value="Next Month">Next Month</option>
+              </select>
+            </div>
+            <div class="sc" style="display:flex; flex-direction:column; gap:2px; max-height:160px; overflow-y:auto">
+              <sc-for list="{{ birthdays }}" as="b" hint-placeholder-count="3">
+                <div style="display:flex; align-items:center; gap:11px; padding:8px 6px; border-radius:9px" style-hover="background:#FAF7F0">
+                  <div style="width:30px; height:30px; border-radius:9px; background:#FEF1DE; color:#B87A1C; display:flex; align-items:center; justify-content:center; flex:none">
+                    <span class="ms" style="font-size:17px">cake</span>
+                  </div>
+                  <div style="flex:1; min-width:0">
+                    <div style="font-size:13px; font-weight:600">{{ b.name }}</div>
+                    <div style="font-size:11.5px; color:#8A9490">{{ b.cls }}</div>
+                  </div>
+                  <div style="font-size:12px; font-weight:600; color:#6E7B74">{{ b.date }}</div>
+                </div>
+              </sc-for>
+              <sc-if value="{{ noBirthdays }}" hint-placeholder-val="{{ false }}">
+                <div style="padding:22px 0; text-align:center; font-size:13px; color:#8A9490">No birthdays {{ bdayFilter }}</div>
+              </sc-if>
+            </div>
+          </div>
+
+          <div style="background:#fff; border:1px solid #EAE3D5; border-radius:16px; padding:20px 22px">
+            <h2 style="margin:0 0 12px; font-family:'Bricolage Grotesque'; font-size:17px; font-weight:700">Holiday</h2>
+            <div class="sc" style="display:flex; flex-direction:column; gap:2px; max-height:160px; overflow-y:auto">
+              <sc-for list="{{ holidays }}" as="h" hint-placeholder-count="3">
+                <div style="display:flex; align-items:center; gap:11px; padding:8px 6px; border-radius:9px" style-hover="background:#FAF7F0">
+                  <div style="width:38px; text-align:center; flex:none">
+                    <div style="font-family:'Bricolage Grotesque'; font-size:15px; font-weight:700; line-height:1.1">{{ h.day }}</div>
+                    <div style="font-size:10px; color:#8A9490; letter-spacing:0.06em; text-transform:uppercase">{{ h.mon }}</div>
+                  </div>
+                  <div style="width:1px; height:26px; background:#EFEAE0; flex:none"></div>
+                  <div style="flex:1; min-width:0; font-size:13px; font-weight:600">{{ h.title }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="background:#fff; border:1px solid #EAE3D5; border-radius:16px; padding:20px 22px">
+            <h2 style="margin:0 0 14px; font-family:'Bricolage Grotesque'; font-size:17px; font-weight:700">Student Gender</h2>
+            <div style="display:flex; gap:5px; height:12px; border-radius:99px; overflow:hidden; margin-bottom:14px">
+              <div style="width:54%; background:#12503A"></div>
+              <div style="width:46%; background:#E8A33D"></div>
+            </div>
+            <div style="display:flex; gap:22px">
+              <sc-for list="{{ genderRows }}" as="g" hint-placeholder-count="2">
+                <div>
+                  <div style="display:flex; align-items:center; gap:7px; font-size:12px; color:#6E7B74"><span style="width:8px; height:8px; border-radius:50%; background:{{ g.c }}"></span>{{ g.label }}</div>
+                  <div style="font-family:'Bricolage Grotesque'; font-size:20px; font-weight:700; margin-top:2px">{{ g.value }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:1150}}">
+const GROUPS = [
+  { title: 'Overview', items: [
+    { label: 'Dashboard', icon: 'space_dashboard' },
+    { label: 'Report', icon: 'insert_chart', arrow: true },
+    { label: 'Session Years', icon: 'calendar_month' }
+  ]},
+  { title: 'Academics', items: [
+    { label: 'Academics', icon: 'account_balance', arrow: true },
+    { label: 'Timetable', icon: 'calendar_view_week', arrow: true },
+    { label: 'Subject Lesson', icon: 'menu_book', arrow: true },
+    { label: 'Student Assignment', icon: 'task_alt', arrow: true },
+    { label: 'Offline Exam', icon: 'quiz', arrow: true },
+    { label: 'Online Exam', icon: 'laptop_mac', arrow: true },
+    { label: 'Custom Fields', icon: 'list_alt' }
+  ]},
+  { title: 'People', items: [
+    { label: 'Students', icon: 'school', arrow: true },
+    { label: 'Teacher', icon: 'person', arrow: true },
+    { label: 'Staff Management', icon: 'badge', arrow: true },
+    { label: 'Attendance', icon: 'how_to_reg', arrow: true },
+    { label: 'Staff Attendance', icon: 'groups', arrow: true },
+    { label: 'Leave', icon: 'flight_takeoff', arrow: true },
+    { label: 'Staff Leave', icon: 'luggage', arrow: true }
+  ]},
+  { title: 'Finance', items: [
+    { label: 'Fees', icon: 'payments', arrow: true, badge: '3' },
+    { label: 'Expense', icon: 'receipt_long', arrow: true },
+    { label: 'Payroll', icon: 'credit_card', arrow: true },
+    { label: 'Payroll Slips', icon: 'description' }
+  ]},
+  { title: 'Communication', items: [
+    { label: 'Announcement', icon: 'campaign' },
+    { label: 'Notification', icon: 'notifications_active' },
+    { label: 'Student Diary', icon: 'mail' },
+    { label: 'Gallery', icon: 'photo_library' },
+    { label: 'Sliders', icon: 'view_carousel' },
+    { label: 'Holiday List', icon: 'beach_access' }
+  ]},
+  { title: 'Operations', items: [
+    { label: 'Transportations', icon: 'directions_bus', arrow: true },
+    { label: 'Certificate & ID Card', icon: 'workspace_premium', arrow: true },
+    { label: 'Web Settings', icon: 'tune', arrow: true },
+    { label: 'System Settings', icon: 'settings', arrow: true },
+    { label: 'Database Backup', icon: 'backup' }
+  ]}
+];
+
+const LEAVES = {
+  Today: [
+    { name: 'Priya Menon', role: 'Teacher · Class 4 A', status: 'Pending', ink: '#B87A1C', bg: '#FEF1DE' },
+    { name: 'Rahul Sharma', role: 'Teacher · Class 7 B', status: 'Approved', ink: '#12503A', bg: '#E7F1EB' },
+    { name: 'Anita Das', role: 'Librarian', status: 'Approved', ink: '#12503A', bg: '#E7F1EB' }
+  ],
+  Tomorrow: [
+    { name: 'Sunil Kumar', role: 'Sports Coach', status: 'Pending', ink: '#B87A1C', bg: '#FEF1DE' },
+    { name: 'Fatima Sheikh', role: 'Teacher · Class 2 A', status: 'Pending', ink: '#B87A1C', bg: '#FEF1DE' }
+  ],
+  Upcoming: [
+    { name: 'Priya Menon', role: 'Teacher · Class 4 A', status: 'Approved', ink: '#12503A', bg: '#E7F1EB' },
+    { name: 'Vikram Rao', role: 'Accountant', status: 'Rejected', ink: '#8E3B21', bg: '#FBE9E3' },
+    { name: 'Neha Gupta', role: 'Teacher · Class 9 C', status: 'Pending', ink: '#B87A1C', bg: '#FEF1DE' },
+    { name: 'Arjun Bose', role: 'Lab Assistant', status: 'Approved', ink: '#12503A', bg: '#E7F1EB' }
+  ]
+};
+
+const BDAYS = {
+  Today: [{ name: 'Meera Iyer', cls: 'Class 5 B · Roll 14', date: '07 Sep' }, { name: 'Dev Patel', cls: 'Class 8 A · Roll 03', date: '07 Sep' }],
+  'This Month': [
+    { name: 'Meera Iyer', cls: 'Class 5 B · Roll 14', date: '07 Sep' },
+    { name: 'Dev Patel', cls: 'Class 8 A · Roll 03', date: '07 Sep' },
+    { name: 'Sara Khan', cls: 'Class 3 A · Roll 21', date: '18 Sep' },
+    { name: 'Nikhil Verma', cls: 'Class 10 B · Roll 09', date: '26 Sep' }
+  ],
+  'Next Month': [
+    { name: 'Tara Joshi', cls: 'Class 6 A · Roll 11', date: '04 Oct' },
+    { name: 'Rohan Mehta', cls: 'Class 9 A · Roll 27', date: '22 Oct' }
+  ]
+};
+
+const OVERDUE = {
+  'Class 1 A': [
+    { name: 'Aarav Nair', meta: 'Term 2 · 41 days late', amt: '₹ 4,500' },
+    { name: 'Ishita Roy', meta: 'Term 2 · 18 days late', amt: '₹ 2,000' },
+    { name: 'Kabir Shah', meta: 'Term 1 + 2 · 66 days late', amt: '₹ 6,750' }
+  ],
+  'Class 2 A': [
+    { name: 'Zoya Ahmed', meta: 'Term 2 · 12 days late', amt: '₹ 3,200' },
+    { name: 'Aditya Sinha', meta: 'Transport · 30 days late', amt: '₹ 1,400' }
+  ],
+  'Class 3 B': [
+    { name: 'Rehan Qureshi', meta: 'Term 2 · 9 days late', amt: '₹ 2,800' }
+  ]
+};
+
+const EXAMS = {
+  'Mid Term 2025': [
+    { cls: 'Class 1 A', pct: '82%', count: '38 students', fill: '#12503A' },
+    { cls: 'Class 2 A', pct: '76%', count: '41 students', fill: '#12503A' },
+    { cls: 'Class 3 B', pct: '68%', count: '36 students', fill: '#E8A33D' },
+    { cls: 'Class 4 A', pct: '91%', count: '44 students', fill: '#12503A' },
+    { cls: 'Class 5 B', pct: '59%', count: '39 students', fill: '#C4623F' }
+  ],
+  'Unit Test 1': [
+    { cls: 'Class 1 A', pct: '74%', count: '38 students', fill: '#12503A' },
+    { cls: 'Class 2 A', pct: '81%', count: '41 students', fill: '#12503A' },
+    { cls: 'Class 3 B', pct: '63%', count: '36 students', fill: '#E8A33D' },
+    { cls: 'Class 4 A', pct: '88%', count: '44 students', fill: '#12503A' }
+  ]
+};
+
+const EXPENSE = {
+  'This year': { total: '₹ 18,42,000', note: '+12% vs last year', months: ['Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar'], vals: [120,180,90,240,160,300,210,140,260,190,120,170] },
+  'Last year': { total: '₹ 16,44,000', note: 'Closed session', months: ['Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar'], vals: [140,120,150,190,170,210,180,200,230,160,140,150] },
+  'Quarter': { total: '₹ 5,12,000', note: '+4% vs Q1', months: ['Jul','Aug','Sep'], vals: [240,160,300] }
+};
+
+const ATT = { 'Class 1 A': 88, 'Class 2 A': 94, 'Class 3 B': 79 };
+
+class Component extends DCLogic {
+  state = {
+    active: 'Dashboard', query: '', cacheLabel: 'Cache clear',
+    leaveFilter: 'Today', bdayFilter: 'Today', attClass: 'Class 1 A',
+    overdueClass: 'Class 1 A', selected: [], examName: 'Mid Term 2025', expenseTab: 'This year', bar: 5
+  };
+
+  renderVals() {
+    const s = this.state;
+    const q = s.query.trim().toLowerCase();
+    const groups = GROUPS.map(g => ({
+      title: g.title,
+      items: g.items.filter(i => !q || i.label.toLowerCase().includes(q)).map(i => ({
+        ...i,
+        arrow: !!i.arrow,
+        badge: i.badge || null,
+        bg: s.active === i.label ? 'rgba(198,232,111,0.16)' : 'transparent',
+        ink: s.active === i.label ? '#C6E86F' : '#CFE3D8',
+        weight: s.active === i.label ? 700 : 500,
+        onClick: () => this.setState({ active: i.label })
+      }))
+    })).filter(g => g.items.length);
+
+    const ex = EXPENSE[s.expenseTab];
+    const maxV = Math.max(...ex.vals);
+    const leaves = LEAVES[s.leaveFilter] || [];
+    const birthdays = BDAYS[s.bdayFilter] || [];
+    const rows = OVERDUE[s.overdueClass] || [];
+    const total = s.selected.reduce((t, n) => {
+      const r = rows.find(x => x.name === n);
+      return t + (r ? Number(r.amt.replace(/[^0-9]/g, '')) : 0);
+    }, 0);
+    const attPct = ATT[s.attClass];
+
+    return {
+      groups, query: s.query, cacheLabel: s.cacheLabel,
+      crumb: s.active === 'Dashboard' ? 'Demo Public School · DEMO001' : 'Demo Public School · DEMO001',
+      heading: s.active,
+      onQuery: e => this.setState({ query: e.target.value }),
+      onCache: () => { this.setState({ cacheLabel: 'Cache cleared' }); setTimeout(() => this.setState({ cacheLabel: 'Cache clear' }), 1600); },
+
+      stats: [
+        { label: 'Total Teachers', value: 24, icon: 'person', tint: '#E7F1EB', ink: '#12503A', delta: '+2', deltaInk: '#12503A', deltaBg: '#E7F1EB', spark: [10,13,11,16,14,19,17,22].map(h => h + 'px') },
+        { label: 'Total Students', value: 486, icon: 'school', tint: '#FEF1DE', ink: '#B87A1C', delta: '+31', deltaInk: '#B87A1C', deltaBg: '#FEF1DE', spark: [12,14,13,17,20,18,23,26].map(h => h + 'px') },
+        { label: 'Total Guardians', value: 402, icon: 'family_restroom', tint: '#E8EEFB', ink: '#3A5A9B', delta: '+27', deltaInk: '#3A5A9B', deltaBg: '#E8EEFB', spark: [11,12,15,14,18,17,21,24].map(h => h + 'px') },
+        { label: 'Total Classes', value: 12, icon: 'meeting_room', tint: '#FBE9E3', ink: '#8E3B21', delta: '0', deltaInk: '#8E7A72', deltaBg: '#F3EFE5', spark: [16,16,16,16,16,16,16,16].map(h => h + 'px') },
+        { label: 'Total Streams', value: 3, icon: 'account_tree', tint: '#EDE7F6', ink: '#5B3E8E', delta: '+1', deltaInk: '#5B3E8E', deltaBg: '#EDE7F6', spark: [8,8,10,10,13,13,16,19].map(h => h + 'px') }
+      ],
+
+      expenseTabs: Object.keys(EXPENSE).map(k => ({
+        label: k, onClick: () => this.setState({ expenseTab: k, bar: 0 }),
+        bg: s.expenseTab === k ? '#fff' : 'transparent',
+        ink: s.expenseTab === k ? '#12503A' : '#8A9490'
+      })),
+      expenseTotal: ex.total, expenseNote: ex.note,
+      expenseBars: ex.months.map((m, i) => ({
+        m, h: Math.round(ex.vals[i] / maxV * 230) + 'px',
+        amount: s.bar === i ? '₹' + (ex.vals[i] * 610).toLocaleString('en-IN') : '',
+        labelInk: '#12503A',
+        fill: s.bar === i ? '#12503A' : '#CFE0D6',
+        mWeight: s.bar === i ? 700 : 500,
+        onClick: () => this.setState({ bar: i })
+      })),
+
+      classOptions: Object.keys(ATT),
+      attClass: s.attClass, onAttClass: e => this.setState({ attClass: e.target.value }),
+      attPct: attPct + '%', attDeg: Math.round(attPct * 3.6) + 'deg',
+      attRows: [
+        { label: 'Present', value: Math.round(38 * attPct / 100), c: '#C6E86F' },
+        { label: 'Absent', value: 38 - Math.round(38 * attPct / 100), c: 'rgba(255,255,255,0.3)' },
+        { label: 'Half day', value: 1, c: '#E8A33D' }
+      ],
+
+      leaveFilter: s.leaveFilter, onLeaveFilter: e => this.setState({ leaveFilter: e.target.value }),
+      leaves: leaves.map(l => ({ ...l, initials: l.name.split(' ').map(w => w[0]).join('') })),
+      noLeaves: leaves.length === 0,
+
+      examOptions: Object.keys(EXAMS), examName: s.examName,
+      onExam: e => this.setState({ examName: e.target.value }),
+      examRows: EXAMS[s.examName],
+
+      overdueClass: s.overdueClass,
+      onOverdueClass: e => this.setState({ overdueClass: e.target.value, selected: [] }),
+      overdue: rows.map(r => {
+        const on = s.selected.includes(r.name);
+        return { ...r, bg: on ? '#F5F1E7' : 'transparent', boxBorder: on ? '#12503A' : '#CFC9BA', boxBg: on ? '#12503A' : '#fff', check: on ? 'check' : '',
+          onClick: () => this.setState(st => ({ selected: st.selected.includes(r.name) ? st.selected.filter(n => n !== r.name) : [...st.selected, r.name] })) };
+      }),
+      overdueSummary: s.selected.length ? s.selected.length + ' selected · ₹ ' + total.toLocaleString('en-IN') : rows.length + ' students overdue',
+      submitBg: s.selected.length ? '#C4623F' : '#F3EFE5',
+      submitInk: s.selected.length ? '#fff' : '#B0AAA0',
+      onOverdueSubmit: () => { if (s.selected.length) this.setState({ selected: [] }); },
+
+      feeRows: [
+        { label: 'Collected', value: '₹ 12.4L', c: '#12503A' },
+        { label: 'Pending', value: '₹ 4.3L', c: '#E8A33D' },
+        { label: 'Overdue', value: '₹ 2.8L', c: '#C4623F' }
+      ],
+
+      announcements: [
+        { title: 'Annual Day', date: '05 Sep', desc: 'Annual day rehearsal starts Monday. All class teachers to submit participant lists by Friday.', icon: 'celebration', tint: '#FEF1DE', ink: '#B87A1C' },
+        { title: 'Fee Reminder', date: '03 Sep', desc: 'Term 2 fees are due by the 30th. Late payment attracts a ₹200 charge per week.', icon: 'payments', tint: '#FBE9E3', ink: '#8E3B21' },
+        { title: 'Parent Teacher Meeting', date: '01 Sep', desc: 'PTM on Saturday, 09:00–13:00. Slots open in the parent app from Thursday.', icon: 'groups', tint: '#E7F1EB', ink: '#12503A' },
+        { title: 'Sports Week', date: '28 Aug', desc: 'Athletics trials this week. Students must bring consent forms signed by a guardian.', icon: 'sports_soccer', tint: '#E8EEFB', ink: '#3A5A9B' }
+      ].map(a => ({ ...a, onClick: () => {} })),
+
+      bdayFilter: s.bdayFilter, onBday: e => this.setState({ bdayFilter: e.target.value }),
+      birthdays, noBirthdays: birthdays.length === 0,
+
+      holidays: [
+        { day: '02', mon: 'Oct', title: 'Gandhi Jayanti' },
+        { day: '12', mon: 'Oct', title: 'Dussehra' },
+        { day: '01', mon: 'Nov', title: 'Diwali Break' },
+        { day: '25', mon: 'Dec', title: 'Christmas' }
+      ],
+      genderRows: [
+        { label: 'Boys', value: 262, c: '#12503A' },
+        { label: 'Girls', value: 224, c: '#E8A33D' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

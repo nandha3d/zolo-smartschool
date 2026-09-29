@@ -2,436 +2,297 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
+    <title>Student ID Cards</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+    @php
+        $selectedDesign = $template_design ?? ($template_id ?? 'wave');
+        // Map legacy template IDs if provided
+        $legacyMap = [
+            'v1' => 'wave', 'v2' => 'classic', 'v3' => 'diamond', 'v4' => 'diagonal',
+            'v5' => 'hexagon', 'v6' => 'minimal', 'v7' => 'swoosh', 'v8' => 'chevron',
+            'v9' => 'wave', 'v10' => 'classic',
+            'h1' => 'h_split', 'h2' => 'h_wave', 'h3' => 'h_diagonal', 'h4' => 'h_classic',
+            'h5' => 'h_split', 'h6' => 'h_minimal', 'h7' => 'h_wave', 'h8' => 'h_diagonal',
+            'h9' => 'h_classic', 'h10' => 'h_minimal',
+        ];
+        if (isset($legacyMap[$selectedDesign])) {
+            $selectedDesign = $legacyMap[$selectedDesign];
+        }
+
+        $primary = $primary_color ?? '#1E293B';
+        $accent = $accent_color ?? '#06B6D4';
+
+        $theme = [
+            'primary'      => $primary,
+            'accent'       => $accent,
+            'text'         => '#FFFFFF',
+            'body_bg'      => '#FFFFFF',
+            'border'       => '#CBD5E1',
+            'photo_border' => $accent,
+        ];
+
+        $isLandscape = str_starts_with($selectedDesign, 'h');
+        $printFormat = $print_format ?? 'single'; // 'single', 'a4', 'a3'
+        $showGuides = !empty($show_cut_guides);
+    @endphp
 
     <style>
         * {
+            box-sizing: border-box;
             font-family: 'DejaVu Sans', sans-serif;
         }
         html, body {
-            margin: 0px !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            background: #ffffff;
         }
-        .full-width
-        {
-            width: 100%;
+        .page-break {
+            page-break-after: always;
         }
 
-        .header th{
-            padding: 10px 0px;
-            background-color: {{ $settings['header_color'] ?? '#00edff' }};
-            color: {{ $settings['header_footer_text_color'] ?? 'black' }};
+        /* Base Card Styling */
+        .id-card-wrapper {
+            border: 1px solid {{ $theme['border'] }};
+            position: relative;
+            overflow: hidden;
+            border-radius: 4px;
         }
-        table {
-            border-collapse: collapse;
-            border: none;
-            font-size: 14px;
-            z-index: 1;
-        }
-        .student-image {
-            width: 30%;
-            padding: 0px 10px;
-            text-align: center;
-            vertical-align: middle;
-            height: 80px;
-        }
-        .student-data {
-            text-align: left;
-            padding-left: 10px;
-            padding: 2px 5px;
-        }
-        .card-title {
-            padding: 6px 0px;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-        }
-        .school-name {
-            padding-right: 10px !important;
-            text-align: right;
-            font-size: 15px;
-            text-transform: uppercase;
-            font-weight: bold;
-            border-bottom-right-radius: 10px;
-        }
-        
-        .footer {
-            background-color: {{ $settings['footer_color'] ?? '#56cc99' }};
-            color: {{ $settings['header_footer_text_color'] ?? 'black' }};
-            position: fixed;
+
+        /* Dimension for Single PVC mode */
+        .single-card-mode .id-card-wrapper {
             width: 100%;
-            padding: 2px 0px;
-            font-size: 12px;
-            bottom: 0px;
-            height: 15px;
-            text-align: right;
-            letter-spacing: 1.5px;
-            z-index: 1;
-            padding-bottom: 5px;
+            height: 100%;
         }
-        .school-logo {
-            border-bottom-left-radius: 10px;
+
+        /* Physical Dimensions for A4 / A3 sheets (CR80 standard 85.6mm x 54mm) */
+        .card-horizontal {
+            width: 85.6mm;
+            height: 54mm;
         }
-        .card-body {
-            height: {{ $settings['page_height'] ?? '100%' }};
+        .card-vertical {
+            width: 54mm;
+            height: 85.6mm;
         }
-        .vertical-student-data {
-            text-align: left;
-            padding: 2px 2px 5px 10px;
+
+        /* Sheet Table Grid */
+        .sheet-table {
+            border-collapse: collapse;
+            margin: 0 auto;
         }
-        .signature {
-            background-size: contain;
-            background-position: center center;
-            background-repeat: no-repeat;
-            padding: 10px;
-            position: fixed;
-            bottom: 35px;
-            right: 10px;   
-        }
-        .vertical-school-name {
-            padding: 10px 10px !important;
+        .cut-cell {
+            vertical-align: middle;
             text-align: center;
-            font-size: 15px;
-            text-transform: uppercase;
+            padding: 2.5mm;
+        }
+        .cut-cell-guided {
+            border: 1px dashed #94A3B8;
+        }
+
+        /* Card Header */
+        .card-header-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: {{ $theme['primary'] }};
+            border-bottom: 2px solid {{ $theme['accent'] }};
+        }
+        .header-logo-cell {
+            padding: 4px 6px;
+            vertical-align: middle;
+            width: 30%;
+        }
+        .header-school-cell {
+            padding: 4px 6px;
+            text-align: right;
+            vertical-align: middle;
+            color: {{ $theme['text'] }};
+            font-size: 8pt;
             font-weight: bold;
-            border-bottom-right-radius: 10px;
-            border-bottom-left-radius: 10px;
+            text-transform: uppercase;
+            line-height: 1.1;
+        }
+        .card-title-bar {
+            background: {{ $theme['accent'] }};
+            color: #ffffff;
+            font-size: 6pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 2px 5px;
+            text-align: center;
+        }
+
+        /* Card Footer */
+        .card-footer-table {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: {{ $theme['primary'] }};
+            border-top: 1.5px solid {{ $theme['accent'] }};
+            color: {{ $theme['text'] }};
+            font-size: 5.5pt;
+            padding: 2.5px 6px;
+        }
+
+        /* Photo Styles */
+        .student-photo-frame {
+            border: 1.5px solid {{ $theme['photo_border'] }};
+            border-radius: {{ (isset($settings['profile_image_style']) && $settings['profile_image_style'] == 'round') ? '50%' : '4px' }};
+            object-fit: cover;
+        }
+
+        /* Data Fields Table */
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 6.5pt;
+            line-height: 1.25;
+        }
+        .info-label {
+            width: 35%;
+            font-weight: bold;
+            color: {{ !empty($theme['dark']) ? '#94A3B8' : '#475569' }};
+            padding: 1px 2px;
+            text-align: left;
+        }
+        .info-value {
+            width: 65%;
+            color: {{ !empty($theme['dark']) ? '#F8FAFC' : '#0F172A' }};
+            padding: 1px 2px;
+            text-align: left;
+        }
+
+        .barcode-table {
+            border-collapse: collapse;
+            margin: 0;
+        }
+
+        .watermark-bg {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0.08;
+            width: 120px;
+            z-index: 0;
         }
     </style>
-
-    @if (isset($settings['profile_image_style']) && $settings['profile_image_style'] == 'squre')
-        <style>
-            .student-profile {
-                border: 3px solid black;
-                border-radius: 6px;
-                background-size: contain;
-                background-position: center center;
-                background-repeat: no-repeat;
-                padding: 2px;
-        }
-        </style>
-    @else
-        <style>
-            .student-profile {
-                border: 3px solid black;
-                border-radius: 80px;
-                background-size: contain;
-                background-position: center center;
-                background-repeat: no-repeat;
-                padding: 2px;
-        }
-        </style>
-    @endif
-
-    @if (isset($settings['layout_type']) && $settings['layout_type'] == 'horizontal')
-        <style>
-            .background-image {
-                position: fixed;
-                width: auto;
-                padding: 5px;
-                height: auto;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                opacity: 0.2;
-                z-index: -1;
-            }
-            .background_image {
-                z-index: -1;
-                object-fit: cover;
-                background-size: contain;
-                background-position: center center;
-                background-repeat: no-repeat;
-            }
-
-        </style>
-    @else
-        <style>
-            .background-image {
-                position: fixed;
-                width: auto;
-                padding: 5px;
-                height: auto;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                opacity: 0.2;
-                z-index: -1;
-            }
-            .background_image {
-                z-index: -1;
-                object-fit: cover;
-                background-size: contain;
-                background-position: center center;
-                background-repeat: no-repeat;
-            }
-        </style>
-    @endif
 </head>
-<body>
-    @foreach ($students as $key => $student)
-    <div class="card-body">
-        @if ($settings['layout_type'] == 'horizontal')
-            
-            <table class="table full-width">
-                <tr class="header">
-                    <th class="school-logo">
-                        @if ($settings['horizontal_logo'] ?? '')
-                            <img height="40" src="{{ public_path('storage/').$settings['horizontal_logo'] }}" alt="">
-                        @else
-                            <img height="40" src="{{ public_path('assets/horizontal-logo2.svg') }}" alt="">
-                        @endif
-                    </th>
-                    <th class="school-name" colspan="2">{{ $settings['school_name'] }}</th>
-                </tr>
-                <tr>
-                    <th class="card-title" colspan="3">Student Identification Card</th>
-                </tr>
-                <tr>
-                    <td class="student-image" rowspan="{{ count($settings['student_id_card_fields']) + count($student->extra_student_details) }}">
-                        @if ($student->getRawOriginal('image'))
-                            <img class="student-profile" height="120" width="120" align="center" src="{{ public_path('storage/').$student->getRawOriginal('image') }}" alt="">
-                        @else
-                            <img class="student-profile" height="120" width="120" align="center" src="{{ public_path('assets/dummy_logo.jpg') }}" alt="">    
-                        @endif
-                        
-                    </td>
-                    @if (in_array('student_name',$settings['student_id_card_fields']))
-                        <th class="student-data">Student Name :</th>
-                        <td>{{ $student->full_name }}</td>
-                    @endif
-                    
-                </tr>
-                @if (in_array('class_section',$settings['student_id_card_fields']))
-                <tr>
-                    <th class="student-data">Class Section :</th>
-                    <td>{{ $student->student->class_section->full_name }}</td>
-                </tr>
-                @endif
+<body class="{{ $printFormat == 'single' ? 'single-card-mode' : '' }}">
 
-                @if (in_array('roll_no',$settings['student_id_card_fields']))
-                <tr>
-                    <th class="student-data">Roll No. :</th>
-                    <td>{{ $student->student->roll_number }}</td>
-                </tr>
-                @endif
+    @if ($printFormat === 'single')
+        {{-- =========================================================================
+             FORMAT 1: SINGLE CARD PER PAGE (CR80 / Dedicated PVC Card Printer)
+             ========================================================================= --}}
+        @foreach ($students as $key => $student)
+            @include('students.id_card_item', [
+                'student' => $student,
+                'settings' => $settings,
+                'sessionYear' => $sessionYear,
+                'valid_until' => $valid_until,
+                'theme' => $theme,
+                'isLandscape' => $isLandscape,
+                'design' => $selectedDesign
+            ])
 
-                @if (in_array('dob',$settings['student_id_card_fields']))
-                <tr>
-                    <th class="student-data">DOB :</th>
-                    <td>{{ date($settings['date_format'],strtotime($student->dob)) }}</td>
-                </tr>
-                @endif
+            @if (!$loop->last)
+                <div class="page-break"></div>
+            @endif
+        @endforeach
 
-                @if (in_array('gender',$settings['student_id_card_fields']))
-                <tr>
-                    <th class="student-data">Gender :</th>
-                    <td style="text-transform: capitalize">{{ $student->gender }}</td>
-                </tr>
-                @endif
+    @elseif ($printFormat === 'a4')
+        {{-- =========================================================================
+             FORMAT 2: COMBINED A4 SHEET (8–9 Cards Per Page with Cutting Guides)
+             ========================================================================= --}}
+        @php
+            // A4 Layout:
+            // Horizontal cards: 2 columns x 4 rows = 8 cards / page
+            // Vertical cards: 3 columns x 3 rows = 9 cards / page
+            $cols = $isLandscape ? 2 : 3;
+            $rows = $isLandscape ? 4 : 3;
+            $perPage = $cols * $rows;
+            $chunks = $students->chunk($perPage);
+        @endphp
 
-                @if (in_array('session_year',$settings['student_id_card_fields']))
-                <tr>
-                    <th class="student-data">Session Year :</th>
-                    <td>{{ $sessionYear->name }}</td>
-                </tr>
-                @endif
-
-                @if (in_array('guardian_name',$settings['student_id_card_fields']))
-                <tr>
-                    <th class="student-data">Guardian Name :</th>
-                    <td>{{ $student->student->guardian->full_name }}</td>
-                </tr>
-                @endif
-
-                @if (in_array('guardian_contact',$settings['student_id_card_fields']))
-                <tr>
-                    <th class="student-data">Guardian Contact :</th>
-                    <td>{{ $student->student->guardian->mobile }}</td>
-                </tr>
-                @endif
-
-                <?php $processedFieldsHorizontal = []; ?>
-                @foreach ($student->extra_student_details as $data)
-                    @php
-                        // Skip this iteration if we've already processed a field with this name
-                        $fieldName = $data->form_field->name;
-                        if (isset($processedFieldsHorizontal[$fieldName])) continue;
-                        $processedFieldsHorizontal[$fieldName] = true;
-                    @endphp
-                    
-                    @if (in_array($data->form_field->type, ['text','number','radio','textarea']))
-                        <tr>
-                            <th class="vertical-student-data">{{ $data->form_field->name }} :</th>
-                            <td>{{ $data->data }}</td>
-                        </tr>
-                    @elseif($data->form_field->type == 'dropdown')
-                        <tr>
-                            <th class="vertical-student-data">{{ $data->form_field->name }} :</th>
-                            <td>{!! isset($data->form_field->default_values[$data->data]) ? $data->form_field->default_values[$data->data] : $data->data !!}</td>
-                        </tr>
-                    @elseif($data->form_field->type == 'checkbox')
-                        <tr>
-                            <th class="vertical-student-data">{{ $data->form_field->name }} :</th>
-                            <td>{!! implode(",",json_decode($data->data ?? '[]')) !!}</td>
-                        </tr>
-                    @endif
-                @endforeach
-
-                <tr>
-                    <td></td>
-                    <td colspan="">
-                        @if ($settings['signature'] ?? '')
-                            <img class="" height="40" class="signature" width="100" align="center" src="{{ public_path('storage/').$settings['signature'] }}" alt="">
-                            <span style="position: fixed;bottom:25px;right:40px"><b>Signature</b></span>
-                        @endif
-                    </td>
-                </tr>
+        @foreach ($chunks as $chunk)
+            @php $chunkItems = $chunk->values(); @endphp
+            <table class="sheet-table" style="width: 190mm; margin: 4mm auto;">
+                @for ($r = 0; $r < $rows; $r++)
+                    <tr>
+                        @for ($c = 0; $c < $cols; $c++)
+                            @php $idx = $r * $cols + $c; @endphp
+                            <td class="cut-cell {{ $showGuides ? 'cut-cell-guided' : '' }}" style="width: {{ 100 / $cols }}%;">
+                                @if (isset($chunkItems[$idx]))
+                                    @include('students.id_card_item', [
+                                        'student' => $chunkItems[$idx],
+                                        'settings' => $settings,
+                                        'sessionYear' => $sessionYear,
+                                        'valid_until' => $valid_until,
+                                        'theme' => $theme,
+                                        'isLandscape' => $isLandscape,
+                                        'design' => $selectedDesign
+                                    ])
+                                @else
+                                    <div style="height: {{ $isLandscape ? '54mm' : '85.6mm' }};"></div>
+                                @endif
+                            </td>
+                        @endfor
+                    </tr>
+                @endfor
             </table>
-        @else
-            {{-- Vertical --}}
-            <table class="table full-width">
-                <tr class="header">
-                    <th class="vertical-school-name" colspan="2">{{ $settings['school_name'] }}</th>
-                </tr>
-                <tr>
-                    <th colspan="2">
-                        @if ($settings['horizontal_logo'] ?? '')
-                            <img height="40" style="padding-top: 5px" src="{{ public_path('storage/').$settings['horizontal_logo'] }}" alt="">
-                        @else
-                            <img height="40" style="padding-top: 5px" src="{{ public_path('assets/horizontal-logo2.svg') }}" alt="">
-                        @endif
-                    </th>
-                </tr>
-                <tr>
-                    <th class="card-title" colspan="2" style="font-size: 12px">Student Identification Card</th>
-                </tr>
-                <tr>
-                    <td class="student-image" colspan="2">
-                        @if ($student->getRawOriginal('image'))
-                            <img class="student-profile" height="120" width="120" align="center" src="{{ public_path('storage/').$student->getRawOriginal('image') }}" alt="">
-                        @else
-                            <img class="student-profile" height="120" width="120" align="center" src="{{ public_path('assets/dummy_logo.jpg') }}" alt="">    
-                        @endif
-                    </td>
-                </tr>
 
-                @if (in_array('student_name',$settings['student_id_card_fields']))
-                <tr>
-                    <th class="vertical-student-data">Name :</th>
-                    <td>{{ $student->full_name }}</td>
-                </tr>
-                @endif
+            @if (!$loop->last)
+                <div class="page-break"></div>
+            @endif
+        @endforeach
 
-                @if (in_array('class_section',$settings['student_id_card_fields']))
-                <tr>
-                    <th class="vertical-student-data">Class Section :</th>
-                    <td>{{ $student->student->class_section->full_name }}</td>
-                </tr>
-                @endif
+    @elseif ($printFormat === 'a3')
+        {{-- =========================================================================
+             FORMAT 3: COMBINED A3 SHEET (16–18 Cards Per Page for Press Printing)
+             ========================================================================= --}}
+        @php
+            // A3 Layout:
+            // Horizontal cards: 3 columns x 6 rows = 18 cards / page
+            // Vertical cards: 4 columns x 4 rows = 16 cards / page
+            $cols = $isLandscape ? 3 : 4;
+            $rows = $isLandscape ? 6 : 4;
+            $perPage = $cols * $rows;
+            $chunks = $students->chunk($perPage);
+        @endphp
 
-                @if (in_array('roll_no',$settings['student_id_card_fields']))
-                <tr>
-                    <th class="vertical-student-data">Roll No. :</th>
-                    <td>{{ $student->student->roll_number }}</td>
-                </tr>
-                @endif
-
-                @if (in_array('dob',$settings['student_id_card_fields']))
-                <tr>
-                    <th class="vertical-student-data">DOB :</th>
-                    <td>{{ date($settings['date_format'],strtotime($student->dob)) }}</td>
-                </tr>
-                @endif
-
-                @if (in_array('gender',$settings['student_id_card_fields']))
-                <tr>
-                    <th class="vertical-student-data">Gender :</th>
-                    <td style="text-transform: capitalize">{{ $student->gender }}</td>
-                </tr>
-                @endif
-
-                @if (in_array('session_year',$settings['student_id_card_fields']))
-                <tr>
-                    <th class="vertical-student-data">Session Year :</th>
-                    <td>{{ $sessionYear->name }}</td>
-                </tr>
-                @endif
-
-                @if (in_array('guardian_name',$settings['student_id_card_fields']))
-                <tr>
-                    <th class="vertical-student-data">Guardian Name :</th>
-                    <td>{{ $student->student->guardian->full_name }}</td>
-                </tr>
-                @endif
-
-                @if (in_array('guardian_contact',$settings['student_id_card_fields']))
-                <tr>
-                    <th class="vertical-student-data">Guardian Contact :</th>
-                    <td>{{ $student->student->guardian->mobile }}</td>
-                </tr>
-                @endif
-
-                <?php $processedFieldsVertical = []; ?>
-                @foreach ($student->extra_student_details as $data)
-                    @php
-                        // Skip this iteration if we've already processed a field with this name
-                        $fieldName = $data->form_field->name;
-                        if (isset($processedFieldsVertical[$fieldName])) continue;
-                        $processedFieldsVertical[$fieldName] = true;
-                    @endphp
-                    
-                    @if (in_array($data->form_field->type, ['text','number','radio','textarea']))
-                        <tr>
-                            <th class="vertical-student-data">{{ $data->form_field->name }} :</th>
-                            <td>{{ $data->data }}</td>
-                        </tr>
-                    @elseif($data->form_field->type == 'dropdown')
-                        <tr>
-                            <th class="vertical-student-data">{{ $data->form_field->name }} :</th>
-                            <td>{!! isset($data->form_field->default_values[$data->data]) ? $data->form_field->default_values[$data->data] : $data->data !!}</td>
-                        </tr>
-                    @elseif($data->form_field->type == 'checkbox')
-                        <tr>
-                            <th class="vertical-student-data">{{ $data->form_field->name }} :</th>
-                            <td>{!! implode(",",json_decode($data->data ?? '[]')) !!}</td>
-                        </tr>
-                    @endif
-                @endforeach
-
-                <tr>
-                    <td></td>
-                    <td>
-                        @if ($settings['signature'] ?? '')
-                            <img class="" height="40" class="signature" width="100" align="center" src="{{ public_path('storage/').$settings['signature'] }}" alt="">
-                            <span style="position: fixed;bottom:25px;right:40px"><b>Signature</b></span>
-                        @endif
-                    </td>
-                </tr>
+        @foreach ($chunks as $chunk)
+            @php $chunkItems = $chunk->values(); @endphp
+            <table class="sheet-table" style="width: 275mm; margin: 5mm auto;">
+                @for ($r = 0; $r < $rows; $r++)
+                    <tr>
+                        @for ($c = 0; $c < $cols; $c++)
+                            @php $idx = $r * $cols + $c; @endphp
+                            <td class="cut-cell {{ $showGuides ? 'cut-cell-guided' : '' }}" style="width: {{ 100 / $cols }}%;">
+                                @if (isset($chunkItems[$idx]))
+                                    @include('students.id_card_item', [
+                                        'student' => $chunkItems[$idx],
+                                        'settings' => $settings,
+                                        'sessionYear' => $sessionYear,
+                                        'valid_until' => $valid_until,
+                                        'theme' => $theme,
+                                        'isLandscape' => $isLandscape,
+                                        'design' => $selectedDesign
+                                    ])
+                                @else
+                                    <div style="height: {{ $isLandscape ? '54mm' : '85.6mm' }};"></div>
+                                @endif
+                            </td>
+                        @endfor
+                    </tr>
+                @endfor
             </table>
-        @endif
-        <div class="footer">
-            <span class="footer-text" style="padding-right:10px;">Valid Until {{ $valid_until }}</span>
-        </div>
-        @if (isset($settings['layout_type']) && $settings['layout_type'] == 'horizontal')
-            <div class="background-image">
-                @if ($settings['background_image'] ?? '')
-                    <img src="{{ public_path('storage/').$settings['background_image'] }}" class="background_image" height="140" width="360" alt="">
-                    
-                @endif
-            </div>
-        @else
-            <div class="background-image">
-                @if ($settings['background_image'] ?? '')
-                    <img src="{{ public_path('storage/').$settings['background_image'] }}" class="background_image" height="140" width="280" alt="">
-                    
-                @endif
-            </div>
-        @endif
-        
-        
-    </div>
-    @endforeach
+
+            @if (!$loop->last)
+                <div class="page-break"></div>
+            @endif
+        @endforeach
+    @endif
+
 </body>
 </html>
