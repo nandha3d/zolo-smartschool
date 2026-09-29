@@ -521,6 +521,34 @@ Route::group(['middleware' => ['Role', 'checkSchoolStatus', 'status','SwitchData
         Route::group(['prefix' => 'timetable'], static function () {
             Route::put('/settings', [TimetableController::class, 'updateTimetableSettings'])->name('timetable.settings');
             Route::post('/auto-generate', [TimetableController::class, 'autoGenerate'])->name('timetable.auto-generate');
+            Route::post('/generate', [TimetableController::class, 'generatePreview'])->name('timetable.generate');
+            Route::post('/generation/{id}/apply', [TimetableController::class, 'applyGeneration'])->name('timetable.generation.apply');
+            Route::post('/generation/{id}/cancel', [TimetableController::class, 'cancelGeneration'])->name('timetable.generation.cancel');
+            Route::post('/repair', [TimetableController::class, 'repair'])->name('timetable.repair');
+            Route::post('/lock/{id}', [TimetableController::class, 'lockSlot'])->name('timetable.lock');
+            Route::post('/unlock/{id}', [TimetableController::class, 'unlockSlot'])->name('timetable.unlock');
+
+            Route::get('/templates', [TimetableController::class, 'getTemplates'])->name('timetable.templates.index');
+            Route::post('/templates', [TimetableController::class, 'createTemplate'])->name('timetable.templates.store');
+            Route::put('/templates/{id}', [TimetableController::class, 'updateTemplate'])->name('timetable.templates.update');
+            Route::delete('/templates/{id}', [TimetableController::class, 'deleteTemplate'])->name('timetable.templates.destroy');
+            Route::post('/templates/{id}/set-default', [TimetableController::class, 'setDefaultTemplate'])->name('timetable.templates.default');
+
+            Route::get('/resources', [TimetableController::class, 'getResources'])->name('timetable.resources.index');
+            Route::post('/resources', [TimetableController::class, 'createResource'])->name('timetable.resources.store');
+            Route::put('/resources/{id}', [TimetableController::class, 'updateResource'])->name('timetable.resources.update');
+            Route::delete('/resources/{id}', [TimetableController::class, 'deleteResource'])->name('timetable.resources.destroy');
+
+            Route::get('/availability/teacher/{teacher_id}', [TimetableController::class, 'getTeacherAvailability'])->name('timetable.availability.teacher');
+            Route::post('/availability/teacher/{teacher_id}', [TimetableController::class, 'saveTeacherAvailability'])->name('timetable.availability.teacher.save');
+            Route::get('/availability/class/{class_section_id}', [TimetableController::class, 'getClassAvailability'])->name('timetable.availability.class');
+            Route::post('/availability/class/{class_section_id}', [TimetableController::class, 'saveClassAvailability'])->name('timetable.availability.class.save');
+            Route::get('/availability/resource/{resource_id}', [TimetableController::class, 'getResourceAvailability'])->name('timetable.availability.resource');
+            Route::post('/availability/resource/{resource_id}', [TimetableController::class, 'saveResourceAvailability'])->name('timetable.availability.resource.save');
+
+            Route::get('/requirements/{class_section_id}', [TimetableController::class, 'getRequirements'])->name('timetable.requirements.index');
+            Route::post('/requirements/{class_section_id}', [TimetableController::class, 'saveRequirements'])->name('timetable.requirements.save');
+
             Route::post('/sync-teachers', [TimetableController::class, 'syncTeachers'])->name('timetable.sync-teachers');
             Route::get('/get-matrix/{class_section_id}', [TimetableController::class, 'getMatrix'])->name('timetable.get-matrix');
             Route::post('/quick-update', [TimetableController::class, 'quickUpdate'])->name('timetable.quick-update');

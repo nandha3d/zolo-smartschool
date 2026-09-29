@@ -20,8 +20,19 @@ class Timetable extends Model {
         "note",
         "day",
         "type",
+        "is_locked",
+        "period_id",
+        "resource_id",
+        "locked_by",
+        "locked_at",
+        "lock_reason",
         "semester_id",
         "school_id"
+    ];
+
+    protected $casts = [
+        'is_locked' => 'boolean',
+        'locked_at' => 'datetime',
     ];
 
     protected $appends = ['title', 'meta', 'primary_teacher_name', 'alternate_teacher_name', 'period_no'];
@@ -42,6 +53,18 @@ class Timetable extends Model {
 
     public function teacher() {
         return $this->hasOneThrough(User::class, SubjectTeacher::class, 'id', 'id', 'subject_teacher_id', 'teacher_id')->withTrashed();
+    }
+
+    public function period() {
+        return $this->belongsTo(TimetablePeriod::class, 'period_id');
+    }
+
+    public function resource() {
+        return $this->belongsTo(TimetableResource::class, 'resource_id');
+    }
+
+    public function locked_by_user() {
+        return $this->belongsTo(User::class, 'locked_by')->withTrashed();
     }
 
     public function scopeOwner($query) {
@@ -103,6 +126,9 @@ class Timetable extends Model {
     }
 
     public function getPeriodNoAttribute() {
+        if ($this->period_id && $this->relationLoaded('period') && $this->period) {
+            return $this->period->period_number;
+        }
         $meta = $this->meta;
         return $meta['period_no'] ?? null;
     }

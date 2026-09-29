@@ -49,6 +49,14 @@ class ClassSection extends Model {
         return $this->hasMany(Timetable::class)->orderBy('start_time');
     }
 
+    public function schedule_requirements() {
+        return $this->hasMany(SubjectScheduleRequirement::class, 'class_section_id');
+    }
+
+    public function availabilities() {
+        return $this->hasMany(ClassSectionAvailability::class, 'class_section_id');
+    }
+
     public function scopeClassTeacher($query) {
         $user = Auth::user();
         if ($user->hasRole('Teacher')) {

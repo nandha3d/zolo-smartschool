@@ -7,7 +7,17 @@ use App\Models\SubjectTeacher;
 use App\Models\User;
 use App\Models\ClassSubject;
 use App\Models\ClassSection;
+use App\Models\TimetableTemplate;
+use App\Models\TimetablePeriod;
+use App\Models\TimetableResource;
+use App\Models\SubjectScheduleRequirement;
+use App\Models\TimetableGenerationRun;
 use App\Services\TimetableGeneratorService;
+use App\Services\Timetable\TimetablePlanningService;
+use App\Services\Timetable\TimetableGenerationService;
+use App\Services\Timetable\TimetableApplyService;
+use App\Services\Timetable\TimetableRepairService;
+use App\Services\Timetable\TimetableValidationService;
 use App\Repositories\ClassSchool\ClassSchoolInterface;
 use App\Repositories\ClassSection\ClassSectionInterface;
 use App\Repositories\Medium\MediumInterface;
@@ -38,9 +48,29 @@ class TimetableController extends Controller
     private ClassSchoolInterface $class;
     private MediumInterface $medium;
     private SessionYearsTrackingsService $sessionYearsTrackingsService;
+    private TimetablePlanningService $planningService;
+    private TimetableGenerationService $generationService;
+    private TimetableApplyService $applyService;
+    private TimetableRepairService $repairService;
+    private TimetableValidationService $validationService;
 
-    public function __construct(SubjectTeacherInterface $subjectTeacher, SubjectInterface $subject, TimetableInterface $timetable, ClassSectionInterface $classSection, UserInterface $user, SchoolSettingInterface $schoolSettings, CachingService $cache, ClassSchoolInterface $class, MediumInterface $medium, SessionYearsTrackingsService $sessionYearsTrackingsService)
-    {
+    public function __construct(
+        SubjectTeacherInterface $subjectTeacher,
+        SubjectInterface $subject,
+        TimetableInterface $timetable,
+        ClassSectionInterface $classSection,
+        UserInterface $user,
+        SchoolSettingInterface $schoolSettings,
+        CachingService $cache,
+        ClassSchoolInterface $class,
+        MediumInterface $medium,
+        SessionYearsTrackingsService $sessionYearsTrackingsService,
+        TimetablePlanningService $planningService,
+        TimetableGenerationService $generationService,
+        TimetableApplyService $applyService,
+        TimetableRepairService $repairService,
+        TimetableValidationService $validationService
+    ) {
         $this->subjectTeacher = $subjectTeacher;
         $this->subject = $subject;
         $this->timetable = $timetable;
@@ -51,6 +81,11 @@ class TimetableController extends Controller
         $this->class = $class;
         $this->medium = $medium;
         $this->sessionYearsTrackingsService = $sessionYearsTrackingsService;
+        $this->planningService = $planningService;
+        $this->generationService = $generationService;
+        $this->applyService = $applyService;
+        $this->repairService = $repairService;
+        $this->validationService = $validationService;
     }
 
     public function index()
@@ -74,7 +109,11 @@ class TimetableController extends Controller
         $mediums = $this->medium->builder()->pluck('name', 'id');
         $classSections = $this->classSection->builder()->with(['class', 'section', 'medium'])->get();
 
-        return view('timetable.index', compact('timetableData', 'classes', 'mediums', 'classSections'));
+        $schoolId = Auth::user()->school_id;
+        $templates = $this->planningService->getTemplates($schoolId);
+        $resources = $this->planningService->getResources($schoolId);
+
+        return view('timetable.index', compact('timetableData', 'classes', 'mediums', 'classSections', 'templates', 'resources'));
     }
 
     public function store(Request $request)
@@ -210,6 +249,11 @@ class TimetableController extends Controller
             ->CurrentSemesterData()
             ->get();
 
+        $schoolId = Auth::user()->school_id ?? $classSection->school_id;
+        $templates = $this->planningService->getTemplates($schoolId);
+        $resources = $this->planningService->getResources($schoolId);
+        $requirements = $this->planningService->getRequirements($classSectionID, $currentSemester?->id);
+
         return view('timetable.edit', compact(
             'subjectTeachers',
             'subjectWithoutTeacherAssigned',
@@ -218,7 +262,10 @@ class TimetableController extends Controller
             'timetableSettingsData',
             'currentSemester',
             'allTeachers',
-            'allClassSubjects'
+            'allClassSubjects',
+            'templates',
+            'resources',
+            'requirements'
         ));
     }
 
@@ -587,30 +634,566 @@ class TimetableController extends Controller
             'subjects'         => 'required|array',
         ]);
 
-        try {
-            $generatorService = app(\App\Services\TimetableGeneratorService::class);
-            $result = $generatorService->generate($request->all());
+        $schoolId = Auth::user()->school_id;
+        $classSectionId = (int)$request->class_section_id;
+        $currentSemester = $this->cache->getDefaultSemesterData();
+        $sessionYear = $this->cache->getDefaultSessionYear();
 
-            if (!$result['status']) {
+        try {
+            DB::beginTransaction();
+            // 1. Sync subjects into SubjectScheduleRequirement and SubjectTeacher
+            $classSection = ClassSection::with('class')->findOrFail($classSectionId);
+            $schoolId = $schoolId ?? $classSection->school_id;
+
+            foreach ($request->subjects as $sub) {
+                $subjectId = $sub['subject_id'] ?? null;
+                if (!$subjectId) continue;
+
+                $periods = (int)($sub['periods'] ?? 5);
+                $teacherId = !empty($sub['teacher_id']) ? (int)$sub['teacher_id'] : null;
+                $altTeacherId = !empty($sub['alt_teacher_id']) ? (int)$sub['alt_teacher_id'] : null;
+                $consecutiveAllowed = !empty($sub['consecutive_allowed']);
+                $consecutivePeriods = $consecutiveAllowed ? (int)($sub['consecutive_periods'] ?? 2) : null;
+
+                $classSubject = ClassSubject::where('class_id', $classSection->class_id)
+                    ->where('subject_id', $subjectId)
+                    ->first();
+
+                // Save or update requirement
+                SubjectScheduleRequirement::updateOrCreate(
+                    [
+                        'school_id'        => $schoolId,
+                        'class_section_id' => $classSectionId,
+                        'subject_id'       => $subjectId,
+                        'semester_id'      => $currentSemester?->id,
+                    ],
+                    [
+                        'class_subject_id'             => $classSubject?->id,
+                        'weekly_periods'               => $periods,
+                        'min_periods_per_day'          => 0,
+                        'max_periods_per_day'          => $consecutiveAllowed ? $consecutivePeriods : 1,
+                        'allow_consecutive'            => $consecutiveAllowed,
+                        'required_consecutive_periods' => $consecutivePeriods,
+                        'priority'                     => 1,
+                        'is_active'                    => true,
+                    ]
+                );
+
+                // Assign teacher
+                if ($teacherId) {
+                    $st = SubjectTeacher::updateOrCreate(
+                        [
+                            'class_section_id' => $classSectionId,
+                            'subject_id'       => $subjectId,
+                        ],
+                        [
+                            'teacher_id'       => $teacherId,
+                            'class_subject_id' => $classSubject?->id,
+                            'school_id'        => $schoolId,
+                        ]
+                    );
+
+                    // Assign alternate teacher if provided
+                    if ($altTeacherId) {
+                        $this->planningService->saveAlternates($st->id, [$altTeacherId], $schoolId);
+                    }
+                }
+            }
+            DB::commit();
+
+            // 2. Run Timetable V2 generation
+            $genResult = $this->generationService->generate([
+                'school_id'         => $schoolId,
+                'semester_id'       => $currentSemester?->id,
+                'session_year_id'   => $sessionYear?->id,
+                'class_section_ids' => [$classSectionId],
+                'started_by'        => Auth::id(),
+                'preserve_existing' => false,
+                'mode'              => 'classes',
+            ]);
+
+            if ($genResult['error'] ?? false) {
                 return response()->json([
-                    'error'   => true,
-                    'message' => $result['message'],
+                    'error'     => true,
+                    'message'   => $genResult['message'] ?? 'Generation failed',
+                    'conflicts' => $genResult['conflicts'] ?? [],
                 ], 422);
             }
 
+            // 3. Atomically apply the generation run to live timetable
+            $applyResult = $this->applyService->apply($genResult['run_id'], $schoolId, Auth::id());
+
             return response()->json([
-                'error'         => false,
-                'message'       => $result['message'],
-                'created_count' => $result['created_count'] ?? 0,
-                'has_conflicts' => $result['has_conflicts'] ?? false,
-                'conflicts'     => $result['conflicts'] ?? [],
+                'error'             => false,
+                'message'           => 'Timetable generated and applied successfully!',
+                'created_count'     => $applyResult['applied_count'] ?? 0,
+                'has_conflicts'     => !empty($genResult['conflicts']),
+                'conflicts'         => $genResult['conflicts'] ?? [],
+                'generation_run_id' => $genResult['run_id'] ?? null,
+                'quality_score'     => $genResult['metrics']['quality_score'] ?? 100,
             ]);
         } catch (\Throwable $e) {
+            DB::rollBack();
             ResponseService::logErrorResponse($e, "TimetableController -> autoGenerate");
             return response()->json([
                 'error'   => true,
                 'message' => 'An error occurred during auto-generation: ' . $e->getMessage()
             ], 500);
+        }
+    }
+
+    public function generatePreview(Request $request)
+    {
+        ResponseService::noFeatureThenRedirect('Timetable Management');
+        ResponseService::noPermissionThenSendJson(['timetable-create', 'timetable-edit']);
+
+        $schoolId = Auth::user()->school_id;
+        $currentSemester = $this->cache->getDefaultSemesterData();
+        $sessionYear = $this->cache->getDefaultSessionYear();
+
+        $classSectionIds = [];
+        if ($request->filled('class_section_id')) {
+            $classSectionIds = [(int)$request->class_section_id];
+        } elseif ($request->filled('class_section_ids')) {
+            $classSectionIds = array_map('intval', (array)$request->class_section_ids);
+        }
+
+        try {
+            $params = [
+                'school_id'         => $schoolId,
+                'template_id'       => $request->filled('template_id') ? (int)$request->template_id : null,
+                'semester_id'       => $request->filled('semester_id') ? (int)$request->semester_id : ($currentSemester?->id),
+                'session_year_id'   => $sessionYear?->id,
+                'class_section_ids' => $classSectionIds,
+                'started_by'        => Auth::id(),
+                'preserve_existing' => $request->boolean('preserve_existing', true),
+                'mode'              => $request->input('mode', 'full'),
+            ];
+
+            $result = $this->generationService->generate($params);
+
+            if ($result['error'] ?? false) {
+                return response()->json($result, 422);
+            }
+
+            return response()->json($result);
+        } catch (\Throwable $e) {
+            ResponseService::logErrorResponse($e, "TimetableController -> generatePreview");
+            return response()->json([
+                'error'   => true,
+                'message' => 'Generation failed: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function applyGeneration(Request $request, $id)
+    {
+        ResponseService::noFeatureThenRedirect('Timetable Management');
+        ResponseService::noPermissionThenSendJson(['timetable-create', 'timetable-edit']);
+
+        $schoolId = Auth::user()->school_id;
+        try {
+            $res = $this->applyService->apply((int)$id, $schoolId, Auth::id());
+            return response()->json($res);
+        } catch (\Throwable $e) {
+            ResponseService::logErrorResponse($e, "TimetableController -> applyGeneration");
+            return response()->json([
+                'error'   => true,
+                'message' => $e->getMessage()
+            ], 422);
+        }
+    }
+
+    public function cancelGeneration(Request $request, $id)
+    {
+        ResponseService::noFeatureThenRedirect('Timetable Management');
+        ResponseService::noPermissionThenSendJson(['timetable-create', 'timetable-edit']);
+
+        $schoolId = Auth::user()->school_id;
+        try {
+            $res = $this->applyService->cancel((int)$id, $schoolId);
+            return response()->json($res);
+        } catch (\Throwable $e) {
+            ResponseService::logErrorResponse($e, "TimetableController -> cancelGeneration");
+            return response()->json([
+                'error'   => true,
+                'message' => $e->getMessage()
+            ], 422);
+        }
+    }
+
+    public function repair(Request $request)
+    {
+        ResponseService::noFeatureThenRedirect('Timetable Management');
+        ResponseService::noPermissionThenSendJson(['timetable-create', 'timetable-edit']);
+
+        $schoolId = Auth::user()->school_id;
+        try {
+            $options = [
+                'class_section_id' => $request->filled('class_section_id') ? (int)$request->class_section_id : null,
+                'teacher_id'       => $request->filled('teacher_id') ? (int)$request->teacher_id : null,
+                'day'              => $request->input('day'),
+                'dry_run'          => $request->boolean('dry_run', false),
+            ];
+
+            $res = $this->repairService->repair($schoolId, $options);
+            return response()->json($res);
+        } catch (\Throwable $e) {
+            ResponseService::logErrorResponse($e, "TimetableController -> repair");
+            return response()->json([
+                'error'   => true,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function lockSlot(Request $request, $id)
+    {
+        ResponseService::noFeatureThenRedirect('Timetable Management');
+        ResponseService::noPermissionThenSendJson(['timetable-edit']);
+
+        try {
+            $slot = $this->planningService->lockSlot((int)$id, Auth::id(), $request->input('reason'));
+            return response()->json([
+                'error'   => false,
+                'message' => 'Slot locked successfully.',
+                'slot'    => $slot
+            ]);
+        } catch (\Throwable $e) {
+            ResponseService::logErrorResponse($e, "TimetableController -> lockSlot");
+            return response()->json([
+                'error'   => true,
+                'message' => $e->getMessage()
+            ], 422);
+        }
+    }
+
+    public function unlockSlot(Request $request, $id)
+    {
+        ResponseService::noFeatureThenRedirect('Timetable Management');
+        ResponseService::noPermissionThenSendJson(['timetable-edit']);
+
+        try {
+            $slot = $this->planningService->unlockSlot((int)$id);
+            return response()->json([
+                'error'   => false,
+                'message' => 'Slot unlocked successfully.',
+                'slot'    => $slot
+            ]);
+        } catch (\Throwable $e) {
+            ResponseService::logErrorResponse($e, "TimetableController -> unlockSlot");
+            return response()->json([
+                'error'   => true,
+                'message' => $e->getMessage()
+            ], 422);
+        }
+    }
+
+    public function getTemplates()
+    {
+        ResponseService::noFeatureThenRedirect('Timetable Management');
+        ResponseService::noPermissionThenSendJson('timetable-list');
+
+        $schoolId = Auth::user()->school_id;
+        $templates = $this->planningService->getTemplates($schoolId);
+        return response()->json(['error' => false, 'data' => $templates]);
+    }
+
+    public function createTemplate(Request $request)
+    {
+        ResponseService::noFeatureThenRedirect('Timetable Management');
+        ResponseService::noPermissionThenSendJson(['timetable-create']);
+
+        $request->validate([
+            'name'         => 'required|string|max:191',
+            'working_days' => 'nullable|array',
+            'periods'      => 'nullable|array',
+        ]);
+
+        $schoolId = Auth::user()->school_id;
+        try {
+            $template = $this->planningService->createTemplate($schoolId, $request->all(), Auth::id());
+            return response()->json([
+                'error'   => false,
+                'message' => 'Template created successfully.',
+                'data'    => $template
+            ]);
+        } catch (\Throwable $e) {
+            ResponseService::logErrorResponse($e, "TimetableController -> createTemplate");
+            return response()->json([
+                'error'   => true,
+                'message' => $e->getMessage()
+            ], 422);
+        }
+    }
+
+    public function updateTemplate(Request $request, $id)
+    {
+        ResponseService::noFeatureThenRedirect('Timetable Management');
+        ResponseService::noPermissionThenSendJson(['timetable-edit']);
+
+        $schoolId = Auth::user()->school_id;
+        try {
+            $template = $this->planningService->updateTemplate((int)$id, $request->all(), Auth::id());
+            return response()->json([
+                'error'   => false,
+                'message' => 'Template updated successfully.',
+                'data'    => $template
+            ]);
+        } catch (\Throwable $e) {
+            ResponseService::logErrorResponse($e, "TimetableController -> updateTemplate");
+            return response()->json([
+                'error'   => true,
+                'message' => $e->getMessage()
+            ], 422);
+        }
+    }
+
+    public function deleteTemplate(Request $request, $id)
+    {
+        ResponseService::noFeatureThenRedirect('Timetable Management');
+        ResponseService::noPermissionThenSendJson(['timetable-delete']);
+
+        try {
+            $this->planningService->deleteTemplate((int)$id);
+            return response()->json([
+                'error'   => false,
+                'message' => 'Template deleted successfully.'
+            ]);
+        } catch (\Throwable $e) {
+            ResponseService::logErrorResponse($e, "TimetableController -> deleteTemplate");
+            return response()->json([
+                'error'   => true,
+                'message' => $e->getMessage()
+            ], 422);
+        }
+    }
+
+    public function setDefaultTemplate(Request $request, $id)
+    {
+        ResponseService::noFeatureThenRedirect('Timetable Management');
+        ResponseService::noPermissionThenSendJson(['timetable-edit']);
+
+        $schoolId = Auth::user()->school_id;
+        try {
+            $template = $this->planningService->setDefaultTemplate((int)$id, $schoolId);
+            return response()->json([
+                'error'   => false,
+                'message' => 'Default template updated.',
+                'data'    => $template
+            ]);
+        } catch (\Throwable $e) {
+            ResponseService::logErrorResponse($e, "TimetableController -> setDefaultTemplate");
+            return response()->json([
+                'error'   => true,
+                'message' => $e->getMessage()
+            ], 422);
+        }
+    }
+
+    public function getResources()
+    {
+        ResponseService::noFeatureThenRedirect('Timetable Management');
+        ResponseService::noPermissionThenSendJson('timetable-list');
+
+        $schoolId = Auth::user()->school_id;
+        $resources = $this->planningService->getResources($schoolId);
+        return response()->json(['error' => false, 'data' => $resources]);
+    }
+
+    public function createResource(Request $request)
+    {
+        ResponseService::noFeatureThenRedirect('Timetable Management');
+        ResponseService::noPermissionThenSendJson(['timetable-create']);
+
+        $request->validate([
+            'name'     => 'required|string|max:191',
+            'type'     => 'nullable|string',
+            'capacity' => 'nullable|numeric',
+        ]);
+
+        $schoolId = Auth::user()->school_id;
+        try {
+            $resource = $this->planningService->createResource($schoolId, $request->all());
+            return response()->json([
+                'error'   => false,
+                'message' => 'Resource created successfully.',
+                'data'    => $resource
+            ]);
+        } catch (\Throwable $e) {
+            ResponseService::logErrorResponse($e, "TimetableController -> createResource");
+            return response()->json([
+                'error'   => true,
+                'message' => $e->getMessage()
+            ], 422);
+        }
+    }
+
+    public function updateResource(Request $request, $id)
+    {
+        ResponseService::noFeatureThenRedirect('Timetable Management');
+        ResponseService::noPermissionThenSendJson(['timetable-edit']);
+
+        try {
+            $resource = $this->planningService->updateResource((int)$id, $request->all());
+            return response()->json([
+                'error'   => false,
+                'message' => 'Resource updated successfully.',
+                'data'    => $resource
+            ]);
+        } catch (\Throwable $e) {
+            ResponseService::logErrorResponse($e, "TimetableController -> updateResource");
+            return response()->json([
+                'error'   => true,
+                'message' => $e->getMessage()
+            ], 422);
+        }
+    }
+
+    public function deleteResource(Request $request, $id)
+    {
+        ResponseService::noFeatureThenRedirect('Timetable Management');
+        ResponseService::noPermissionThenSendJson(['timetable-delete']);
+
+        try {
+            $this->planningService->deleteResource((int)$id);
+            return response()->json([
+                'error'   => false,
+                'message' => 'Resource deleted successfully.'
+            ]);
+        } catch (\Throwable $e) {
+            ResponseService::logErrorResponse($e, "TimetableController -> deleteResource");
+            return response()->json([
+                'error'   => true,
+                'message' => $e->getMessage()
+            ], 422);
+        }
+    }
+
+    public function getTeacherAvailability($teacher_id)
+    {
+        ResponseService::noFeatureThenRedirect('Timetable Management');
+        ResponseService::noPermissionThenSendJson('timetable-list');
+
+        $schoolId = Auth::user()->school_id;
+        $data = $this->planningService->getTeacherAvailability((int)$teacher_id, $schoolId);
+        return response()->json(['error' => false, 'data' => $data]);
+    }
+
+    public function saveTeacherAvailability(Request $request, $teacher_id)
+    {
+        ResponseService::noFeatureThenRedirect('Timetable Management');
+        ResponseService::noPermissionThenSendJson(['timetable-edit']);
+
+        $schoolId = Auth::user()->school_id;
+        try {
+            $this->planningService->saveTeacherAvailability((int)$teacher_id, $request->input('grid', []), $schoolId);
+            return response()->json([
+                'error'   => false,
+                'message' => 'Teacher availability saved successfully.'
+            ]);
+        } catch (\Throwable $e) {
+            ResponseService::logErrorResponse($e, "TimetableController -> saveTeacherAvailability");
+            return response()->json([
+                'error'   => true,
+                'message' => $e->getMessage()
+            ], 422);
+        }
+    }
+
+    public function getClassAvailability($class_section_id)
+    {
+        ResponseService::noFeatureThenRedirect('Timetable Management');
+        ResponseService::noPermissionThenSendJson('timetable-list');
+
+        $schoolId = Auth::user()->school_id;
+        $data = $this->planningService->getClassAvailability((int)$class_section_id, $schoolId);
+        return response()->json(['error' => false, 'data' => $data]);
+    }
+
+    public function saveClassAvailability(Request $request, $class_section_id)
+    {
+        ResponseService::noFeatureThenRedirect('Timetable Management');
+        ResponseService::noPermissionThenSendJson(['timetable-edit']);
+
+        $schoolId = Auth::user()->school_id;
+        try {
+            $this->planningService->saveClassAvailability((int)$class_section_id, $request->input('grid', []), $schoolId);
+            return response()->json([
+                'error'   => false,
+                'message' => 'Class availability saved successfully.'
+            ]);
+        } catch (\Throwable $e) {
+            ResponseService::logErrorResponse($e, "TimetableController -> saveClassAvailability");
+            return response()->json([
+                'error'   => true,
+                'message' => $e->getMessage()
+            ], 422);
+        }
+    }
+
+    public function getResourceAvailability($resource_id)
+    {
+        ResponseService::noFeatureThenRedirect('Timetable Management');
+        ResponseService::noPermissionThenSendJson('timetable-list');
+
+        $schoolId = Auth::user()->school_id;
+        $data = $this->planningService->getResourceAvailability((int)$resource_id, $schoolId);
+        return response()->json(['error' => false, 'data' => $data]);
+    }
+
+    public function saveResourceAvailability(Request $request, $resource_id)
+    {
+        ResponseService::noFeatureThenRedirect('Timetable Management');
+        ResponseService::noPermissionThenSendJson(['timetable-edit']);
+
+        $schoolId = Auth::user()->school_id;
+        try {
+            $this->planningService->saveResourceAvailability((int)$resource_id, $request->input('grid', []), $schoolId);
+            return response()->json([
+                'error'   => false,
+                'message' => 'Resource availability saved successfully.'
+            ]);
+        } catch (\Throwable $e) {
+            ResponseService::logErrorResponse($e, "TimetableController -> saveResourceAvailability");
+            return response()->json([
+                'error'   => true,
+                'message' => $e->getMessage()
+            ], 422);
+        }
+    }
+
+    public function getRequirements($class_section_id)
+    {
+        ResponseService::noFeatureThenRedirect('Timetable Management');
+        ResponseService::noPermissionThenSendJson('timetable-list');
+
+        $currentSemester = $this->cache->getDefaultSemesterData();
+        $requirements = $this->planningService->getRequirements((int)$class_section_id, $currentSemester?->id);
+        return response()->json(['error' => false, 'data' => $requirements]);
+    }
+
+    public function saveRequirements(Request $request, $class_section_id)
+    {
+        ResponseService::noFeatureThenRedirect('Timetable Management');
+        ResponseService::noPermissionThenSendJson(['timetable-edit']);
+
+        $schoolId = Auth::user()->school_id;
+        $currentSemester = $this->cache->getDefaultSemesterData();
+        try {
+            $requirementsData = $request->input('requirements', []);
+            $saved = $this->planningService->saveBulkRequirements((int)$class_section_id, $requirementsData, $schoolId, $currentSemester?->id);
+            return response()->json([
+                'error'   => false,
+                'message' => 'Requirements saved successfully.',
+                'data'    => $saved
+            ]);
+        } catch (\Throwable $e) {
+            ResponseService::logErrorResponse($e, "TimetableController -> saveRequirements");
+            return response()->json([
+                'error'   => true,
+                'message' => $e->getMessage()
+            ], 422);
         }
     }
 
@@ -679,7 +1262,9 @@ class TimetableController extends Controller
             ->with([
                 'teacher:users.id,first_name,last_name',
                 'subject:id,name,type,bg_color',
-                'subject_teacher.teacher:id,first_name,last_name'
+                'subject_teacher.teacher:id,first_name,last_name',
+                'resource:id,name,type',
+                'period'
             ])
             ->orderBy('start_time', 'ASC')
             ->CurrentSemesterData()
@@ -759,6 +1344,12 @@ class TimetableController extends Controller
                 'alt_teacher_name'     => $altTeacherName,
                 'alt_teacher_id'       => $t->alt_teacher_id,
                 'period_no'            => $t->period_no,
+                'period_id'            => $t->period_id,
+                'resource_id'          => $t->resource_id,
+                'resource_name'        => $t->resource?->name,
+                'is_locked'            => (bool)$t->is_locked,
+                'locked_by'            => $t->locked_by,
+                'lock_reason'          => $t->lock_reason,
                 'conflict'             => $conflict,
                 'note'                 => $t->note,
             ];
@@ -778,18 +1369,65 @@ class TimetableController extends Controller
         ResponseService::noPermissionThenSendJson(['timetable-edit']);
 
         $request->validate([
-            'id'                 => 'required|numeric',
-            'subject_id'         => 'nullable|numeric',
-            'teacher_id'         => 'nullable|numeric',
-            'alt_teacher_id'     => 'nullable|numeric',
+            'id'             => 'required|numeric',
+            'subject_id'     => 'nullable|numeric',
+            'teacher_id'     => 'nullable|numeric',
+            'alt_teacher_id' => 'nullable|numeric',
+            'resource_id'    => 'nullable|numeric',
+            'is_locked'      => 'nullable|boolean',
+            'lock_reason'    => 'nullable|string',
         ]);
 
         try {
+            DB::beginTransaction();
             $timetable = Timetable::findOrFail($request->id);
             $schoolId = Auth::user()->school_id ?? $timetable->school_id;
 
+            // If slot is locked and user isn't toggling lock, reject changes
+            if ($timetable->is_locked && !$request->has('is_locked') && !$request->has('unlock')) {
+                return response()->json([
+                    'error'   => true,
+                    'message' => 'This slot is locked (' . ($timetable->lock_reason ?? 'locked by admin') . '). Unlock it first to make edits.'
+                ], 422);
+            }
+
+            if ($request->has('is_locked')) {
+                $timetable->is_locked = (bool)$request->is_locked;
+                $timetable->locked_by = $timetable->is_locked ? Auth::id() : null;
+                $timetable->locked_at = $timetable->is_locked ? Carbon::now() : null;
+                $timetable->lock_reason = $timetable->is_locked ? ($request->lock_reason ?? 'Manually locked') : null;
+            }
+
             if ($request->filled('subject_id')) {
                 $timetable->subject_id = $request->subject_id;
+            }
+
+            if ($request->has('resource_id')) {
+                $timetable->resource_id = $request->resource_id ? (int)$request->resource_id : null;
+            }
+
+            $targetTeacherId = $request->filled('teacher_id') ? (int)$request->teacher_id : ($timetable->subject_teacher?->teacher_id ?? $timetable->teacher_id);
+
+            // Constraint validation via TimetableValidationService
+            $violations = $this->validationService->validateSingleSlot(
+                $schoolId,
+                $timetable->class_section_id,
+                $timetable->day,
+                $timetable->start_time,
+                $timetable->end_time,
+                $targetTeacherId,
+                $timetable->resource_id,
+                $timetable->id,
+                $timetable->period_id
+            );
+
+            if (!empty($violations)) {
+                DB::rollBack();
+                return response()->json([
+                    'error'      => true,
+                    'message'    => $violations[0]['message'],
+                    'violations' => $violations
+                ], 422);
             }
 
             if ($request->filled('teacher_id')) {
@@ -822,12 +1460,14 @@ class TimetableController extends Controller
             $timetable->note = json_encode($currentMeta);
             $timetable->save();
 
+            DB::commit();
             return response()->json([
                 'error'   => false,
                 'message' => 'Timetable slot updated successfully!',
-                'data'    => $timetable
+                'data'    => $timetable->fresh(['subject', 'resource', 'subject_teacher.teacher'])
             ]);
         } catch (\Throwable $e) {
+            DB::rollBack();
             ResponseService::logErrorResponse($e, "TimetableController -> quickUpdate");
             return response()->json([
                 'error'   => true,

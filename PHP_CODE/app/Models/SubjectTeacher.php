@@ -46,6 +46,14 @@ class SubjectTeacher extends Model {
         return $this->belongsTo(Semester::class)->withTrashed();
     }
 
+    public function alternates() {
+        return $this->hasMany(SubjectTeacherAlternate::class, 'subject_teacher_id')->orderBy('priority', 'ASC');
+    }
+
+    public function active_alternates() {
+        return $this->hasMany(SubjectTeacherAlternate::class, 'subject_teacher_id')->where('is_active', true)->orderBy('priority', 'ASC');
+    }
+
     public function scopeOwner($query) {
         if (Auth::user()) {
 

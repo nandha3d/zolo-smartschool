@@ -353,6 +353,16 @@
                 </button>
             </div>
 
+            <!-- Subject Rules Action -->
+            <button type="button" class="btn btn-outline-success mr-2" data-toggle="modal" data-target="#subjectRequirementsModal">
+                <i class="fa fa-sliders mr-1"></i> {{ __('Subject Rules & Labs') }}
+            </button>
+
+            <!-- Repair Schedule Action -->
+            <button type="button" class="btn btn-outline-warning mr-2" onclick="runConflictRepair()">
+                <i class="fa fa-wrench mr-1"></i> {{ __('Repair Schedule') }}
+            </button>
+
             <!-- Teacher Setup Action -->
             <button type="button" class="btn btn-outline-info mr-2" data-toggle="modal" data-target="#teacherSetupModal">
                 <i class="fa fa-users mr-1"></i> {{ __('Teacher Setup') }}
@@ -794,8 +804,11 @@
                     <button type="button" class="btn btn-primary" id="btnWizardNext" onclick="stepWizard(1)">
                         {{ __('Next') }} <i class="fa fa-arrow-right ml-1"></i>
                     </button>
+                    <button type="button" class="btn btn-outline-info mr-2 d-none" id="btnWizardPreview" onclick="runAutoGenerationPreview()">
+                        <i class="fa fa-eye mr-1"></i> {{ __('Preview Results') }}
+                    </button>
                     <button type="button" class="btn btn-gradient-success d-none" id="btnWizardSubmit" onclick="runAutoGeneration()">
-                        <i class="fa fa-bolt mr-1"></i> {{ __('Generate Timetable') }}
+                        <i class="fa fa-bolt mr-1"></i> {{ __('Generate & Apply') }}
                     </button>
                 </div>
             </div>
@@ -846,6 +859,26 @@
                         @endforeach
                     </select>
                 </div>
+                <div class="form-group mb-2">
+                    <label class="font-weight-bold small">{{ __('Resource / Room / Lab') }}</label>
+                    <select id="quickEditResourceId" class="form-control form-control-sm">
+                        <option value="">{{ __('-- Default Classroom --') }}</option>
+                        @foreach($resources as $res)
+                            <option value="{{ $res->id }}">{{ $res->name }} ({{ $res->type }})</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="form-group mb-2">
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" id="quickEditIsLocked" onchange="$('#quickEditLockReasonGroup').toggleClass('d-none', !this.checked)">
+                        <label class="custom-control-label font-weight-bold small text-dark" for="quickEditIsLocked">
+                            🔒 {{ __('Lock Slot (Prevent Auto-Regeneration from moving/deleting)') }}
+                        </label>
+                    </div>
+                    <div id="quickEditLockReasonGroup" class="d-none mt-1">
+                        <input type="text" id="quickEditLockReason" class="form-control form-control-sm" placeholder="{{ __('Reason for locking (e.g. Fixed Lab period, Visiting Teacher)') }}">
+                    </div>
+                </div>
             </div>
             <div class="modal-footer bg-light d-flex justify-content-between">
                 <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteSlotFromQuickEdit()">
@@ -853,6 +886,172 @@
                 </button>
                 <button type="button" class="btn btn-sm btn-primary" onclick="saveQuickEditSlot()">
                     <i class="fa fa-check mr-1"></i> {{ __('Save Slot') }}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- =========================================================================
+     MODAL 4: Timetable V2 Generation Preview Modal
+     ========================================================================= -->
+<div class="modal fade" id="generationPreviewModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+        <div class="modal-content" style="border-radius: 14px;">
+            <div class="modal-header bg-light">
+                <div>
+                    <h5 class="modal-title font-weight-bold text-dark">
+                        <i class="fa fa-tachometer text-primary mr-1"></i> {{ __('Timetable Generation Preview & Quality Report') }}
+                    </h5>
+                    <small class="text-muted" id="previewRunInfo">{{ __('Review solver metrics, clash analysis, and candidate slot distribution before applying.') }}</small>
+                </div>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body p-4">
+                <!-- KPI Metrics Cards -->
+                <div class="row mb-3" id="previewMetricsRow">
+                    <div class="col-md-3">
+                        <div class="card bg-light border p-3 text-center">
+                            <div class="text-muted small">{{ __('Quality Score') }}</div>
+                            <h3 class="font-weight-bold text-success mb-0" id="previewQualityScore">--</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-light border p-3 text-center">
+                            <div class="text-muted small">{{ __('Total Slots Placed') }}</div>
+                            <h3 class="font-weight-bold text-primary mb-0" id="previewSlotsPlaced">--</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-light border p-3 text-center">
+                            <div class="text-muted small">{{ __('Locked Slots Preserved') }}</div>
+                            <h3 class="font-weight-bold text-warning mb-0" id="previewLockedPreserved">--</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-light border p-3 text-center">
+                            <div class="text-muted small">{{ __('Hard Conflicts') }}</div>
+                            <h3 class="font-weight-bold text-danger mb-0" id="previewConflictCount">0</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Conflicts Alert -->
+                <div id="previewConflictAlert" class="alert alert-danger d-none" role="alert">
+                    <h6 class="font-weight-bold mb-1"><i class="fa fa-exclamation-circle mr-1"></i> {{ __('Unresolved Conflicts Detected:') }}</h6>
+                    <ul class="mb-0 small" id="previewConflictList"></ul>
+                </div>
+
+                <!-- Preview Table of Entries -->
+                <h6 class="font-weight-bold text-dark mb-2">{{ __('Generated Lesson Placement Preview') }}</h6>
+                <div class="table-responsive" style="max-height: 340px; overflow-y: auto;">
+                    <table class="table table-sm table-bordered table-striped" id="previewEntriesTable">
+                        <thead class="bg-light">
+                            <tr>
+                                <th>{{ __('Day') }}</th>
+                                <th>{{ __('Period / Time') }}</th>
+                                <th>{{ __('Subject') }}</th>
+                                <th>{{ __('Teacher') }}</th>
+                                <th>{{ __('Room / Resource') }}</th>
+                                <th>{{ __('Status') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody id="previewEntriesBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer bg-light d-flex justify-content-between">
+                <input type="hidden" id="previewRunId" />
+                <button type="button" class="btn btn-outline-danger" onclick="cancelPreviewRun()">
+                    <i class="fa fa-times mr-1"></i> {{ __('Discard Run') }}
+                </button>
+                <div>
+                    <button type="button" class="btn btn-secondary mr-2" data-dismiss="modal">{{ __('Close Preview') }}</button>
+                    <button type="button" class="btn btn-gradient-success" id="btnApplyPreviewRun" onclick="applyPreviewRun()">
+                        <i class="fa fa-check-circle mr-1"></i> {{ __('Apply & Save to Live Timetable') }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- =========================================================================
+     MODAL 5: Subject Schedule Requirements & Labs Modal
+     ========================================================================= -->
+<div class="modal fade" id="subjectRequirementsModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content" style="border-radius: 14px;">
+            <div class="modal-header bg-light">
+                <div>
+                    <h5 class="modal-title font-weight-bold text-dark">
+                        <i class="fa fa-sliders text-primary mr-1"></i> {{ __('Subject Schedule Rules & Lab Requirements') }}
+                    </h5>
+                    <small class="text-muted">{{ __('Configure weekly period quotas, double-period/lab constraints, and room bookings.') }}</small>
+                </div>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body p-3">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-sm mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th>{{ __('Subject') }}</th>
+                                <th style="width: 100px;">{{ __('Weekly Periods') }}</th>
+                                <th style="width: 90px;">{{ __('Max/Day') }}</th>
+                                <th style="width: 120px;">{{ __('Consecutive?') }}</th>
+                                <th>{{ __('Dedicated Room / Lab') }}</th>
+                                <th style="width: 80px;">{{ __('Priority') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody id="requirementsTableBody">
+                            @foreach($allClassSubjects as $cs)
+                                @php
+                                    $req = $requirements->firstWhere('subject_id', $cs->subject_id);
+                                @endphp
+                                <tr class="req-row" data-subject-id="{{ $cs->subject_id }}" data-class-subject-id="{{ $cs->id }}">
+                                    <td>
+                                        <strong>{{ $cs->subject->name }}</strong>
+                                        <div class="text-muted small">{{ $cs->subject->type }}</div>
+                                    </td>
+                                    <td>
+                                        <input type="number" class="form-control form-control-sm req-weekly" min="1" max="30" value="{{ $req ? $req->weekly_periods : 5 }}">
+                                    </td>
+                                    <td>
+                                        <input type="number" class="form-control form-control-sm req-max-day" min="1" max="4" value="{{ $req ? $req->max_periods_per_day : 1 }}">
+                                    </td>
+                                    <td>
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox" class="custom-control-input req-consecutive" id="req_consec_{{ $cs->subject_id }}" {{ $req && $req->allow_consecutive ? 'checked' : '' }}>
+                                            <label class="custom-control-label small" for="req_consec_{{ $cs->subject_id }}">{{ __('Allow Block') }}</label>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <select class="form-control form-control-sm req-resource">
+                                            <option value="">{{ __('-- None (Regular Classroom) --') }}</option>
+                                            @foreach($resources as $res)
+                                                <option value="{{ $res->id }}" {{ $req && $req->resource_id == $res->id ? 'selected' : '' }}>{{ $res->name }} ({{ $res->type }})</option>
+                                            @endforeach
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <input type="number" class="form-control form-control-sm req-priority" min="1" max="10" value="{{ $req ? $req->priority : 1 }}">
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer bg-light d-flex justify-content-between">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __('Cancel') }}</button>
+                <button type="button" class="btn btn-primary" onclick="saveSubjectRequirements()">
+                    <i class="fa fa-save mr-1"></i> {{ __('Save Subject Requirements') }}
                 </button>
             </div>
         </div>
@@ -984,10 +1183,13 @@
 
                         bodyHtml += `
                             <td>
-                                <div class="slot-card" style="border-left-color: ${entry.bg_color || '#3B82F6'} !important;">
+                                <div class="slot-card ${entry.is_locked ? 'border-warning' : ''}" style="border-left-color: ${entry.bg_color || '#3B82F6'} !important; ${entry.is_locked ? 'background: #fffdf5;' : ''}">
                                     <div>
                                         <div class="slot-subject-title">
-                                            <span>${entry.subject_name}</span>
+                                            <span>
+                                                ${entry.is_locked ? `<span class="badge badge-warning text-dark font-weight-bold mr-1" title="${entry.lock_reason || 'Locked Slot'}">🔒</span>` : ''}
+                                                ${entry.subject_name}
+                                            </span>
                                             <span class="slot-subject-type">${timeRange}</span>
                                         </div>
                                         <div class="slot-teacher-info">
@@ -1001,6 +1203,12 @@
                                                     <span>Alt: ${entry.alt_teacher_name}</span>
                                                 </div>
                                             ` : ''}
+                                            ${entry.resource_name ? `
+                                                <div class="slot-alt-teacher text-info" title="Dedicated Room/Lab">
+                                                    <i class="fa fa-map-marker"></i>
+                                                    <span>${entry.resource_name}</span>
+                                                </div>
+                                            ` : ''}
                                             ${entry.conflict ? `
                                                 <div class="slot-conflict-badge" title="${entry.conflict}">
                                                     <i class="fa fa-exclamation-triangle"></i>
@@ -1010,7 +1218,16 @@
                                         </div>
                                     </div>
                                     <div class="slot-actions">
-                                        <button type="button" class="slot-action-btn" title="Edit Slot" onclick="openQuickEditSlot(${entry.id}, '${day}', '${periodLabel}', ${entry.subject_id || 0}, ${entry.primary_teacher_id || 0}, ${entry.alt_teacher_id || 0})">
+                                        ${entry.is_locked ? `
+                                            <button type="button" class="slot-action-btn unlock-btn text-warning" title="Unlock Slot (${entry.lock_reason || 'Locked'})" onclick="toggleSlotLock(${entry.id}, false)">
+                                                <i class="fa fa-lock"></i>
+                                            </button>
+                                        ` : `
+                                            <button type="button" class="slot-action-btn lock-btn" title="Lock Slot" onclick="toggleSlotLock(${entry.id}, true)">
+                                                <i class="fa fa-unlock"></i>
+                                            </button>
+                                        `}
+                                        <button type="button" class="slot-action-btn" title="Edit Slot" onclick="openQuickEditSlot(${entry.id}, '${day}', '${periodLabel}', ${entry.subject_id || 0}, ${entry.primary_teacher_id || 0}, ${entry.alt_teacher_id || 0}, ${entry.resource_id || 0}, ${entry.is_locked ? 1 : 0}, '${(entry.lock_reason || '').replace(/'/g, "\\'")}')">
                                             <i class="fa fa-pencil"></i>
                                         </button>
                                         <button type="button" class="slot-action-btn delete-btn" title="Remove Slot" onclick="deleteSlotEntry(${entry.id})">
@@ -1105,6 +1322,7 @@
 
         $('#btnWizardPrev').toggleClass('d-none', step === 1);
         $('#btnWizardNext').toggleClass('d-none', step === 3);
+        $('#btnWizardPreview').toggleClass('d-none', step !== 3);
         $('#btnWizardSubmit').toggleClass('d-none', step !== 3);
     }
 
@@ -1270,17 +1488,24 @@
     }
 
     // Quick Slot Edit Handlers
-    function openQuickEditSlot(id, day, periodLabel, subjectId, teacherId, altTeacherId) {
+    function openQuickEditSlot(id, day, periodLabel, subjectId, teacherId, altTeacherId, resourceId, isLocked, lockReason) {
         $('#quickEditSlotId').val(id);
         $('#quickEditSlotLabel').text(`${day} • ${periodLabel}`);
         $('#quickEditSubjectId').val(subjectId);
         $('#quickEditTeacherId').val(teacherId || '');
         $('#quickEditAltTeacherId').val(altTeacherId || '');
+        $('#quickEditResourceId').val(resourceId || '');
+        $('#quickEditIsLocked').prop('checked', !!parseInt(isLocked));
+        $('#quickEditLockReason').val(lockReason || '');
+        $('#quickEditLockReasonGroup').toggleClass('d-none', !parseInt(isLocked));
         $('#quickEditSlotModal').modal('show');
     }
 
     function saveQuickEditSlot() {
         const id = $('#quickEditSlotId').val();
+        const isLocked = $('#quickEditIsLocked').is(':checked') ? 1 : 0;
+        const lockReason = $('#quickEditLockReason').val();
+
         $.ajax({
             url: "{{ route('timetable.quick-update') }}",
             type: 'POST',
@@ -1289,7 +1514,10 @@
                 id: id,
                 subject_id: $('#quickEditSubjectId').val(),
                 teacher_id: $('#quickEditTeacherId').val(),
-                alt_teacher_id: $('#quickEditAltTeacherId').val()
+                alt_teacher_id: $('#quickEditAltTeacherId').val(),
+                resource_id: $('#quickEditResourceId').val(),
+                is_locked: isLocked,
+                lock_reason: lockReason
             },
             success: function(res) {
                 showToast(res.message || 'Slot updated successfully!', 'success');
@@ -1299,6 +1527,225 @@
             error: function(xhr) {
                 const msg = xhr.responseJSON ? xhr.responseJSON.message : 'Update failed.';
                 showToast(msg, 'error');
+            }
+        });
+    }
+
+    // Direct Lock / Unlock Toggle from Slot Card
+    function toggleSlotLock(id, shouldLock) {
+        const url = shouldLock ? `{{ url('timetable/lock') }}/${id}` : `{{ url('timetable/unlock') }}/${id}`;
+        let reason = null;
+        if (shouldLock) {
+            reason = prompt("Enter lock reason (e.g. Fixed Lab, Visiting Lecturer):", "Admin Lock");
+            if (reason === null) return; // User cancelled
+        }
+
+        $.ajax({
+            url: url,
+            type: 'POST',
+            data: {
+                _token: "{{ csrf_token() }}",
+                reason: reason
+            },
+            success: function(res) {
+                showToast(res.message || (shouldLock ? 'Slot locked!' : 'Slot unlocked!'), 'success');
+                loadMatrixData();
+            },
+            error: function(xhr) {
+                const msg = xhr.responseJSON ? xhr.responseJSON.message : 'Lock toggle failed.';
+                showToast(msg, 'error');
+            }
+        });
+    }
+
+    // Conflict Repair Function
+    function runConflictRepair() {
+        if (!confirm("Run intelligent minimum-move conflict repair for this class timetable?")) return;
+
+        $.ajax({
+            url: "{{ route('timetable.repair') }}",
+            type: 'POST',
+            data: {
+                _token: "{{ csrf_token() }}",
+                class_section_id: classSectionId,
+                dry_run: 0
+            },
+            success: function(res) {
+                if (res.resolved_count > 0) {
+                    showToast(`Repaired ${res.resolved_count} conflicts successfully!`, 'success');
+                } else if (res.total_conflicts === 0) {
+                    showToast('No conflicts detected in this schedule. All clear!', 'success');
+                } else {
+                    showToast(`Found ${res.total_conflicts} conflicts. ${res.unresolved_count} remain unresolved.`, 'warning');
+                }
+                loadMatrixData();
+            },
+            error: function(xhr) {
+                const msg = xhr.responseJSON ? xhr.responseJSON.message : 'Repair operation failed.';
+                showToast(msg, 'error');
+            }
+        });
+    }
+
+    // Save Subject Schedule Requirements
+    function saveSubjectRequirements() {
+        const reqs = [];
+        $('.req-row').each(function() {
+            const subId = $(this).data('subject-id');
+            const classSubId = $(this).data('class-subject-id');
+            const weekly = $(this).find('.req-weekly').val() || 5;
+            const maxDay = $(this).find('.req-max-day').val() || 1;
+            const consecutive = $(this).find('.req-consecutive').is(':checked') ? 1 : 0;
+            const resId = $(this).find('.req-resource').val() || null;
+            const priority = $(this).find('.req-priority').val() || 1;
+
+            reqs.push({
+                subject_id: subId,
+                class_subject_id: classSubId,
+                weekly_periods: parseInt(weekly),
+                max_periods_per_day: parseInt(maxDay),
+                allow_consecutive: consecutive,
+                required_consecutive_periods: consecutive ? 2 : null,
+                resource_id: resId ? parseInt(resId) : null,
+                resource_required: !!resId,
+                priority: parseInt(priority)
+            });
+        });
+
+        $.ajax({
+            url: `{{ url('timetable/requirements') }}/${classSectionId}`,
+            type: 'POST',
+            data: {
+                _token: "{{ csrf_token() }}",
+                requirements: reqs
+            },
+            success: function(res) {
+                showToast(res.message || 'Subject requirements saved successfully!', 'success');
+                $('#subjectRequirementsModal').modal('hide');
+            },
+            error: function(xhr) {
+                const msg = xhr.responseJSON ? xhr.responseJSON.message : 'Failed to save requirements.';
+                showToast(msg, 'error');
+            }
+        });
+    }
+
+    // Run Auto-Generation with Preview
+    function runAutoGenerationPreview() {
+        const days = [];
+        $('.gen-day-checkbox:checked').each(function() {
+            days.push($(this).val());
+        });
+
+        if (days.length === 0) {
+            showToast('Please select at least one active school day.', 'warning');
+            return;
+        }
+
+        $('#generationProgressContainer').removeClass('d-none');
+        $('#btnWizardPreview, #btnWizardSubmit').prop('disabled', true);
+
+        $.ajax({
+            url: "{{ route('timetable.generate') }}",
+            type: 'POST',
+            data: {
+                _token: "{{ csrf_token() }}",
+                class_section_id: classSectionId,
+                preserve_existing: $('#genClearExisting').is(':checked') ? 0 : 1,
+                mode: 'classes'
+            },
+            success: function(res) {
+                $('#generationProgressContainer').addClass('d-none');
+                $('#btnWizardPreview, #btnWizardSubmit').prop('disabled', false);
+                $('#autoGenerateModal').modal('hide');
+
+                // Populate Preview Modal
+                $('#previewRunId').val(res.run_id);
+                $('#previewQualityScore').text((res.metrics?.quality_score ?? 100) + '/100');
+                $('#previewSlotsPlaced').text(res.entries_count ?? 0);
+                $('#previewLockedPreserved').text(res.metrics?.preserved_locked ?? 0);
+                $('#previewConflictCount').text(res.conflicts?.length ?? 0);
+
+                if (res.conflicts && res.conflicts.length > 0) {
+                    $('#previewConflictAlert').removeClass('d-none');
+                    let listHtml = '';
+                    res.conflicts.forEach(c => {
+                        listHtml += `<li>${c.message || JSON.stringify(c)}</li>`;
+                    });
+                    $('#previewConflictList').html(listHtml);
+                } else {
+                    $('#previewConflictAlert').addClass('d-none');
+                }
+
+                // Populate Preview entries table
+                let entriesHtml = '';
+                (res.entries_preview || []).forEach(e => {
+                    entriesHtml += `
+                        <tr>
+                            <td><strong>${e.day}</strong></td>
+                            <td>${e.start_time.substring(0, 5)} - ${e.end_time.substring(0, 5)}</td>
+                            <td>${e.subject_name || 'Subject #' + e.subject_id}</td>
+                            <td>${e.teacher_name || 'Teacher #' + e.teacher_id}</td>
+                            <td>${e.resource_name || '<span class="text-muted">Standard</span>'}</td>
+                            <td><span class="badge badge-success">Candidate</span></td>
+                        </tr>
+                    `;
+                });
+                $('#previewEntriesBody').html(entriesHtml);
+
+                $('#generationPreviewModal').modal('show');
+            },
+            error: function(xhr) {
+                $('#generationProgressContainer').addClass('d-none');
+                $('#btnWizardPreview, #btnWizardSubmit').prop('disabled', false);
+                const msg = xhr.responseJSON ? xhr.responseJSON.message : 'Preview generation failed.';
+                showToast(msg, 'error');
+            }
+        });
+    }
+
+    // Apply Previewed Generation Run
+    function applyPreviewRun() {
+        const runId = $('#previewRunId').val();
+        if (!runId) return;
+
+        $('#btnApplyPreviewRun').prop('disabled', true);
+        $.ajax({
+            url: `{{ url('timetable/generation') }}/${runId}/apply`,
+            type: 'POST',
+            data: { _token: "{{ csrf_token() }}" },
+            success: function(res) {
+                $('#btnApplyPreviewRun').prop('disabled', false);
+                $('#generationPreviewModal').modal('hide');
+                showToast(res.message || 'Timetable applied successfully!', 'success');
+                loadMatrixData();
+            },
+            error: function(xhr) {
+                $('#btnApplyPreviewRun').prop('disabled', false);
+                const msg = xhr.responseJSON ? xhr.responseJSON.message : 'Apply failed.';
+                showToast(msg, 'error');
+            }
+        });
+    }
+
+    // Cancel Previewed Generation Run
+    function cancelPreviewRun() {
+        const runId = $('#previewRunId').val();
+        if (!runId) {
+            $('#generationPreviewModal').modal('hide');
+            return;
+        }
+
+        $.ajax({
+            url: `{{ url('timetable/generation') }}/${runId}/cancel`,
+            type: 'POST',
+            data: { _token: "{{ csrf_token() }}" },
+            success: function() {
+                $('#generationPreviewModal').modal('hide');
+                showToast('Generation run discarded.', 'info');
+            },
+            error: function() {
+                $('#generationPreviewModal').modal('hide');
             }
         });
     }

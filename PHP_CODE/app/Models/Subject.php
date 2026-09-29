@@ -34,6 +34,10 @@ class Subject extends Model {
         return $this->hasMany(ClassSubject::class);
     }
 
+    public function schedule_requirements() {
+        return $this->hasMany(SubjectScheduleRequirement::class, 'subject_id');
+    }
+
     //    public function scopeSubjectTeacher($query) {
     //        $user = Auth::user();
     //        if ($user->hasRole('Teacher')) {
