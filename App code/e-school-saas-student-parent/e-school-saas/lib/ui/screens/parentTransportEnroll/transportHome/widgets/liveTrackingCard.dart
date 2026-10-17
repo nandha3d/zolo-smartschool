@@ -3,6 +3,7 @@ import 'package:zolo_smart_school/ui/screens/parentTransportEnroll/transportHome
 import 'package:zolo_smart_school/ui/screens/parentTransportEnroll/transportHome/widgets/pickupTimeRow.dart';
 import 'package:zolo_smart_school/ui/screens/parentTransportEnroll/transportHome/widgets/liveRouteBottomSheet.dart';
 import 'package:zolo_smart_school/data/repositories/authRepository.dart';
+import 'package:zolo_smart_school/ui/screens/parentTransportEnroll/transportHome/liveBusMapScreen.dart';
 import 'package:zolo_smart_school/utils/labelKeys.dart';
 import 'package:zolo_smart_school/utils/utils.dart';
 import 'package:flutter/material.dart';
@@ -27,7 +28,12 @@ class LiveTrackingCard extends StatelessWidget {
             onTap: () {
             _showLiveRouteBottomSheet(context);
           }),
+          if (!AuthRepository.getIsStudentLogIn()) ...[
+            SizedBox(height: 8),
+            _liveMapButton(context),
+          ],
         ] else ...[
+          if (!AuthRepository.getIsStudentLogIn()) _liveMapButton(context),
           Center(
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 20),
@@ -58,6 +64,19 @@ class LiveTrackingCard extends StatelessWidget {
           ),
         ]
       ],
+    );
+  }
+
+  /// Opens the GPS map. The screen itself finds which children ride a tracked bus,
+  /// so it works whether [studentId] is a user id or a student id.
+  Widget _liveMapButton(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton.icon(
+        onPressed: () => LiveBusMapScreen.open(context, preferredStudentId: studentId),
+        icon: const Icon(Icons.map_outlined),
+        label: const Text('See the bus on the map'),
+      ),
     );
   }
 

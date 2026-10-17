@@ -55,8 +55,8 @@ class DriverGpsApiController extends Controller
         ResponseService::noFeatureThenSendJson(GpsTransportServiceProvider::FEATURE);
 
         $driver = Auth::user();
-        if (!$driver) {
-            return ResponseService::errorResponse("Unauthorized", null, 401);
+        if ($denied = $this->denyNonDriver()) {
+            return $denied;
         }
 
         try {
@@ -127,9 +127,27 @@ class DriverGpsApiController extends Controller
             return ResponseService::validationError($validator->errors()->first());
         }
 
+        if ($denied = $this->denyNonDriver()) {
+            return $denied;
+        }
+
         try {
             $trip = GpsTrip::findOrFail($request->trip_id);
             $driver = Auth::user();
+
+            // Only an unassigned trip or the driver's own, and only one active trip per driver.
+            if ($trip->driver_id && (int) $trip->driver_id !== (int) $driver->id) {
+                return response()->json(['error' => true, 'message' => 'This trip is assigned to another driver.'], 403);
+            }
+            if (!in_array($trip->status, ['SCHEDULED', 'READY', 'PAUSED'], true)) {
+                return response()->json(['error' => true, 'message' => "This trip is {$trip->status} and cannot be started."], 422);
+            }
+            $otherActive = GpsTrip::where('status', 'ACTIVE')->where('id', '!=', $trip->id)
+                ->where(fn($q) => $q->where('driver_id', $driver->id)->orWhere('vehicle_id', $trip->vehicle_id))
+                ->exists();
+            if ($otherActive) {
+                return response()->json(['error' => true, 'message' => 'You (or this vehicle) already have an active trip. End it first.'], 422);
+            }
 
             $trip->status = 'ACTIVE';
             $trip->driver_id = $driver->id;
@@ -188,11 +206,31 @@ class DriverGpsApiController extends Controller
             $payloads = [$request->all()];
         }
 
-        $processedCount = 0;
-        $lastResult = null;
+        if ($denied = $this->denyNonDriver()) {
+            return $denied;
+        }
 
-        foreach ($payloads as $p) {
-            $p['driver_id'] = $driver ? $driver->id : ($p['driver_id'] ?? null);
+        $processedCount = 0;
+        $rejectedCount = 0;
+        $lastResult = null;
+        $trips = [];
+
+        foreach (array_slice($payloads, 0, 500) as $p) {
+            if (!is_array($p)) {
+                $rejectedCount++;
+                continue;
+            }
+            // A point is accepted only for an ACTIVE trip this driver is running, and the
+            // vehicle is taken from that trip, never from the client.
+            $tripId = (int) ($p['trip_id'] ?? 0);
+            $trips[$tripId] ??= GpsTrip::where('id', $tripId)->where('driver_id', $driver->id)->where('status', 'ACTIVE')->first();
+            if (!$trips[$tripId]) {
+                $rejectedCount++;
+                continue;
+            }
+            $p['trip_id'] = $trips[$tripId]->id;
+            $p['vehicle_id'] = $trips[$tripId]->vehicle_id;
+            $p['driver_id'] = $driver->id;
             $p['source_type'] = 'MOBILE_APP';
 
             try {
@@ -200,7 +238,8 @@ class DriverGpsApiController extends Controller
                 $lastResult = $this->trackingEngine->ingest($processed['location'], $processed['flags']);
                 $processedCount++;
             } catch (Throwable $e) {
-                // Log and continue processing remaining batch points
+                // Invalid point (validator, impossible jump …): skip it, keep the rest of the batch.
+                $rejectedCount++;
                 continue;
             }
         }
@@ -208,6 +247,7 @@ class DriverGpsApiController extends Controller
         return response()->json([
             'error'           => false,
             'processed_count' => $processedCount,
+            'rejected_count'  => $rejectedCount,
             'current_state'   => $lastResult,
         ]);
     }
@@ -232,10 +272,21 @@ class DriverGpsApiController extends Controller
             return ResponseService::validationError($validator->errors()->first());
         }
 
+        if ($denied = $this->denyNonDriver()) {
+            return $denied;
+        }
+
         try {
             $trip = GpsTrip::with('vehicle')->findOrFail($request->trip_id);
             $driver = Auth::user();
             $now = Carbon::now();
+
+            if ((int) $trip->driver_id !== (int) $driver->id || $trip->status !== 'ACTIVE') {
+                return response()->json(['error' => true, 'message' => 'Attendance can only be recorded on your active trip.'], 403);
+            }
+            if (!GpsStudentTripAttendance::where('trip_id', $trip->id)->where('student_id', $request->student_id)->exists()) {
+                return response()->json(['error' => true, 'message' => 'This student is not on the trip roster.'], 422);
+            }
 
             // 1. Record immutable boarding event
             GpsBoardingEvent::create([
@@ -308,10 +359,20 @@ class DriverGpsApiController extends Controller
             return ResponseService::validationError($validator->errors()->first());
         }
 
+        if ($denied = $this->denyNonDriver()) {
+            return $denied;
+        }
+
         try {
             $driver = Auth::user();
             $tripId = $request->trip_id;
             $studentCount = (int) ($request->student_count ?? 0);
+            if ($tripId && !$this->ownTrip((int) $tripId)) {
+                return response()->json(['error' => true, 'message' => 'This trip is not yours.'], 403);
+            }
+            if ($tripId) {
+                $request->merge(['vehicle_id' => $this->ownTrip((int) $tripId)->vehicle_id]);
+            }
 
             if ($tripId && !$studentCount) {
                 $studentCount = GpsStudentTripAttendance::where('trip_id', $tripId)->where('status', 'BOARDED')->count();
@@ -356,8 +417,18 @@ class DriverGpsApiController extends Controller
             return ResponseService::validationError($validator->errors()->first());
         }
 
+        if ($denied = $this->denyNonDriver()) {
+            return $denied;
+        }
+
         try {
             $driver = Auth::user();
+            if ($request->trip_id && !$this->ownTrip((int) $request->trip_id)) {
+                return response()->json(['error' => true, 'message' => 'This trip is not yours.'], 403);
+            }
+            if ($request->trip_id) {
+                $request->merge(['vehicle_id' => $this->ownTrip((int) $request->trip_id)->vehicle_id]);
+            }
             $incident = $this->emergencyService->reportBreakdown(
                 (int) $request->vehicle_id,
                 $driver?->id,
@@ -393,7 +464,14 @@ class DriverGpsApiController extends Controller
             return ResponseService::validationError($validator->errors()->first());
         }
 
+        if ($denied = $this->denyNonDriver()) {
+            return $denied;
+        }
+
         $trip = GpsTrip::with('studentAttendances.student.user')->findOrFail($request->trip_id);
+        if ((int) $trip->driver_id !== (int) Auth::id() || $trip->status !== 'ACTIVE') {
+            return response()->json(['error' => true, 'message' => 'Only your active trip can be ended.'], 403);
+        }
 
         // Section 48: Child Still Onboard Safety Check
         $stillOnboard = $trip->studentAttendances->where('status', 'BOARDED');
@@ -440,5 +518,26 @@ class DriverGpsApiController extends Controller
         } catch (Throwable $e) {
             return response()->json(['error' => true, 'message' => $e->getMessage()], 500);
         }
+    }
+
+    /**
+     * These endpoints move a school bus on every parent's map, so only Driver accounts
+     * may call them (a student or parent token used to be enough).
+     */
+    private function denyNonDriver(): ?JsonResponse
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json(['error' => true, 'message' => 'Unauthorized'], 401);
+        }
+        if (!$user->hasRole('Driver')) {
+            return response()->json(['error' => true, 'message' => 'Only drivers can use the trip endpoints.'], 403);
+        }
+        return null;
+    }
+
+    private function ownTrip(int $tripId): ?GpsTrip
+    {
+        return GpsTrip::where('id', $tripId)->where('driver_id', Auth::id())->first();
     }
 }

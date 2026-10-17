@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Addons\AddonRegistry;
 use App\Models\School;
 use App\Models\SchoolSetting;
 use App\Models\SessionYear;
@@ -400,6 +401,9 @@ class SchoolDataService
 
             ...self::permission('staff-attendance'),
 
+            // Library / Hostel / Canteen addons (kept here so the cleanup below does not delete them)
+            ...AddonRegistry::permissionRows(),
+
 
         ];
         $permissions = array_map(static function ($data) {
@@ -703,6 +707,7 @@ class SchoolDataService
             'transportationRequests-edit',
             'transportationRequests-receipt',
         ];
+        $SchoolAdminHasAccessTo = array_merge($SchoolAdminHasAccessTo, AddonRegistry::permissions());
 
         $role->syncPermissions($SchoolAdminHasAccessTo);
     }

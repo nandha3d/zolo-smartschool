@@ -45,6 +45,7 @@
     <array>
         <string>fetch</string>
         <string>remote-notification</string>
+        <string>location</string>
     </array>
     <key>UIFileSharingEnabled</key>
     <true/>
@@ -72,8 +73,8 @@
     
     <!-- Location permissions -->
     <key>NSLocationWhenInUseUsageDescription</key>
-    <string>This app needs location access to show your position on the map during trips.</string>
+    <string>While you run a school bus trip, your location is shared with the school and with parents of students on the bus.</string>
     <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-    <string>This app needs location access to track trip progress and provide accurate navigation.</string>
+    <string>Lets the school bus position keep updating for parents when the app is in the background during a trip. Sharing stops when you end the trip.</string>
 </dict>
 </plist>

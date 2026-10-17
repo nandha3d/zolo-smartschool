@@ -6,7 +6,7 @@
 
 <!-- swiper -->
 <link rel="stylesheet" href="{{ asset('assets/home_page/css/owl.carousel.min.css') }}">
-<link rel="stylesheet" href="{{ asset('assets/home_page/css/all.min.css') }}">
+<link rel="stylesheet" href="{{ asset('/assets/vendor/fontawesome6/all.min.css') }}">
 <link rel="stylesheet" href="{{ asset('/assets/jquery-toast-plugin/jquery.toast.min.css') }}">
 
 <link rel="shortcut icon" href="{{$systemSettings['favicon'] ?? url('assets/vertical-logo.svg') }}"/>

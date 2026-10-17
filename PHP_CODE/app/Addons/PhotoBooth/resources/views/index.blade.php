@@ -101,15 +101,9 @@
 @endsection
 
 @section('js')
-    <script>
-        (function () {
-            const rosterUrl  = "{{ route('photo-booth.roster') }}";
-            const captureUrl = "{{ route('photo-booth.capture') }}";
-            const csrf       = "{{ csrf_token() }}";
-
-            // Every string this script can put on screen, translated server-side, so the
-            // panel stays in the operator's language instead of falling back to English.
-            const T = @json([
+    @php
+    // Multi-line arrays inside @json(...) do not compile in Blade, so build it here.
+    $boothStrings = [
                 'summary'          => __('photo_booth_roster_summary'),
                 'roll'             => __('photo_booth_roll_number'),
                 'has_photo'        => __('photo_booth_has_photo'),
@@ -123,7 +117,17 @@
                 'no_camera_api'    => __('photo_booth_no_camera_api'),
                 'denied'           => __('photo_booth_permission_denied'),
                 'camera_failed'    => __('photo_booth_camera_failed'),
-            ]);
+            ];
+@endphp
+    <script>
+        (function () {
+            const rosterUrl  = "{{ route('photo-booth.roster') }}";
+            const captureUrl = "{{ route('photo-booth.capture') }}";
+            const csrf       = "{{ csrf_token() }}";
+
+            // Every string this script can put on screen, translated server-side, so the
+            // panel stays in the operator's language instead of falling back to English.
+            const T = @json($boothStrings);
 
             const el = id => document.getElementById(id);
             const video = el('booth-video'), canvas = el('booth-canvas');

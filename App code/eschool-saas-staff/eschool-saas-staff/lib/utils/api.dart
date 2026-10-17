@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:curl_logger_dio_interceptor/curl_logger_dio_interceptor.dart';
 import 'package:dio/dio.dart';
 import 'package:zolo_smart_school_staff/data/repositories/authRepository.dart';
 import 'package:zolo_smart_school_staff/utils/constants.dart';
@@ -209,8 +208,6 @@ class Api {
       final Dio dio = Dio();
       final FormData formData =
           FormData.fromMap(body, ListFormat.multiCompatible);
-      dio.interceptors.add(CurlLoggerDioInterceptor(
-          printOnSuccess: true, convertFormData: true));
 
       final response = await dio.post(url,
           data: formData,
@@ -252,8 +249,6 @@ class Api {
       }
       //
       final Dio dio = Dio();
-      dio.interceptors.add(CurlLoggerDioInterceptor(
-          printOnSuccess: true, convertFormData: true));
 
       final response = await dio.get(url,
           queryParameters: queryParameters,

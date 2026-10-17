@@ -1045,8 +1045,6 @@ $(document).on('click', '.create-backup', function (e) {
                     document.body.appendChild(aTag);
                     aTag.click();
                     aTag.remove();
-
-                    window.URL.revokeObjectURL(objectUrl); // Clean up the object URL after download
                 }
                 
                 $('#table_list').bootstrapTable('refresh');

@@ -1,10 +1,8 @@
 @php
     $lang = Session::get('language');
 @endphp
-{{-- Google Fonts & Material Symbols Sharp for Claude Zolo Redesign --}}
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Sharp:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet" />
+{{-- Instrument Sans, Figtree & Material Symbols Sharp, all self-hosted --}}
+<link rel="stylesheet" href="{{ asset('/assets/fonts/material-symbols/material-symbols-sharp.css') }}">
 <link rel="stylesheet" href="{{ asset('/assets/fonts/zolo/zolo-fonts.css') }}">
 <link rel="stylesheet" href="{{ asset('/assets/css/materialdesignicons.min.css') }}">
 <link rel="stylesheet" href="{{ asset('/assets/css/vendor.bundle.base.css') }}">

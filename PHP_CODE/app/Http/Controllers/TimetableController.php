@@ -12,6 +12,8 @@ use App\Models\TimetablePeriod;
 use App\Models\TimetableResource;
 use App\Models\SubjectScheduleRequirement;
 use App\Models\TimetableGenerationRun;
+use App\Models\TeacherAvailability;
+use App\Models\Leave;
 use App\Services\TimetableGeneratorService;
 use App\Services\Timetable\TimetablePlanningService;
 use App\Services\Timetable\TimetableGenerationService;
@@ -113,7 +115,24 @@ class TimetableController extends Controller
         $templates = $this->planningService->getTemplates($schoolId);
         $resources = $this->planningService->getResources($schoolId);
 
-        return view('timetable.index', compact('timetableData', 'classes', 'mediums', 'classSections', 'templates', 'resources'));
+        // Per-section readiness for the school-wide batch generator: how many subject
+        // requirements are set, their weekly periods, and how many lack a teacher.
+        $currentSemester = $this->cache->getDefaultSemesterData();
+        $requirements = SubjectScheduleRequirement::where('school_id', $schoolId)
+            ->where('is_active', true)
+            ->when($currentSemester, fn($q) => $q->where(fn($sq) => $sq->where('semester_id', $currentSemester->id)->orWhereNull('semester_id')))
+            ->get(['class_section_id', 'subject_id', 'weekly_periods']);
+        $taught = SubjectTeacher::whereIn('class_section_id', $classSections->pluck('id'))
+            ->get(['class_section_id', 'subject_id'])
+            ->map(fn($st) => $st->class_section_id . ':' . $st->subject_id)
+            ->flip();
+        $readiness = $requirements->groupBy('class_section_id')->map(fn($reqs) => [
+            'subjects'   => $reqs->count(),
+            'periods'    => (int) $reqs->sum('weekly_periods'),
+            'no_teacher' => $reqs->filter(fn($r) => !isset($taught[$r->class_section_id . ':' . $r->subject_id]))->count(),
+        ]);
+
+        return view('timetable.index', compact('timetableData', 'classes', 'mediums', 'classSections', 'templates', 'resources', 'readiness'));
     }
 
     public function store(Request $request)
@@ -1474,5 +1493,316 @@ class TimetableController extends Controller
                 'message' => 'Update failed: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * School-wide teacher matrix: one row per teacher, one column per day/period, so a
+     * principal can see who is teaching where and move lessons without clashes.
+     */
+    public function teacherMatrix()
+    {
+        ResponseService::noFeatureThenRedirect('Timetable Management');
+        ResponseService::noPermissionThenRedirect('timetable-list');
+
+        return view('timetable.teacher_matrix', [
+            'canEdit' => Auth::user()->can('timetable-edit'),
+        ]);
+    }
+
+    public function teacherMatrixData()
+    {
+        ResponseService::noFeatureThenRedirect('Timetable Management');
+        ResponseService::noPermissionThenSendJson('timetable-list');
+
+        $schoolId = Auth::user()->school_id;
+        $template = $this->planningService->getDefaultTemplate($schoolId);
+
+        $entries = $this->timetable->builder()
+            ->where('type', 'Lecture')
+            ->with([
+                'subject:id,name,bg_color',
+                'subject_teacher:id,teacher_id',
+                'class_section.class',
+                'class_section.section',
+                'class_section.medium',
+                'resource:id,name',
+            ])
+            ->CurrentSemesterData()
+            ->get();
+
+        // Columns: the default bell schedule, plus any legacy slot times not on it.
+        $slots = [];
+        foreach ($template->periods as $period) {
+            $key = $period->start_time . '-' . $period->end_time;
+            $slots[$key] = [
+                'key'        => $key,
+                'start_time' => $period->start_time,
+                'end_time'   => $period->end_time,
+                'period_id'  => $period->id,
+                'label'      => $period->name ?: ('P' . $period->period_number),
+                'is_break'   => !$period->is_instructional,
+            ];
+        }
+        foreach ($entries as $entry) {
+            $key = $entry->start_time . '-' . $entry->end_time;
+            if (!isset($slots[$key])) {
+                $slots[$key] = [
+                    'key'        => $key,
+                    'start_time' => $entry->start_time,
+                    'end_time'   => $entry->end_time,
+                    'period_id'  => $entry->period_id,
+                    'label'      => substr($entry->start_time, 0, 5),
+                    'is_break'   => false,
+                ];
+            }
+        }
+        $slots = array_values($slots);
+        usort($slots, fn($a, $b) => strcmp($a['start_time'], $b['start_time']));
+
+        $daysOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+        $days = array_values(array_unique(array_merge($template->working_days ?? [], $entries->pluck('day')->all())));
+        usort($days, fn($a, $b) => array_search($a, $daysOrder) <=> array_search($b, $daysOrder));
+
+        $teachers = $this->user->builder()->role('Teacher')->orderBy('first_name')->get(['id', 'first_name', 'last_name']);
+
+        $rows = $entries->map(fn($t) => [
+            'id'               => $t->id,
+            'teacher_id'       => $t->subject_teacher?->teacher_id,
+            'class_section_id' => $t->class_section_id,
+            'class_name'       => $t->class_section?->full_name,
+            'subject_name'     => $t->subject?->name,
+            'bg_color'         => $t->subject?->bg_color ?: '#4F46E5',
+            'day'              => $t->day,
+            'start_time'       => $t->start_time,
+            'end_time'         => $t->end_time,
+            'period_id'        => $t->period_id,
+            'resource_name'    => $t->resource?->name,
+            'is_locked'        => (bool) $t->is_locked,
+        ])->values();
+
+        return response()->json([
+            'error'      => false,
+            'days'       => $days,
+            'slots'      => $slots,
+            'teachers'   => $teachers->map(fn($u) => ['id' => $u->id, 'name' => trim($u->first_name . ' ' . $u->last_name)])->values(),
+            'entries'    => $rows,
+            'unassigned' => $rows->whereNull('teacher_id')->count(),
+        ]);
+    }
+
+    /**
+     * Move a lesson to another day / period. If the class already has a lesson there,
+     * the two are swapped, provided both teachers (and rooms) are free at their new times.
+     */
+    public function moveSlot(Request $request)
+    {
+        ResponseService::noFeatureThenRedirect('Timetable Management');
+        ResponseService::noPermissionThenSendJson('timetable-edit');
+
+        $request->validate([
+            'id'         => 'required|integer',
+            'day'        => 'required|in:Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday',
+            'start_time' => 'required|date_format:H:i:s',
+            'end_time'   => 'required|date_format:H:i:s|after:start_time',
+            'period_id'  => 'nullable|integer',
+        ]);
+
+        $schoolId = Auth::user()->school_id;
+        $day = $request->day;
+        $start = $request->start_time;
+        $end = $request->end_time;
+        $periodId = $request->filled('period_id') ? (int) $request->period_id : null;
+
+        try {
+            DB::beginTransaction();
+            $slot = $this->timetable->builder()->with('subject_teacher')->lockForUpdate()->findOrFail((int) $request->id);
+
+            if ($slot->type !== 'Lecture') {
+                DB::rollBack();
+                return response()->json(['error' => true, 'message' => 'Only lessons can be moved.'], 422);
+            }
+            if ($slot->is_locked) {
+                DB::rollBack();
+                return response()->json(['error' => true, 'message' => 'This lesson is locked. Unlock it first.'], 422);
+            }
+            if ($slot->day === $day && $slot->start_time === $start && $slot->end_time === $end) {
+                DB::rollBack();
+                return response()->json(['error' => false, 'message' => 'Nothing to change.']);
+            }
+
+            // Whatever this class already has at the target time.
+            $occupants = $this->timetable->builder()
+                ->with('subject_teacher')
+                ->where('class_section_id', $slot->class_section_id)
+                ->where('day', $day)
+                ->where('id', '!=', $slot->id)
+                ->where('start_time', '<', $end)
+                ->where('end_time', '>', $start)
+                ->CurrentSemesterData()
+                ->lockForUpdate()
+                ->get();
+
+            $swap = null;
+            if ($occupants->count() > 1) {
+                DB::rollBack();
+                return response()->json(['error' => true, 'message' => 'The target time overlaps more than one lesson of this class.'], 422);
+            }
+            if ($occupants->count() === 1) {
+                $swap = $occupants->first();
+                if ($swap->type !== 'Lecture') {
+                    DB::rollBack();
+                    return response()->json(['error' => true, 'message' => 'The target period is a break for this class.'], 422);
+                }
+                if ($swap->is_locked) {
+                    DB::rollBack();
+                    return response()->json(['error' => true, 'message' => 'The class lesson at the target time is locked.'], 422);
+                }
+                if ($swap->start_time !== $start || $swap->end_time !== $end
+                    || $this->minutesBetween($slot->start_time, $slot->end_time) !== $this->minutesBetween($start, $end)) {
+                    DB::rollBack();
+                    return response()->json(['error' => true, 'message' => 'Lessons of different lengths cannot be swapped.'], 422);
+                }
+            }
+
+            $excludeIds = array_values(array_filter([$slot->id, $swap?->id]));
+            $violations = $this->validationService->validateSingleSlot(
+                $schoolId, $slot->class_section_id, $day, $start, $end,
+                $slot->subject_teacher?->teacher_id, $slot->resource_id, $excludeIds, $periodId
+            );
+            if ($swap) {
+                $violations = array_merge($violations, $this->validationService->validateSingleSlot(
+                    $schoolId, $swap->class_section_id, $slot->day, $slot->start_time, $slot->end_time,
+                    $swap->subject_teacher?->teacher_id, $swap->resource_id, $excludeIds, $slot->period_id
+                ));
+            }
+
+            if (!empty($violations)) {
+                DB::rollBack();
+                return response()->json([
+                    'error'      => true,
+                    'message'    => $violations[0]['message'],
+                    'violations' => $violations,
+                ], 422);
+            }
+
+            $origin = ['day' => $slot->day, 'start_time' => $slot->start_time, 'end_time' => $slot->end_time, 'period_id' => $slot->period_id];
+            $slot->update(['day' => $day, 'start_time' => $start, 'end_time' => $end, 'period_id' => $periodId]);
+            $swap?->update($origin);
+
+            DB::commit();
+            return response()->json([
+                'error'   => false,
+                'message' => $swap ? 'Lessons swapped successfully.' : 'Lesson moved successfully.',
+                'swapped' => $swap?->id,
+            ]);
+        } catch (Throwable $e) {
+            DB::rollBack();
+            ResponseService::logErrorResponse($e, "TimetableController -> moveSlot");
+            return response()->json(['error' => true, 'message' => 'Move failed.'], 500);
+        }
+    }
+
+    /**
+     * Substitute (proxy) suggestions for a teacher who is away on a date: for each of
+     * their lessons that day, teachers who are free, not on leave and not marked
+     * unavailable, ranked by subject fit, class familiarity and lightest load that day.
+     */
+    public function substitutes(Request $request)
+    {
+        ResponseService::noFeatureThenRedirect('Timetable Management');
+        ResponseService::noPermissionThenSendJson('timetable-list');
+
+        $request->validate([
+            'teacher_id' => 'required|integer',
+            'date'       => 'required|date',
+        ]);
+
+        $schoolId = Auth::user()->school_id;
+        $absentId = (int) $request->teacher_id;
+        $date = Carbon::parse($request->date);
+        $day = $date->format('l');
+
+        $dayLessons = $this->timetable->builder()
+            ->where('type', 'Lecture')
+            ->where('day', $day)
+            ->with(['subject:id,name', 'subject_teacher:id,teacher_id', 'class_section.class', 'class_section.section', 'class_section.medium'])
+            ->CurrentSemesterData()
+            ->orderBy('start_time')
+            ->get();
+
+        $absentLessons = $dayLessons->filter(fn($t) => (int) $t->subject_teacher?->teacher_id === $absentId)->values();
+
+        $onLeave = Leave::where('school_id', $schoolId)
+            ->where('status', 1)
+            ->whereHas('leave_detail', fn($q) => $q->whereDate('date', $date->toDateString()))
+            ->pluck('user_id')
+            ->all();
+
+        $teachers = $this->user->builder()->role('Teacher')
+            ->where('id', '!=', $absentId)
+            ->whereNotIn('id', $onLeave)
+            ->get(['id', 'first_name', 'last_name']);
+
+        $assignments = SubjectTeacher::whereIn('teacher_id', $teachers->pluck('id'))
+            ->get(['teacher_id', 'subject_id', 'class_section_id'])
+            ->groupBy('teacher_id');
+
+        $unavailable = TeacherAvailability::where('school_id', $schoolId)
+            ->where('day', $day)
+            ->where('status', 'unavailable')
+            ->get(['teacher_id', 'period_id'])
+            ->groupBy('teacher_id')
+            ->map(fn($g) => $g->pluck('period_id')->flip()->all());
+
+        $busyByTeacher = $dayLessons->groupBy(fn($t) => $t->subject_teacher?->teacher_id);
+
+        $result = $absentLessons->map(function ($lesson) use ($teachers, $assignments, $unavailable, $busyByTeacher) {
+            $candidates = [];
+            foreach ($teachers as $teacher) {
+                $busy = $busyByTeacher->get($teacher->id, collect());
+                $clash = $busy->first(fn($b) => $b->start_time < $lesson->end_time && $b->end_time > $lesson->start_time);
+                if ($clash || ($lesson->period_id && isset($unavailable[$teacher->id][$lesson->period_id]))) {
+                    continue;
+                }
+
+                $teaches = $assignments->get($teacher->id, collect());
+                $sameSubject = $teaches->contains('subject_id', $lesson->subject_id);
+                $sameClass = $teaches->contains('class_section_id', $lesson->class_section_id);
+                $reasons = [];
+                if ($sameSubject) $reasons[] = 'teaches ' . ($lesson->subject?->name ?? 'this subject');
+                if ($sameClass) $reasons[] = 'already teaches this class';
+                $reasons[] = $busy->count() . ' lessons that day';
+
+                $candidates[] = [
+                    'teacher_id'   => $teacher->id,
+                    'name'         => trim($teacher->first_name . ' ' . $teacher->last_name),
+                    'score'        => ($sameSubject ? 20 : 0) + ($sameClass ? 10 : 0) - $busy->count(),
+                    'lessons_that_day' => $busy->count(),
+                    'reasons'      => $reasons,
+                ];
+            }
+            usort($candidates, fn($a, $b) => [$b['score'], $a['name']] <=> [$a['score'], $b['name']]);
+
+            return [
+                'timetable_id' => $lesson->id,
+                'class_name'   => $lesson->class_section?->full_name,
+                'subject_name' => $lesson->subject?->name,
+                'start_time'   => $lesson->start_time,
+                'end_time'     => $lesson->end_time,
+                'candidates'   => array_slice($candidates, 0, 5),
+            ];
+        })->values();
+
+        return response()->json([
+            'error'   => false,
+            'day'     => $day,
+            'date'    => $date->toDateString(),
+            'lessons' => $result,
+        ]);
+    }
+
+    private function minutesBetween(string $start, string $end): int
+    {
+        return (int) ((strtotime($end) - strtotime($start)) / 60);
     }
 }

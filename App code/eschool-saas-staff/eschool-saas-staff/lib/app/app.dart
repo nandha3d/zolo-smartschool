@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:zolo_smart_school_staff/app/appTranslation.dart';
@@ -10,7 +11,9 @@ import 'package:zolo_smart_school_staff/cubits/driverDashboardCubit.dart';
 import 'package:zolo_smart_school_staff/cubits/schoolDetailsCubit.dart';
 import 'package:zolo_smart_school_staff/cubits/teacherAcademics/teacherMyTimetableCubit.dart';
 import 'package:zolo_smart_school_staff/cubits/userDetails/staffAllowedPermissionsAndModulesCubit.dart';
+import 'package:zolo_smart_school_staff/data/repositories/authRepository.dart';
 import 'package:zolo_smart_school_staff/data/repositories/settingsRepository.dart';
+import 'package:zolo_smart_school_staff/utils/gps/gpsTrackingService.dart';
 import 'package:zolo_smart_school_staff/ui/styles/colors.dart';
 import 'package:zolo_smart_school_staff/utils/hiveBoxKeys.dart';
 import 'package:flutter/foundation.dart';
@@ -20,9 +23,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/route_manager.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/adapters.dart';
-import 'package:device_preview/device_preview.dart';
 
-//to avoid handshake error on some devices
+// Debug builds only: lets the app talk to a local server with a self-signed certificate.
 class MyHttpOverrides extends HttpOverrides {
   @override
   HttpClient createHttpClient(SecurityContext? context) {
@@ -34,7 +36,11 @@ class MyHttpOverrides extends HttpOverrides {
 
 Future<void> initializeApp() async {
   WidgetsFlutterBinding.ensureInitialized();
-  HttpOverrides.global = MyHttpOverrides();
+  // Accepting any certificate defeats TLS (tokens and passwords could be read by
+  // anyone on the network), so it is only allowed for local development builds.
+  if (kDebugMode) {
+    HttpOverrides.global = MyHttpOverrides();
+  }
   //Register the licence of font
   //If using google-fonts
   LicenseRegistry.addLicense(() async* {
@@ -62,13 +68,13 @@ Future<void> initializeApp() async {
   await Hive.openBox(settingsBoxKey);
 
   await Hive.openBox(notificationsBoxKey);
+  await GpsTrackingService.openBoxes();
+  // A driver whose app was killed mid-trip carries on sharing the bus position.
+  if (AuthRepository.getIsLogIn()) {
+    unawaited(GpsTrackingService.instance.resumeIfNeeded());
+  }
 
-  runApp(
-    DevicePreview(
-      enabled: false,
-      builder: (context) => const MyApp(),
-    ),
-  );
+  runApp(const MyApp());
 }
 
 class MyApp extends StatefulWidget {

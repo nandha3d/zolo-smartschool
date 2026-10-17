@@ -3,8 +3,6 @@
 
 <!-- bootstrap  -->
 {{-- <script src="{{ asset('/assets/vendor/jquery/jquery.min.js') }}"></script> --}}
-<!-- fontawesome icons   -->
-<script src="{{ asset('assets/home_page/js/1d2a297b20.js') }}"></script>
 <script src="{{ asset('/assets/home_page/js/custom/common.js') }}"></script>
 <script src="{{ asset('/assets/home_page/js/custom/custom.js') }}"></script>
 <script src="{{ asset('/assets/js/custom/function.js') }}"></script>

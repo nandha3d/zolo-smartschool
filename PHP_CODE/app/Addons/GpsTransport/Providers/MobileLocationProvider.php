@@ -28,7 +28,8 @@ class MobileLocationProvider implements LocationProviderInterface
             'altitude'          => isset($payload['altitude']) ? (float) $payload['altitude'] : null,
             'speed'             => (float) ($payload['speed'] ?? 0.0),
             'heading'           => (float) ($payload['heading'] ?? 0.0),
-            'timestamp'         => isset($payload['timestamp']) ? Carbon::parse($payload['timestamp']) : Carbon::now(),
+            // Devices send UTC / offset timestamps; store them in the app timezone like every other column.
+            'timestamp'         => isset($payload['timestamp']) ? Carbon::parse($payload['timestamp'])->setTimezone(config('app.timezone')) : Carbon::now(),
             'battery_level'     => isset($payload['battery_level']) ? (int) $payload['battery_level'] : null,
             'is_mock_location'  => (bool) ($payload['is_mock_location'] ?? false),
             'source_type'       => 'MOBILE_APP',

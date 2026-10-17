@@ -31,24 +31,38 @@ use App\Repositories\DatabaseBackup\DatabaseBackupInterface;
 use App\Services\BootstrapTableService;
 use App\Services\ResponseService;
 use App\Services\SubscriptionService;
+use App\Services\UploadService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\Auth as FacadesAuth;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
+use RuntimeException;
 use Throwable;
 use ZipArchive;
 
+/**
+ * Backups are written to storage/app/private (never the web-served public disk) and
+ * handed out through an authenticated download route. Each archive carries a manifest
+ * signed with an HMAC derived from APP_KEY and bound to the backup scope and owner, and
+ * restore refuses any archive whose signature does not verify. On top of that, restore
+ * only runs CREATE TABLE IF NOT EXISTS / INSERT INTO statements against plain table names
+ * of the current database, and only copies media files with an allowed upload extension.
+ * Together this stops an uploaded archive from running arbitrary SQL (every tenant DB is
+ * reached with the same MySQL user, so that would reach the central database) or from
+ * dropping a script into the public disk.
+ */
 class DatabaseBackupController extends Controller
 {
-    //
+    private const MANIFEST_ENTRY = 'database-backup/manifest.json';
+
+    private const SCHOOL_EXCLUDED_TABLES = ['addons', 'attachments', 'categories', 'chats', 'failed_jobs', 'features', 'feature_sections', 'feature_section_lists', 'guidances', 'languages', 'messages', 'migrations', 'packages', 'package_features', 'password_resets', 'personal_access_tokens', 'staff_support_schools', 'system_settings', 'user_status_for_next_cycles', 'database_backups'];
+
+    private const SUPER_ADMIN_EXCLUDED_TABLES = ['addons', 'failed_jobs', 'features', 'feature_sections', 'feature_section_lists', 'guidances', 'languages', 'migrations', 'packages', 'package_features', 'password_resets', 'personal_access_tokens', 'staff_support_schools', 'system_settings'];
 
     private DatabaseBackupInterface $databaseBackup;
     private SubscriptionService $subscriptionService;
@@ -72,417 +86,47 @@ class DatabaseBackupController extends Controller
 
     public function store()
     {
-
         ResponseService::noPermissionThenSendJson('database-backup');
-        $user_Id = Auth::user()->hasRole('School Admin') ? Auth::user()->school_id : Auth::user()->id;
+        [$backupType, $ownerId] = $this->backupScope();
         $current_version = SystemSetting::where('name', 'system_version')->first()['data'];
 
-        if (Auth::user()->hasRole('School Admin')) {
-
-            // Database backup
-            $allTables = DB::select('SHOW TABLES');
-            $tableNames = array_map('current', $allTables);
-
-            $expectedTables = ['addons', 'attachments', 'categories', 'chats', 'failed_jobs', 'features', 'feature_sections', 'feature_section_lists', 'guidances', 'languages', 'messages', 'migrations', 'packages', 'package_features', 'password_resets', 'personal_access_tokens', 'staff_support_schools', 'system_settings', 'user_status_for_next_cycles', 'database_backups'];
-
-            $subscription = $this->subscriptionService->active_subscription(Auth::user()->school_id);
-
-            $allTables = array_diff($tableNames, $expectedTables);
-            $tableNames = array_values($allTables);
-
-            $staff_ids = Staff::whereHas('user', function ($q) use ($user_Id) {
-                $q->where('school_id', $user_Id);
-            })->pluck('id')->toArray();
-
-            $students = Students::where('school_id', $user_Id)->withTrashed()->get();
-            $student_ids = $students->pluck('user_id')->toArray();
-            $guardian_ids = $students->pluck('guardian_id')->toArray();
-
-            $roles_id = Role::where('school_id', Auth::user()->school_id)->pluck('id')->toArray();
-
-            $guardian_ids = array_values(array_unique($guardian_ids));
-            // Tables requiring additional conditions
-            // dd($subscription->school->admin_id);
-            $tablesWithAdditionalConditions = [
-                'users' => function ($query) use ($user_Id, $guardian_ids, $subscription) {
-                    $query->where(function ($q) use ($user_Id, $guardian_ids) {
-                        $q->where('school_id', $user_Id)
-                            ->orWhereIn('id', $guardian_ids);
-                    });
-                    // ->where(function ($q) use ($subscription) {
-                    //     $q->WhereNot('id', $subscription->school->admin_id)
-                    //         ->where('id', Auth::user()->id);
-                    // });
-                },
-                'fees_advance' => function ($query) use ($guardian_ids) {
-                    $query->whereIn('parent_id', $guardian_ids);
-                },
-                'staffs' => function ($query) use ($staff_ids) {
-                    $query->whereIn('id', $staff_ids);
-                },
-                'staff_salaries' => function ($query) use ($staff_ids) {
-                    $query->whereIn('staff_id', $staff_ids);
-                },
-                'model_has_roles' => function ($query) use ($roles_id) {
-                    $query->whereIn('role_id', $roles_id);
-                },
-
-                'role_has_permissions' => function ($query) use ($roles_id) {
-                    $query->whereIn('role_id', $roles_id);
-                },
-                'subscription_features' => function ($query) use ($subscription) {
-                    $query->where('subscription_id', $subscription->id);
-                },
-                // Add more specific tables here
-            ];
-
-            $backupData = '';
-            // dd($tableNames);
-            foreach ($tableNames as $table) {
-                // Get table creation SQL
-                // $createTableSQL = DB::select("SHOW CREATE TABLE `$table`");
-                // $backupData .= $createTableSQL[0]->{'Create Table'} . ";\n\n";
-
-                // ==========================================================
-                $createTableSQL = DB::select("SHOW CREATE TABLE `$table`");
-                $createTable = $createTableSQL[0]->{'Create Table'};
-
-                // Replace 'CREATE TABLE' with 'CREATE TABLE IF NOT EXISTS'
-                $createTableWithIfNotExists = str_replace('CREATE TABLE', 'CREATE TABLE IF NOT EXISTS', $createTable);
-
-                // Add the modified SQL to the backup
-                $backupData .= $createTableWithIfNotExists . ";\n\n";
-                // ==========================================================
-
-                // Create query builder
-
-                $query = DB::table($table);
-                // Check if 'school_id' column exists
-                $hasSchoolIdColumn = Schema::hasColumn($table, 'school_id');
-                // Apply conditions
-                if ($hasSchoolIdColumn) {
-                    if (!array_key_exists($table, $tablesWithAdditionalConditions)) {
-                        $query->where('school_id', $user_Id);
-                    } else {
-                        // Apply specific conditions
-                        $tablesWithAdditionalConditions[$table]($query);
-                    }
-                } else {
-                    // Apply specific conditions if necessary
-                    if (array_key_exists($table, $tablesWithAdditionalConditions)) {
-                        $tablesWithAdditionalConditions[$table]($query);
-                    }
-                }
-
-                // Fetch rows and build SQL for inserts
-                $rows = $query->get();
-
-                foreach ($rows as $row) {
-                    // Convert row to array
-                    $rowArray = (array) $row;
-
-                    // For class_subjects table, skip virtual_semester_id
-                    if ($table === 'class_subjects') {
-                        unset($rowArray['virtual_semester_id']);
-                    }
-
-                    $values = array_map(function ($value) use ($table) {
-                        if (is_null($value)) {
-                            return 'NULL';
-                        }
-
-                        // Special handling for settings tables that contain HTML content or email templates
-                        if (in_array($table, ['school_settings', 'system_settings'])) {
-                            // Check if it's an email template or contains HTML
-                            if (
-                                strpos($value, '<') !== false || strpos($value, '>') !== false ||
-                                strpos($value, '{') !== false || strpos($value, '}') !== false
-                            ) {
-                                // Properly escape HTML content and template variables
-                                $value = str_replace('\\', '\\\\', $value); // Escape backslashes first
-                                $value = str_replace("'", "\\'", $value);   // Escape single quotes
-                                $value = str_replace('"', '\\"', $value);   // Escape double quotes
-                                return "'" . $value . "'";
-                            }
-                        }
-
-                        // For all other tables/content
-                        $value = str_replace("'", "''", $value); // Escape single quotes
-                        $value = str_replace("\\", "\\\\", $value); // Escape backslashes
-                        return "'" . $value . "'";
-                    }, $rowArray);
-
-                    // Get column names for INSERT statement
-                    if ($table === 'class_subjects') {
-                        $columns = array_keys($rowArray);
-                        $backupData .= "INSERT INTO `$table` (`" . implode('`, `', $columns) . "`) VALUES (" . implode(', ', $values) . ");\n";
-                    } else {
-                        $backupData .= "INSERT INTO `$table` VALUES (" . implode(', ', $values) . ");\n";
-                    }
-                }
-                $backupData .= "\n";
-            }
-
-            // Define the path
-            $path = 'public/database-backup/schools/' . $user_Id; // Change to store in the 'sql' directory
-            // $path = storage_path('public/database-backup/schools/' . $user_Id);
-            $timestamp = Carbon::now()->format('Y-m-d');
-            $file_name = "database_backup_{$user_Id}_{$timestamp}";
-            $filePath = $path . "/database_backup_{$user_Id}_{$timestamp}.sql";
-
-            // check storage public in id folder exist
-            if (!Storage::exists('public/' . $user_Id)) {
-                Storage::makeDirectory('public/' . $user_Id);
-            }
-
-            // Create the directory if it doesn't exist
-            if (!Storage::exists($path)) {
-                Storage::makeDirectory($path);
-            }
-
-            // Save the backup to the file
-            Storage::put($filePath, $backupData);
-            // End database backup
-            // ==========================================================
-
-            $zip = new ZipArchive;
-            $backup_type = 'schools';
-            $public_folder_path = storage_path('app/public/' . $user_Id);
-            $backup_folder_path = storage_path('app/public/database-backup/' . $backup_type . '/' . $user_Id);
-
-            $zip_file_path = $backup_folder_path . '/' . $file_name . '-(V-' . $current_version . ').zip';
-
-            // dd(File::isDirectory($backup_folder_path));
-            // $mainFolder = Auth::user()->id; // Main folder name
-            // $mainFolderPath = storage_path('app/public/database-backup/super-admin/' . $mainFolder); // Path to the main folder
-
-            if ($zip->open($zip_file_path, ZipArchive::CREATE) === TRUE) {
-
-                if (File::isDirectory($backup_folder_path)) {
-
-                    // Add main folder to the zip
-                    $zip_media_folder = 'media';
-
-                    // create folder for media files
-                    $zip->addEmptyDir($zip_media_folder);
-
-                    // create database-backup folder and add .sql file
-                    $relativeSqlFile = 'database-backup/database_backup_' . $user_Id . '_' . $timestamp . '.sql';
-                    $zip->addFile(storage_path('app/' . $filePath), $relativeSqlFile);
-                    // dd($relativeSqlFile);
-
-                    // // Get all subdirectories inside the main folder
-                    $subfolders = File::directories($public_folder_path);
-
-                    foreach ($subfolders as $subfolderPath) {
-                        // Get the relative path of the subfolder
-                        $relativeSubfolder = $zip_media_folder . '/' . str_replace(storage_path('app/public/'), '', $subfolderPath);
-
-
-                        // Add the subfolder to the zip
-                        $zip->addEmptyDir($relativeSubfolder);
-
-                        // Get all files inside the current subfolder
-                        $files = File::files($subfolderPath);
-
-                        foreach ($files as $file) {
-                            // Get the relative path of the file
-                            $relativeFile = $zip_media_folder . '/' . str_replace(storage_path('app/public/'), '', $file);
-
-                            // Add the file to the zip with its relative path
-                            $zip->addFile($file, $relativeFile);
-                        }
-                    }
-
-                    // // Add files in the main folder
-                    // $mainFolderFiles = File::files($mainFolderPath);
-                    // foreach ($mainFolderFiles as $file) {
-                    //     // Get the relative path of the file
-                    //     $relativeFile = str_replace(storage_path('app/public/'), '', $file);
-
-                    //     // Add the file to the zip
-                    //     $zip->addFile($file, $relativeFile);
-                    // }
-
-
-                    // Close the archive
-                    $zip->close();
-
-                    // Create the directory if it doesn't exist
-                    if (!Storage::exists($path)) {
-                        Storage::makeDirectory($path);
-                    }
-                }
-
-                // Delete the .sql file after zipping
-                Storage::delete($filePath);
-
-                $data = [
-                    'name' => $file_name
-                ];
-
-                // $this->databaseBackup->create($data);
-
-                $file_name = "database_backup_{$user_Id}_" . Carbon::now()->format('Y-m-d') . '-(V-' . $current_version . ').zip';
-                // dd($file_name);
-
-                $zipFileDownload = 'database-backup/schools/' . $user_Id . '/' . $file_name;
-
-                $download_url = url(Storage::url($zipFileDownload));
-
-                ResponseService::successResponse('Backup completed successfully', $download_url);
+        try {
+            if ($backupType === 'schools') {
+                $backupData = $this->dumpSchoolDatabase($ownerId);
             } else {
-                ResponseService::logErrorResponse("DatabaseBackup Controller -> Store Method");
-                ResponseService::errorResponse();
-            }
-        } else if (Auth::user()->hasRole('Super Admin')) {
-
-            // Set default connection for Super Admin
-            DB::setDefaultConnection('mysql');
-
-            // Get all tables
-            $allTables = DB::select('SHOW TABLES');
-            $tableNames = array_map('current', $allTables);
-
-            $backupData = '';
-
-            $expectedTables = ['addons', 'failed_jobs', 'features', 'feature_sections', 'feature_section_lists', 'guidances', 'languages', 'migrations', 'packages', 'package_features', 'password_resets', 'personal_access_tokens', 'staff_support_schools', 'system_settings'];
-
-            $allTables = array_diff($tableNames, $expectedTables);
-            $tableNames = array_values($allTables);
-
-            // Loop through each table and generate backup data
-            foreach ($tableNames as $table) {
-                $createTableSQL = DB::select("SHOW CREATE TABLE `$table`");
-                $createTable = $createTableSQL[0]->{'Create Table'};
-                $createTableWithIfNotExists = str_replace('CREATE TABLE', 'CREATE TABLE IF NOT EXISTS', $createTable);
-                $backupData .= $createTableWithIfNotExists . ";\n\n";
-
-                $query = DB::table($table);
-                $rows = $query->get();
-
-                foreach ($rows as $row) {
-                    $values = array_map(function ($value) {
-                        return is_null($value) ? 'NULL' : "'" . addslashes($value) . "'";
-                    }, (array) $row);
-
-                    $backupData .= "INSERT INTO `$table` VALUES (" . implode(', ', $values) . ");\n";
-                }
-                $backupData .= "\n";
+                // Set default connection for Super Admin
+                DB::setDefaultConnection('mysql');
+                $backupData = $this->dumpSuperAdminDatabase();
             }
 
-            // Define the path
-            $path = 'public/database-backup/super-admin/' . $user_Id; // Change to store in the 'sql' directory
-
-            $timestamp = Carbon::now()->format('Y-m-d');
-            $file_name = "database_backup_{$user_Id}_{$timestamp}";
-            $filePath = $path . "/database_backup_{$user_Id}_{$timestamp}.sql";
-
-            // check storage public in id folder exist
-            if (!Storage::exists('public/' . $user_Id)) {
-                Storage::makeDirectory('public/' . $user_Id);
-            }
-
-            // Create the directory if it doesn't exist
-            if (!Storage::exists($path)) {
-                Storage::makeDirectory($path);
-            }
-
-            // Save the backup to the file
-            Storage::put($filePath, $backupData);
-            // End database backup
-            // ==========================================================
-
-            $zip = new ZipArchive;
-            $backup_type = 'super-admin';
-            $public_folder_path = storage_path('app/public/' . $user_Id);
-            $backup_folder_path = storage_path('app/public/database-backup/' . $backup_type . '/' . $user_Id);
-
-            $zip_file_path = $backup_folder_path . '/' . $file_name . '-(V-' . $current_version . ').zip';
-
-            // dd(File::isDirectory($backup_folder_path));
-            // $mainFolder = Auth::user()->id; // Main folder name
-            // $mainFolderPath = storage_path('app/public/database-backup/super-admin/' . $mainFolder); // Path to the main folder
-
-            if ($zip->open($zip_file_path, ZipArchive::CREATE) === TRUE) {
-
-                if (File::isDirectory($backup_folder_path)) {
-
-                    // Add main folder to the zip
-                    $zip_media_folder = 'media';
-
-                    // create folder for media files
-                    $zip->addEmptyDir($zip_media_folder);
-
-                    // create database-backup folder and add .sql file
-                    $relativeSqlFile = 'database-backup/database_backup_' . $user_Id . '_' . $timestamp . '.sql';
-                    $zip->addFile(storage_path('app/' . $filePath), $relativeSqlFile);
-                    // dd($relativeSqlFile);
-
-                    // // Get all subdirectories inside the main folder
-                    $subfolders = File::directories($public_folder_path);
-
-                    foreach ($subfolders as $subfolderPath) {
-                        // Get the relative path of the subfolder
-                        $relativeSubfolder = $zip_media_folder . '/' . str_replace(storage_path('app/public/'), '', $subfolderPath);
-
-
-                        // Add the subfolder to the zip
-                        $zip->addEmptyDir($relativeSubfolder);
-
-                        // Get all files inside the current subfolder
-                        $files = File::files($subfolderPath);
-
-                        foreach ($files as $file) {
-                            // Get the relative path of the file
-                            $relativeFile = $zip_media_folder . '/' . str_replace(storage_path('app/public/'), '', $file);
-
-                            // Add the file to the zip with its relative path
-                            $zip->addFile($file, $relativeFile);
-                        }
-                    }
-
-                    // // Add files in the main folder
-                    // $mainFolderFiles = File::files($mainFolderPath);
-                    // foreach ($mainFolderFiles as $file) {
-                    //     // Get the relative path of the file
-                    //     $relativeFile = str_replace(storage_path('app/public/'), '', $file);
-
-                    //     // Add the file to the zip
-                    //     $zip->addFile($file, $relativeFile);
-                    // }
-
-
-                    // Close the archive
-                    $zip->close();
-
-                    // Create the directory if it doesn't exist
-                    if (!Storage::exists($path)) {
-                        Storage::makeDirectory($path);
-                    }
-                }
-
-                // Delete the .sql file after zipping
-                Storage::delete($filePath);
-
-                $data = [
-                    'name' => $file_name
-                ];
-
-                // $this->databaseBackup->create($data);
-
-                $file_name = "database_backup_{$user_Id}_" . Carbon::now()->format('Y-m-d') . '-(V-' . $current_version . ').zip';
-
-                $zipFileDownload = 'database-backup/super-admin/' . $user_Id . '/' . $file_name;
-
-                $download_url = url(Storage::url($zipFileDownload));
-
-                ResponseService::successResponse('Backup completed successfully', $download_url);
-            } else {
-                ResponseService::logErrorResponse("DatabaseBackup Controller -> Store Method");
-                ResponseService::errorResponse();
-            }
+            $file_name = $this->writeArchive($backupType, $ownerId, $backupData, $current_version);
+        } catch (Throwable $e) {
+            ResponseService::logErrorResponse($e, "DatabaseBackup Controller -> Store Method");
+            ResponseService::errorResponse();
         }
+
+        ResponseService::successResponse('Backup completed successfully', route('database-backup.download', ['file' => $file_name]));
+    }
+
+    /**
+     * Stream a backup archive to its owner, then remove it so finished backups do not
+     * accumulate on the server.
+     */
+    public function download(string $file)
+    {
+        ResponseService::noPermissionThenRedirect('database-backup');
+        [$backupType, $ownerId] = $this->backupScope();
+
+        if (basename($file) !== $file || !preg_match('/^database_backup_\d+_[0-9-]+-\(V-[0-9A-Za-z._-]+\)\.zip$/', $file)) {
+            abort(404);
+        }
+
+        $path = $this->backupDirectory($backupType, $ownerId) . DIRECTORY_SEPARATOR . $file;
+        if (!is_file($path)) {
+            abort(404);
+        }
+
+        return response()->download($path, $file, ['Content-Type' => 'application/zip'])->deleteFileAfterSend(true);
     }
 
     public function show()
@@ -532,18 +176,16 @@ class DatabaseBackupController extends Controller
     {
         ResponseService::noPermissionThenSendJson('database-backup');
         try {
+            [$backupType, $ownerId] = $this->backupScope();
             $databaseBackup = $this->databaseBackup->findById($id);
-            $sql_file = 'database-backup/' . Auth::user()->school_id . '/' . $databaseBackup->name . '.sql';
-            $zip_file = 'database-backup/' . Auth::user()->school_id . '/' . $databaseBackup->name . '.zip';
+            $name = basename((string) $databaseBackup->name);
+            $directory = $this->backupDirectory($backupType, $ownerId);
 
-
-            if (Storage::disk('public')->exists($sql_file)) {
-                Storage::disk('public')->delete($sql_file);
+            foreach ([$name . '.sql', $name . '.zip'] as $file) {
+                if (is_file($directory . DIRECTORY_SEPARATOR . $file)) {
+                    File::delete($directory . DIRECTORY_SEPARATOR . $file);
+                }
             }
-            if (Storage::disk('public')->exists($zip_file)) {
-                Storage::disk('public')->delete($zip_file);
-            }
-
 
             $this->databaseBackup->deleteById($id);
             ResponseService::successResponse('Data Deleted Successfully');
@@ -556,161 +198,62 @@ class DatabaseBackupController extends Controller
     public function restore(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'zip_file' => 'required|mimes:zip',
+            'zip_file' => 'required|file|mimes:zip',
         ]);
 
         if ($validator->fails()) {
             ResponseService::errorResponse($validator->errors()->first());
         }
 
+        [$backupType, $ownerId] = $this->backupScope();
+
+        $zip = new ZipArchive;
+        if ($zip->open($request->file('zip_file')->getRealPath()) !== true) {
+            ResponseService::errorResponse('The backup archive could not be opened.');
+        }
+
+        // Verify everything before touching the existing data.
         try {
+            $manifest = $this->verifiedManifest($zip, $backupType, $ownerId);
+            $sql = $zip->getFromName($manifest['sql']);
+            if ($sql === false || !hash_equals($manifest['sha256'], hash('sha256', $sql))) {
+                throw new RuntimeException('The backup archive has been modified.');
+            }
 
-            $authId = Auth::user()->hasRole('School Admin') ? Auth::user()->school_id : Auth::user()->id;
+            if ($backupType === 'super-admin') {
+                DB::setDefaultConnection('mysql');
+            }
 
-            if (Auth::user()->hasRole('School Admin')) {
+            $excludedTables = $backupType === 'schools' ? self::SCHOOL_EXCLUDED_TABLES : self::SUPER_ADMIN_EXCLUDED_TABLES;
+            $currentTables = $this->listTables();
+            $statements = $this->restorableStatements($sql, $currentTables, $excludedTables);
+            $mediaEntries = $this->restorableMediaEntries($zip, $ownerId);
+        } catch (RuntimeException $e) {
+            $zip->close();
+            ResponseService::errorResponse($e->getMessage());
+        }
 
-                // File UnZip
-                $zip = new ZipArchive;
-                $backup_type = 'schools';
-                $public_folder_path = storage_path('app/public/' . $authId);
-                $backup_folder_path = storage_path('app/public/database-backup/' . $backup_type . '/' . $authId);
+        try {
+            $this->replaceMedia($zip, $ownerId, $mediaEntries);
+            $zip->close();
 
-
-
-                // Ensure the school ID folder exists
-                if (!file_exists($public_folder_path)) {
-                    File::makeDirectory($public_folder_path, 0755, true);
+            DB::statement("SET FOREIGN_KEY_CHECKS = 0");
+            try {
+                foreach (array_diff($currentTables, $excludedTables) as $table) {
+                    DB::table($table)->truncate();
                 }
-
-                // Old Data Delete from public folder
-                $mainOldfolders = File::directories($public_folder_path);
-                // dd("School Admin",$mainOldfolders);
-
-                foreach ($mainOldfolders as $subfolder) {
-                    foreach (File::files($subfolder) as $file) {
-                        File::delete($file);
-                    }
+                foreach ($statements as $statement) {
+                    DB::unprepared($statement);
                 }
+            } finally {
+                DB::statement("SET FOREIGN_KEY_CHECKS = 1");
+            }
 
-                // Un-Zip and move data
-                if ($zip->open($request->zip_file) === TRUE) {
-
-                    $zip->extractTo($backup_folder_path);
-                    $mainfolders = File::directories($backup_folder_path);
-
-                    foreach ($mainfolders as $subfolder) {
-
-                        // Check if the folder doesn't contain the specific 'database-backup' path
-                        if (!Str::contains($subfolder, $authId . "/database-backup")) {
-
-                            if (File::isDirectory($subfolder . '/' . $authId)) {
-                                // Get the list of subfolders
-                                $mainSubfolders = File::directories($subfolder . '/' . $authId);
-
-                                // Iterate through each subfolder
-                                foreach ($mainSubfolders as $folder) {
-
-                                    $folderName = basename($folder);
-
-                                    // Build the destination path for the folder
-                                    $destinationPath = $public_folder_path . "/" . $folderName;
-
-                                    File::move($folder, $destinationPath);
-                                }
-                            }
-                        }
-                    }
-
-                    $zip->close();
-                }
-
-
-
-                // Read Backup .sql File
-                $sql_file_path = "";
-                foreach (File::directories($backup_folder_path) as $subfolders) {
-                    foreach (File::files($subfolders) as $subfolders) {
-                        $sql_file_path = pathinfo($subfolders)['dirname'] . "/" . pathinfo($subfolders)['basename'];
-                    }
-                }
-
-
-                try {
-                    DB::beginTransaction();
-                    DB::statement("SET FOREIGN_KEY_CHECKS = 0");
-                    $tables = DB::connection()->getDoctrineSchemaManager()->listTableNames();
-
-                    $expectedTables = ['addons', 'attachments', 'categories', 'chats', 'failed_jobs', 'features', 'feature_sections', 'feature_section_lists', 'guidances', 'languages', 'messages', 'migrations', 'packages', 'package_features', 'password_resets', 'personal_access_tokens', 'staff_support_schools', 'system_settings', 'user_status_for_next_cycles', 'database_backups'];
-
-                    $allTables = array_diff($tables, $expectedTables);
-                    $tableNames = array_values($allTables);
-                    // dd($tableNames);
-                    foreach ($tableNames as $table) {
-                        DB::table($table)->truncate();
-                        \Log::info("Table {$table} truncated.");
-                    }
-                    DB::statement("SET FOREIGN_KEY_CHECKS = 1");
-                    DB::commit();
-                } catch (\Exception $e) {
-                    DB::rollBack();
-                    \Log::error('Truncation error: ' . $e->getMessage());
-                }
-
-                // Check if the SQL file exists and proceed with execution
-                if (File::exists($sql_file_path)) {
-
-                    // Read the contents of the SQL file
-                    $sql = File::get($sql_file_path);
-
-                    $queries = array_filter(
-                        explode(";\n", $sql),
-                        function ($query) {
-                            return !empty(trim($query));
-                        }
-                    );
-                    try {
-                        // Begin transaction
-                        DB::beginTransaction();
-                        DB::statement("SET FOREIGN_KEY_CHECKS = 0");
-                        foreach ($queries as $query) {
-                            if (!empty(trim($query))) {
-                                DB::unprepared(trim($query));
-                                \Log::info("Executed query: {$query}");
-                            }
-                        }
-                        DB::statement("SET FOREIGN_KEY_CHECKS = 1");
-                        DB::commit();
-                    } catch (\Exception $e) {
-                        DB::rollBack();
-                        \Log::error("Transaction failed: " . $e->getMessage());
-                    }
-                } else {
-                    \Log::warning('SQL file not found: ' . $sql_file_path);
-                }
-
-                // Delete backup folders and .sql files after backup
-                $deleteBackupFolders = File::directories($backup_folder_path);
-
-                foreach ($deleteBackupFolders as $subfolder) {
-                    if (Str::contains($subfolder, $authId . "/database-backup")) {
-
-                        // Delete all .sql files in the subfolder
-                        foreach (File::files($subfolder) as $subpath) {
-                            if (pathinfo($subpath)['extension'] === 'sql') {
-                                File::delete($subpath);
-                            }
-                        }
-
-                        // Delete the subfolder after its contents have been deleted
-                        File::deleteDirectory($subfolder);
-                    }
-                }
-
-
+            if ($backupType === 'schools') {
                 // add school current version migration
                 $schools = School::withTrashed()->where('id', Auth::user()->school_id)->get();
 
-                foreach ($schools as $key => $school) {
+                foreach ($schools as $school) {
                     Config::set('database.connections.school.database', $school->database_name);
                     DB::purge('school');
                     DB::connection('school')->reconnect();
@@ -722,159 +265,13 @@ class DatabaseBackupController extends Controller
                         '--force' => true,
                     ]);
                 }
-            } else if (Auth::user()->hasRole('Super Admin')) {
-                // File UnZip
-                $zip = new ZipArchive;
-                $backup_type = 'super-admin';
-                $public_folder_path = storage_path('app/public/' . $authId);
-                $backup_folder_path = storage_path('app/public/database-backup/' . $backup_type . '/' . $authId);
-
-                // Ensure the school ID folder exists
-                if (!file_exists($public_folder_path)) {
-                    File::makeDirectory($public_folder_path, 0755, true);
-                }
-
-                // Old Data Delete from public folder
-                $mainOldfolders = File::directories($public_folder_path);
-                // dd("School Admin",$mainOldfolders);
-
-                foreach ($mainOldfolders as $subfolder) {
-                    foreach (File::files($subfolder) as $file) {
-                        File::delete($file);
-                    }
-                }
-
-                // Un-Zip and move data
-                if ($zip->open($request->zip_file) === TRUE) {
-
-                    $zip->extractTo($backup_folder_path);
-                    $mainfolders = File::directories($backup_folder_path);
-
-                    foreach ($mainfolders as $subfolder) {
-                        // Check if the folder doesn't contain the specific 'database-backup' path
-                        if (!Str::contains($subfolder, $authId . "/database-backup")) {
-
-                            if (File::isDirectory($subfolder . '/' . $authId)) {
-                                // Get the list of subfolders
-                                $mainSubfolders = File::directories($subfolder . '/' . $authId);
-
-                                // Iterate through each subfolder
-                                foreach ($mainSubfolders as $folder) {
-
-                                    $folderName = basename($folder);
-
-                                    // Build the destination path for the folder
-                                    $destinationPath = $public_folder_path . "/" . $folderName;
-
-                                    File::move($folder, $destinationPath);
-                                }
-                            }
-                        }
-                    }
-
-                    $zip->close();
-                }
-
-
-                // Read Backup .sql File
-                $sql_file_path = "";
-                foreach (File::directories($backup_folder_path) as $subfolders) {
-                    foreach (File::files($subfolders) as $subfolders) {
-
-                        $sql_file_path = pathinfo($subfolders)['dirname'] . "/" . pathinfo($subfolders)['basename'];
-                    }
-                }
-
-                try {
-                    // Start the transaction
-                    DB::beginTransaction();
-
-                    // Disable foreign key checks
-                    DB::statement("SET FOREIGN_KEY_CHECKS = 0");
-
-                    // Get all table names
-                    $tables = DB::connection()->getDoctrineSchemaManager()->listTableNames();
-
-                    $expectedTables = ['addons', 'attachments', 'categories', 'chats', 'failed_jobs', 'features', 'feature_sections', 'feature_section_lists', 'guidances', 'languages', 'messages', 'migrations', 'packages', 'package_features', 'password_resets', 'personal_access_tokens', 'staff_support_schools', 'system_settings', 'user_status_for_next_cycles', 'database_backups'];
-
-                    $allTables = array_diff($tables, $expectedTables);
-                    $tableNames = array_values($allTables);
-
-                    // Loop through each table and truncate
-                    foreach ($tableNames as $table) {
-                        // You can use `DB::table($table)->truncate()` or use raw SQL for truncation
-                        DB::table($table)->truncate();
-                        \Log::info("Table {$table} truncated.");
-                    }
-
-                    // Re-enable foreign key checks
-                    DB::statement("SET FOREIGN_KEY_CHECKS = 1");
-
-                    // Commit the transaction
-                    DB::commit();
-                } catch (\Exception $e) {
-                    // Rollback the transaction if an error occurs
-                    DB::rollBack();
-                    \Log::error('Truncation error: ' . $e->getMessage());
-                }
-
-                // Check if the SQL file exists and proceed with execution
-                if (File::exists($sql_file_path)) {
-
-                    // Read the contents of the SQL file
-                    $sql = File::get($sql_file_path);
-
-                    $queries = array_filter(
-                        explode(";\n", $sql),
-                        function ($query) {
-                            return !empty(trim($query));
-                        }
-                    );
-                    try {
-                        // Begin transaction
-                        DB::beginTransaction();
-                        DB::statement("SET FOREIGN_KEY_CHECKS = 0");
-                        foreach ($queries as $query) {
-                            if (!empty(trim($query))) {
-                                DB::unprepared(trim($query));
-                                \Log::info("Executed query: {$query}");
-                            }
-                        }
-                        DB::statement("SET FOREIGN_KEY_CHECKS = 1");
-                        DB::commit();
-                    } catch (\Exception $e) {
-                        DB::rollBack();
-                        \Log::error("Transaction failed: " . $e->getMessage());
-                    }
-                } else {
-                    \Log::warning('SQL file not found: ' . $sql_file_path);
-                }
-
-                // Delete backup folders and .sql files after backup
-                $deleteBackupFolders = File::directories($backup_folder_path);
-
-                foreach ($deleteBackupFolders as $subfolder) {
-                    if (Str::contains($subfolder, $authId . "/database-backup")) {
-
-                        // Delete all .sql files in the subfolder
-                        foreach (File::files($subfolder) as $subpath) {
-                            if (pathinfo($subpath)['extension'] === 'sql') {
-                                File::delete($subpath);
-                            }
-                        }
-
-                        // Delete the subfolder after its contents have been deleted
-                        File::deleteDirectory($subfolder);
-                    }
-                }
             }
-
-            ResponseService::successResponse('Data Restore Successfully');
-        } catch (\Throwable $th) {
-            DB::rollBack();
+        } catch (Throwable $th) {
             ResponseService::logErrorResponse($th, "DatabaseBackup Controller -> Restore Method");
             ResponseService::errorResponse();
         }
+
+        ResponseService::successResponse('Data Restore Successfully');
     }
 
     public function getTableNameFromQuery($query)
@@ -914,6 +311,378 @@ class DatabaseBackupController extends Controller
             Stream::where('school_id', $schoolId)->delete();
             Subscription::where('school_id', $schoolId)->delete();
             PaymentTransaction::where('school_id', $schoolId)->delete();
+        }
+    }
+
+    /**
+     * @return array{0: string, 1: int} backup type ('schools' | 'super-admin') and owner id
+     */
+    private function backupScope(): array
+    {
+        $user = Auth::user();
+        if ($user->hasRole('School Admin')) {
+            return ['schools', (int) $user->school_id];
+        }
+        if ($user->hasRole('Super Admin')) {
+            return ['super-admin', (int) $user->id];
+        }
+
+        ResponseService::errorResponse("You Don't have enough permissions");
+    }
+
+    private function backupDirectory(string $backupType, int $ownerId): string
+    {
+        return storage_path('app/private/database-backup/' . $backupType . '/' . $ownerId);
+    }
+
+    private function listTables(): array
+    {
+        return array_map('current', DB::select('SHOW TABLES'));
+    }
+
+    private function signingKey(): string
+    {
+        return hash_hmac('sha256', 'zolo-database-backup', (string) config('app.key'));
+    }
+
+    private function signature(string $backupType, int $ownerId, string $sha256): string
+    {
+        return hash_hmac('sha256', $backupType . '|' . $ownerId . '|' . $sha256, $this->signingKey());
+    }
+
+    private function dumpSchoolDatabase(int $user_Id): string
+    {
+        $tableNames = array_values(array_diff($this->listTables(), self::SCHOOL_EXCLUDED_TABLES));
+
+        $subscription = $this->subscriptionService->active_subscription(Auth::user()->school_id);
+
+        $staff_ids = Staff::whereHas('user', function ($q) use ($user_Id) {
+            $q->where('school_id', $user_Id);
+        })->pluck('id')->toArray();
+
+        $students = Students::where('school_id', $user_Id)->withTrashed()->get();
+        $guardian_ids = array_values(array_unique($students->pluck('guardian_id')->toArray()));
+
+        $roles_id = Role::where('school_id', Auth::user()->school_id)->pluck('id')->toArray();
+
+        // Tables requiring additional conditions
+        $tablesWithAdditionalConditions = [
+            'users' => function ($query) use ($user_Id, $guardian_ids) {
+                $query->where(function ($q) use ($user_Id, $guardian_ids) {
+                    $q->where('school_id', $user_Id)
+                        ->orWhereIn('id', $guardian_ids);
+                });
+            },
+            'fees_advance' => function ($query) use ($guardian_ids) {
+                $query->whereIn('parent_id', $guardian_ids);
+            },
+            'staffs' => function ($query) use ($staff_ids) {
+                $query->whereIn('id', $staff_ids);
+            },
+            'staff_salaries' => function ($query) use ($staff_ids) {
+                $query->whereIn('staff_id', $staff_ids);
+            },
+            'model_has_roles' => function ($query) use ($roles_id) {
+                $query->whereIn('role_id', $roles_id);
+            },
+            'role_has_permissions' => function ($query) use ($roles_id) {
+                $query->whereIn('role_id', $roles_id);
+            },
+            'subscription_features' => function ($query) use ($subscription) {
+                $query->where('subscription_id', $subscription->id);
+            },
+        ];
+
+        $backupData = '';
+        foreach ($tableNames as $table) {
+            $createTableSQL = DB::select("SHOW CREATE TABLE `$table`");
+            $createTable = $createTableSQL[0]->{'Create Table'};
+            $backupData .= str_replace('CREATE TABLE', 'CREATE TABLE IF NOT EXISTS', $createTable) . ";\n\n";
+
+            $query = DB::table($table);
+            if (Schema::hasColumn($table, 'school_id')) {
+                if (!array_key_exists($table, $tablesWithAdditionalConditions)) {
+                    $query->where('school_id', $user_Id);
+                } else {
+                    $tablesWithAdditionalConditions[$table]($query);
+                }
+            } elseif (array_key_exists($table, $tablesWithAdditionalConditions)) {
+                $tablesWithAdditionalConditions[$table]($query);
+            }
+
+            foreach ($query->get() as $row) {
+                $rowArray = (array) $row;
+
+                // For class_subjects table, skip virtual_semester_id
+                if ($table === 'class_subjects') {
+                    unset($rowArray['virtual_semester_id']);
+                }
+
+                $values = array_map(function ($value) use ($table) {
+                    if (is_null($value)) {
+                        return 'NULL';
+                    }
+
+                    // Special handling for settings tables that contain HTML content or email templates
+                    if (in_array($table, ['school_settings', 'system_settings'])) {
+                        if (
+                            strpos($value, '<') !== false || strpos($value, '>') !== false ||
+                            strpos($value, '{') !== false || strpos($value, '}') !== false
+                        ) {
+                            $value = str_replace('\\', '\\\\', $value); // Escape backslashes first
+                            $value = str_replace("'", "\\'", $value);   // Escape single quotes
+                            $value = str_replace('"', '\\"', $value);   // Escape double quotes
+                            return "'" . $value . "'";
+                        }
+                    }
+
+                    // For all other tables/content
+                    $value = str_replace("'", "''", $value); // Escape single quotes
+                    $value = str_replace("\\", "\\\\", $value); // Escape backslashes
+                    return "'" . $value . "'";
+                }, $rowArray);
+
+                if ($table === 'class_subjects') {
+                    $columns = array_keys($rowArray);
+                    $backupData .= "INSERT INTO `$table` (`" . implode('`, `', $columns) . "`) VALUES (" . implode(', ', $values) . ");\n";
+                } else {
+                    $backupData .= "INSERT INTO `$table` VALUES (" . implode(', ', $values) . ");\n";
+                }
+            }
+            $backupData .= "\n";
+        }
+
+        return $backupData;
+    }
+
+    private function dumpSuperAdminDatabase(): string
+    {
+        $tableNames = array_values(array_diff($this->listTables(), self::SUPER_ADMIN_EXCLUDED_TABLES));
+
+        $backupData = '';
+        foreach ($tableNames as $table) {
+            $createTableSQL = DB::select("SHOW CREATE TABLE `$table`");
+            $createTable = $createTableSQL[0]->{'Create Table'};
+            $backupData .= str_replace('CREATE TABLE', 'CREATE TABLE IF NOT EXISTS', $createTable) . ";\n\n";
+
+            foreach (DB::table($table)->get() as $row) {
+                $values = array_map(function ($value) {
+                    return is_null($value) ? 'NULL' : "'" . addslashes($value) . "'";
+                }, (array) $row);
+
+                $backupData .= "INSERT INTO `$table` VALUES (" . implode(', ', $values) . ");\n";
+            }
+            $backupData .= "\n";
+        }
+
+        return $backupData;
+    }
+
+    /**
+     * Zip the dump, the owner's media and a signed manifest into the private backup
+     * directory. Returns the archive's file name.
+     */
+    private function writeArchive(string $backupType, int $ownerId, string $backupData, string $current_version): string
+    {
+        $directory = $this->backupDirectory($backupType, $ownerId);
+        File::ensureDirectoryExists($directory, 0750);
+
+        $timestamp = Carbon::now()->format('Y-m-d');
+        $safeVersion = preg_replace('/[^0-9A-Za-z._-]/', '', $current_version);
+        $file_name = "database_backup_{$ownerId}_{$timestamp}-(V-{$safeVersion}).zip";
+        $zip_file_path = $directory . DIRECTORY_SEPARATOR . $file_name;
+        if (is_file($zip_file_path)) {
+            File::delete($zip_file_path);
+        }
+
+        $sqlEntry = 'database-backup/database_backup_' . $ownerId . '_' . $timestamp . '.sql';
+        $sha256 = hash('sha256', $backupData);
+        $manifest = [
+            'format' => 2,
+            'type' => $backupType,
+            'owner' => $ownerId,
+            'sql' => $sqlEntry,
+            'sha256' => $sha256,
+            'version' => $current_version,
+            'created_at' => Carbon::now()->toIso8601String(),
+            'signature' => $this->signature($backupType, $ownerId, $sha256),
+        ];
+
+        $zip = new ZipArchive;
+        if ($zip->open($zip_file_path, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
+            throw new RuntimeException('Unable to create backup archive.');
+        }
+
+        $zip->addFromString($sqlEntry, $backupData);
+        $zip->addFromString(self::MANIFEST_ENTRY, json_encode($manifest, JSON_PRETTY_PRINT));
+
+        $zip_media_folder = 'media';
+        $zip->addEmptyDir($zip_media_folder);
+        $public_folder_path = storage_path('app/public/' . $ownerId);
+        if (File::isDirectory($public_folder_path)) {
+            foreach (File::directories($public_folder_path) as $subfolderPath) {
+                $relativeSubfolder = $zip_media_folder . '/' . $ownerId . '/' . basename($subfolderPath);
+                $zip->addEmptyDir($relativeSubfolder);
+                foreach (File::files($subfolderPath) as $file) {
+                    $zip->addFile($file->getPathname(), $relativeSubfolder . '/' . $file->getFilename());
+                }
+            }
+        }
+
+        $zip->close();
+
+        return $file_name;
+    }
+
+    private function verifiedManifest(ZipArchive $zip, string $backupType, int $ownerId): array
+    {
+        $raw = $zip->getFromName(self::MANIFEST_ENTRY);
+        $manifest = $raw === false ? null : json_decode($raw, true);
+
+        if (!is_array($manifest) || !isset($manifest['type'], $manifest['owner'], $manifest['sql'], $manifest['sha256'], $manifest['signature'])) {
+            throw new RuntimeException('This archive was not created by this server\'s backup tool (or predates signed backups) and cannot be restored.');
+        }
+
+        $expected = $this->signature($backupType, $ownerId, (string) $manifest['sha256']);
+        if ($manifest['type'] !== $backupType || (int) $manifest['owner'] !== $ownerId || !hash_equals($expected, (string) $manifest['signature'])) {
+            throw new RuntimeException('The backup signature is invalid for this account.');
+        }
+
+        if (!preg_match('#^database-backup/database_backup_\d+_[0-9-]+\.sql$#', (string) $manifest['sql'])) {
+            throw new RuntimeException('The backup archive is malformed.');
+        }
+
+        return $manifest;
+    }
+
+    /**
+     * Split the dump into statements and refuse anything other than recreating or
+     * filling a plain-named table of this database.
+     */
+    private function restorableStatements(string $sql, array $currentTables, array $excludedTables): array
+    {
+        $statements = [];
+        $knownTables = $currentTables;
+        foreach ($this->splitSqlStatements($sql) as $statement) {
+            if (preg_match('/^CREATE TABLE IF NOT EXISTS `([A-Za-z0-9_]+)` \(/', $statement, $m)) {
+                $table = $m[1];
+                $knownTables[] = $table;
+            } elseif (preg_match('/^INSERT INTO `([A-Za-z0-9_]+)` (\(`[A-Za-z0-9_`, ]+\) )?VALUES \(/', $statement, $m)) {
+                $table = $m[1];
+                if (!in_array($table, $knownTables, true)) {
+                    throw new RuntimeException("The backup writes to an unknown table ({$table}).");
+                }
+            } else {
+                throw new RuntimeException('The backup contains a statement that is not allowed in a restore.');
+            }
+
+            if (in_array($table, $excludedTables, true)) {
+                throw new RuntimeException("The backup writes to a protected table ({$table}).");
+            }
+
+            $statements[] = $statement;
+        }
+
+        return $statements;
+    }
+
+    /**
+     * Split on top-level semicolons, honouring quoted strings ('…', "…", `…`), backslash
+     * escapes and doubled quotes, so a value containing ";\n" does not break a statement.
+     */
+    private function splitSqlStatements(string $sql): array
+    {
+        $statements = [];
+        $length = strlen($sql);
+        $start = 0;
+        $quote = null;
+
+        for ($i = 0; $i < $length; $i++) {
+            $char = $sql[$i];
+
+            if ($quote !== null) {
+                if ($char === '\\' && $quote !== '`') {
+                    $i++;
+                } elseif ($char === $quote) {
+                    if ($i + 1 < $length && $sql[$i + 1] === $quote) {
+                        $i++;
+                    } else {
+                        $quote = null;
+                    }
+                }
+                continue;
+            }
+
+            if ($char === "'" || $char === '"' || $char === '`') {
+                $quote = $char;
+            } elseif ($char === ';') {
+                $statement = trim(substr($sql, $start, $i - $start));
+                if ($statement !== '') {
+                    $statements[] = $statement;
+                }
+                $start = $i + 1;
+            }
+        }
+
+        if ($quote !== null) {
+            throw new RuntimeException('The backup SQL is malformed.');
+        }
+
+        $tail = trim(substr($sql, $start));
+        if ($tail !== '') {
+            $statements[] = $tail;
+        }
+
+        return $statements;
+    }
+
+    /**
+     * @return array<int, array{index: int, folder: string, file: string}>
+     */
+    private function restorableMediaEntries(ZipArchive $zip, int $ownerId): array
+    {
+        $entries = [];
+        $pattern = '#^media/' . $ownerId . '/([A-Za-z0-9][A-Za-z0-9_-]*)/([A-Za-z0-9][A-Za-z0-9_.-]*)$#';
+
+        for ($i = 0; $i < $zip->numFiles; $i++) {
+            $name = $zip->getNameIndex($i);
+            if (!preg_match($pattern, $name, $m)) {
+                continue;
+            }
+            $extension = strtolower(pathinfo($m[2], PATHINFO_EXTENSION));
+            if (!in_array($extension, UploadService::ALLOWED_EXTENSIONS, true)) {
+                continue;
+            }
+            $entries[] = ['index' => $i, 'folder' => $m[1], 'file' => $m[2]];
+        }
+
+        return $entries;
+    }
+
+    private function replaceMedia(ZipArchive $zip, int $ownerId, array $entries): void
+    {
+        $public_folder_path = storage_path('app/public/' . $ownerId);
+        File::ensureDirectoryExists($public_folder_path, 0755);
+
+        // Old Data Delete from public folder
+        foreach (File::directories($public_folder_path) as $subfolder) {
+            foreach (File::files($subfolder) as $file) {
+                File::delete($file);
+            }
+        }
+
+        foreach ($entries as $entry) {
+            $folder = $public_folder_path . '/' . $entry['folder'];
+            File::ensureDirectoryExists($folder, 0755);
+
+            $source = $zip->getStream($zip->getNameIndex($entry['index']));
+            if ($source === false) {
+                continue;
+            }
+            $target = fopen($folder . '/' . $entry['file'], 'wb');
+            stream_copy_to_stream($source, $target);
+            fclose($target);
+            fclose($source);
         }
     }
 }

@@ -22,11 +22,25 @@ class SaaSRepository extends BaseRepository
         return parent::defaultModel()->owner();
     }
 
+    /**
+     * A school user always writes into their own school: a school_id arriving in the
+     * payload (often straight from $request->all()) is overridden, not trusted. Only a
+     * user without a school (Super Admin) may target a school explicitly.
+     */
+    private static function scopeSchoolId(array $payload): array
+    {
+        $user = Auth::user();
+        if ($user && $user->school_id) {
+            $payload['school_id'] = $user->school_id;
+        } elseif (empty($payload['school_id'])) {
+            $payload['school_id'] = $user?->school_id;
+        }
+        return $payload;
+    }
+
     public function create(array $payload): Model
     {
-        if(empty($payload['school_id'])){
-            $payload['school_id'] = Auth::user()->school_id;
-        }
+        $payload = self::scopeSchoolId($payload);
         return parent::create($payload)->fresh();
     }
 
@@ -47,18 +61,14 @@ class SaaSRepository extends BaseRepository
 
     public function update(int $modelId, array $payload): ?Model
     {
-        if(empty($payload['school_id'])){
-            $payload['school_id'] = Auth::user()->school_id;
-        }
+        $payload = self::scopeSchoolId($payload);
         return parent::update($modelId, $payload);
 
     }
 
     public function updateOrCreate(array $uniqueColumns, array $updatingColumn): Model
     {
-        if(empty($uniqueColumns['school_id'])){
-            $uniqueColumns['school_id'] = Auth::user()->school_id;
-        }
+        $uniqueColumns = self::scopeSchoolId($uniqueColumns);
         return parent::updateOrCreate($uniqueColumns, $updatingColumn);
     }
 

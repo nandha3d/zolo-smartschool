@@ -56,5 +56,9 @@ return [
         'default_center_lat' => 11.0168,
         'default_center_lng' => 76.9558,
         'default_zoom' => 13,
+        // Raster tile server for the web maps and the parent app. The public OSM servers
+        // are for light use only; point this at your own tile server for production.
+        'tile_url' => env('GPS_MAP_TILE_URL', 'https://tile.openstreetmap.org/{z}/{x}/{y}.png'),
+        'attribution' => env('GPS_MAP_ATTRIBUTION', '© OpenStreetMap contributors'),
     ],
 ];

@@ -28,6 +28,10 @@ class TimetableGenerationService
     private TimetableScoringService $scoringService;
     private TimetablePlanningService $planningService;
 
+    // Soft limits on a teacher's day
+    private const MAX_TEACHER_PERIODS_PER_DAY = 5;
+    private const MAX_TEACHER_CONSECUTIVE = 3;
+
     // Safety limits
     private int $maxSearchNodes = 100000;
     private int $maxExecutionSeconds = 60;
@@ -382,14 +386,32 @@ class TimetableGenerationService
             }
         }
 
+        // Weekly periods each teacher must cover across every selected class. A teacher
+        // who takes Maths in 11-A, 11-B, 12-A and Chemistry in 10-A is the scarcest
+        // resource in a school-wide run, so their lessons are placed first (MRV).
+        $teacherLoad = [];
+        foreach ($blocks as $block) {
+            if ($block['teacher_id']) {
+                $teacherLoad[$block['teacher_id']] = ($teacherLoad[$block['teacher_id']] ?? 0) + $block['block_size'];
+            }
+        }
+        foreach ($blocks as &$block) {
+            $block['teacher_load'] = $block['teacher_id'] ? $teacherLoad[$block['teacher_id']] : 0;
+        }
+        unset($block);
+
         // Deterministic sorting (Section 21):
         // 1. Most constrained first (higher block_size double periods)
-        // 2. Highest priority first
-        // 3. Highest weekly periods first
-        // 4. Stable class_section_id, subject_id tie-breaker
+        // 2. Busiest teacher first (minimum remaining values)
+        // 3. Highest priority first
+        // 4. Highest weekly periods first
+        // 5. Stable class_section_id, subject_id tie-breaker
         usort($blocks, function ($a, $b) {
             if ($a['block_size'] !== $b['block_size']) {
                 return $b['block_size'] <=> $a['block_size'];
+            }
+            if ($a['teacher_load'] !== $b['teacher_load']) {
+                return $b['teacher_load'] <=> $a['teacher_load'];
             }
             if ($a['priority'] !== $b['priority']) {
                 return $b['priority'] <=> $a['priority'];
@@ -459,13 +481,13 @@ class TimetableGenerationService
 
         foreach ($lockedSlots as $ls) {
             $pId = $ls['period_id'] ?? null;
-            if (!$pId) {
+            $matchedPeriod = $pId
+                ? $allPeriods->firstWhere('id', $pId)
                 // Find matching period from template
-                $matchedPeriod = $allPeriods->first(function ($p) use ($ls) {
+                : $allPeriods->first(function ($p) use ($ls) {
                     return $p->start_time === $ls['start_time'] && $p->end_time === $ls['end_time'];
                 });
-                $pId = $matchedPeriod?->id;
-            }
+            $pId = $pId ?: $matchedPeriod?->id;
 
             $currentSchedule[] = [
                 'day'                => $ls['day'],
@@ -677,6 +699,10 @@ class TimetableGenerationService
                         $softScore += 50;
                     }
 
+                    if ($teacherId) {
+                        $softScore += $this->teacherLoadScore($occupancy[$day], $instPeriodsArr, $teacherId, $pIdx, $blockSize);
+                    }
+
                     $candidates[] = [
                         'day'          => $day,
                         'day_index'    => $dayIndex,
@@ -775,6 +801,43 @@ class TimetableGenerationService
         }
 
         return false;
+    }
+
+    /**
+     * Soft constraints on a teacher's day: no more than MAX_TEACHER_PERIODS_PER_DAY
+     * lessons and no run longer than MAX_TEACHER_CONSECUTIVE periods without a gap.
+     * Returns a penalty (<= 0) for placing $blockSize periods at $pIdx.
+     */
+    private function teacherLoadScore(array $dayOccupancy, array $instPeriodsArr, int $teacherId, int $pIdx, int $blockSize): int
+    {
+        $busy = [];
+        foreach ($instPeriodsArr as $index => $period) {
+            $busy[$index] = isset($dayOccupancy[$period->id]['teachers'][$teacherId])
+                || ($index >= $pIdx && $index < $pIdx + $blockSize);
+        }
+
+        $score = 0;
+        $dailyTotal = count(array_filter($busy));
+        if ($dailyTotal > self::MAX_TEACHER_PERIODS_PER_DAY) {
+            $score -= 60 * ($dailyTotal - self::MAX_TEACHER_PERIODS_PER_DAY);
+        }
+
+        // Length of the run of busy periods that contains the new placement.
+        $start = $pIdx;
+        while ($start > 0 && $busy[$start - 1]) {
+            $start--;
+        }
+        $end = $pIdx + $blockSize - 1;
+        $last = count($instPeriodsArr) - 1;
+        while ($end < $last && $busy[$end + 1]) {
+            $end++;
+        }
+        $run = $end - $start + 1;
+        if ($run > self::MAX_TEACHER_CONSECUTIVE) {
+            $score -= 40 * ($run - self::MAX_TEACHER_CONSECUTIVE);
+        }
+
+        return $score;
     }
 
     private function createGenerationRunRecord(

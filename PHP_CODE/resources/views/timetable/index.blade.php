@@ -59,9 +59,17 @@
                                     <button type="button" class="btn btn-outline-secondary" data-toggle="modal" data-target="#resourcesModal">
                                         <i class="fa fa-building mr-1"></i> {{ __('Rooms & Labs') }}
                                     </button>
+                                    <a href="{{ route('timetable.teacher-matrix') }}" class="btn btn-outline-primary">
+                                        <i class="fa fa-th mr-1"></i> {{ __('Teacher Matrix') }}
+                                    </a>
                                     <button type="button" class="btn btn-gradient-primary" data-toggle="modal" data-target="#chooseClassForAutoGenerateModal">
                                         <i class="fa fa-magic mr-1"></i> {{ __('Auto-Generate') }}
                                     </button>
+                                    @can('timetable-create')
+                                    <button type="button" class="btn btn-gradient-success" data-toggle="modal" data-target="#batchGenerateModal">
+                                        <i class="fa fa-sitemap mr-1"></i> {{ __('School-Wide Generate') }}
+                                    </button>
+                                    @endcan
                                 </div>
                             </div>
                             <div class="col-12">
@@ -133,6 +141,113 @@
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __('Cancel') }}</button>
                     <button type="button" class="btn btn-gradient-primary" onclick="launchAutoGeneratorForSelected()">
                         <i class="fa fa-arrow-right mr-1"></i> {{ __('Launch Auto-Generator') }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: School-wide batch generation across many classes at once -->
+    <div class="modal fade" id="batchGenerateModal" tabindex="-1" role="dialog" aria-labelledby="batchGenerateModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable" role="document">
+            <div class="modal-content" style="border-radius: 14px;">
+                <div class="modal-header bg-light">
+                    <div>
+                        <h5 class="modal-title font-weight-bold text-dark" id="batchGenerateModalLabel">
+                            <i class="fa fa-sitemap text-primary mr-1"></i> {{ __('School-Wide Timetable Generator') }}
+                        </h5>
+                        <small class="text-muted">{{ __('Generate several classes in one run so a teacher shared across grades and sections is never double-booked.') }}</small>
+                    </div>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body p-4">
+                    <div id="batch-step-select">
+                        <div class="row">
+                            <div class="col-md-5 form-group">
+                                <label class="font-weight-bold small">{{ __('Bell Schedule') }}</label>
+                                <select id="batch_template_id" class="form-control form-control-sm">
+                                    <option value="">{{ __('Default schedule') }}</option>
+                                    @foreach($templates as $tmpl)
+                                        <option value="{{ $tmpl->id }}" @selected($tmpl->is_default)>{{ $tmpl->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-7 form-group d-flex align-items-end">
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input" id="batch_preserve_existing" checked>
+                                    <label class="custom-control-label small" for="batch_preserve_existing">
+                                        {{ __('Respect the timetables of classes not selected (their teachers stay booked)') }}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex flex-wrap align-items-center mb-2" style="gap: 6px;">
+                            <button type="button" class="btn btn-xs btn-outline-primary" onclick="batchSelect('ready')">{{ __('Select ready') }}</button>
+                            <button type="button" class="btn btn-xs btn-outline-secondary" onclick="batchSelect('all')">{{ __('Select all') }}</button>
+                            <button type="button" class="btn btn-xs btn-outline-secondary" onclick="batchSelect('none')">{{ __('Clear') }}</button>
+                            <span class="small text-muted ml-auto"><span id="batch-selected-count">0</span> {{ __('sections selected') }}</span>
+                        </div>
+
+                        <div class="border rounded p-2" style="max-height: 45vh; overflow-y: auto;">
+                            @php($sectionsByClass = $classSections->groupBy('class_id'))
+                            @forelse($sectionsByClass as $classId => $sections)
+                                <div class="mb-2">
+                                    <div class="d-flex align-items-center bg-light rounded px-2 py-1">
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox" class="custom-control-input batch-class-toggle" id="batch_class_{{ $classId }}" data-class="{{ $classId }}">
+                                            <label class="custom-control-label font-weight-bold small" for="batch_class_{{ $classId }}">
+                                                {{ $sections->first()->class->full_name ?? $sections->first()->class->name ?? __('Class') }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex flex-wrap pl-4 pt-1" style="gap: 4px 18px;">
+                                        @foreach($sections as $cs)
+                                            @php($r = $readiness[$cs->id] ?? null)
+                                            <div class="custom-control custom-checkbox">
+                                                <input type="checkbox" class="custom-control-input batch-section" id="batch_cs_{{ $cs->id }}"
+                                                       value="{{ $cs->id }}" data-class="{{ $classId }}" data-ready="{{ $r && $r['subjects'] > 0 ? 1 : 0 }}">
+                                                <label class="custom-control-label small" for="batch_cs_{{ $cs->id }}">
+                                                    {{ $cs->full_name }}
+                                                    @if(!$r)
+                                                        <span class="badge badge-warning" title="{{ __('No subject requirements set for this section yet. Open its Auto-Generator once to set weekly periods.') }}">{{ __('no requirements') }}</span>
+                                                    @else
+                                                        <span class="badge badge-light">{{ $r['subjects'] }} {{ __('subjects') }} · {{ $r['periods'] }} {{ __('periods/wk') }}</span>
+                                                        @if($r['no_teacher'] > 0)
+                                                            <span class="badge badge-danger" title="{{ __('Subjects without an assigned teacher') }}">{{ $r['no_teacher'] }} {{ __('without teacher') }}</span>
+                                                        @endif
+                                                    @endif
+                                                </label>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @empty
+                                <div class="text-center text-muted small py-3">{{ __('No class sections found.') }}</div>
+                            @endforelse
+                        </div>
+                    </div>
+
+                    <div id="batch-step-result" class="d-none">
+                        <div id="batch-result-summary" class="alert mb-3" role="alert"></div>
+                        <ul id="batch-result-conflicts" class="small mb-0 pl-3"></ul>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __('Close') }}</button>
+                    <button type="button" class="btn btn-outline-secondary d-none" id="batch-back-btn" onclick="batchBack()">
+                        <i class="fa fa-arrow-left mr-1"></i> {{ __('Back') }}
+                    </button>
+                    <button type="button" class="btn btn-outline-danger d-none" id="batch-discard-btn" onclick="batchDiscard()">
+                        {{ __('Discard Preview') }}
+                    </button>
+                    <button type="button" class="btn btn-gradient-success d-none" id="batch-apply-btn" onclick="batchApply()">
+                        <i class="fa fa-check mr-1"></i> {{ __('Apply to Live Timetable') }}
+                    </button>
+                    <button type="button" class="btn btn-gradient-primary" id="batch-generate-btn" onclick="batchGenerate()">
+                        <i class="fa fa-magic mr-1"></i> {{ __('Generate Preview') }}
                     </button>
                 </div>
             </div>
@@ -331,6 +446,136 @@
 
 @section('script')
 <script>
+    // ---- School-wide batch generation -------------------------------------
+    var batchRunId = null;
+
+    function batchUpdateCount() {
+        $('#batch-selected-count').text($('.batch-section:checked').length);
+        $('.batch-class-toggle').each(function () {
+            var cls = $(this).data('class');
+            var all = $('.batch-section[data-class="' + cls + '"]');
+            $(this).prop('checked', all.length > 0 && all.filter(':checked').length === all.length);
+        });
+    }
+
+    function batchSelect(mode) {
+        $('.batch-section').each(function () {
+            $(this).prop('checked', mode === 'all' || (mode === 'ready' && $(this).data('ready') == 1));
+        });
+        batchUpdateCount();
+    }
+
+    $(document).on('change', '.batch-section', batchUpdateCount);
+    $(document).on('change', '.batch-class-toggle', function () {
+        $('.batch-section[data-class="' + $(this).data('class') + '"]').prop('checked', $(this).is(':checked'));
+        batchUpdateCount();
+    });
+
+    function batchShowStep(step) {
+        var result = step === 'result';
+        $('#batch-step-select').toggleClass('d-none', result);
+        $('#batch-step-result').toggleClass('d-none', !result);
+        $('#batch-generate-btn').toggleClass('d-none', result);
+        $('#batch-back-btn').toggleClass('d-none', !result);
+        $('#batch-apply-btn, #batch-discard-btn').toggleClass('d-none', !(result && batchRunId));
+    }
+
+    function batchRenderConflicts(conflicts) {
+        var list = $('#batch-result-conflicts').empty();
+        (conflicts || []).forEach(function (c) {
+            list.append($('<li>').text(c.message || c.code || JSON.stringify(c)));
+        });
+    }
+
+    function batchGenerate() {
+        var ids = $('.batch-section:checked').map(function () { return $(this).val(); }).get();
+        if (!ids.length) {
+            showErrorToast("{{ __('Select at least one class section.') }}");
+            return;
+        }
+        var btn = $('#batch-generate-btn').prop('disabled', true).html('<i class="fa fa-spinner fa-spin mr-1"></i> {{ __('Generating…') }}');
+        batchRunId = null;
+        $.ajax({
+            url: "{{ route('timetable.generate') }}",
+            type: 'POST',
+            data: {
+                _token: "{{ csrf_token() }}",
+                class_section_ids: ids,
+                template_id: $('#batch_template_id').val(),
+                preserve_existing: $('#batch_preserve_existing').is(':checked') ? 1 : 0,
+                mode: 'classes'
+            },
+            success: function (res) {
+                batchRunId = res.generation_run_id || res.run_id;
+                var score = res.quality && res.quality.quality_score !== undefined ? res.quality.quality_score : null;
+                $('#batch-result-summary').removeClass('alert-danger').addClass('alert-success')
+                    .text((res.message || '') + (score !== null ? ' {{ __('Quality score') }}: ' + score + '/100.' : '')
+                        + ' {{ __('Review, then apply it to replace the live timetable of the selected sections (locked slots are kept).') }}');
+                batchRenderConflicts(res.conflicts);
+                batchShowStep('result');
+            },
+            error: function (xhr) {
+                var res = xhr.responseJSON || {};
+                batchRunId = null;
+                $('#batch-result-summary').removeClass('alert-success').addClass('alert-danger')
+                    .text(res.message || "{{ __('Generation failed.') }}");
+                batchRenderConflicts(res.conflicts);
+                batchShowStep('result');
+            },
+            complete: function () {
+                btn.prop('disabled', false).html('<i class="fa fa-magic mr-1"></i> {{ __('Generate Preview') }}');
+            }
+        });
+    }
+
+    function batchBack() {
+        if (batchRunId) {
+            batchDiscard(true);
+        }
+        batchShowStep('select');
+    }
+
+    function batchDiscard(silent) {
+        if (!batchRunId) return;
+        var id = batchRunId;
+        batchRunId = null;
+        $.post("{{ url('timetable/generation') }}/" + id + "/cancel", { _token: "{{ csrf_token() }}" })
+            .always(function () {
+                if (silent !== true) {
+                    showSuccessToast("{{ __('Preview discarded.') }}");
+                    batchShowStep('select');
+                }
+            });
+    }
+
+    function batchApply() {
+        if (!batchRunId) return;
+        var btn = $('#batch-apply-btn').prop('disabled', true);
+        $.post("{{ url('timetable/generation') }}/" + batchRunId + "/apply", { _token: "{{ csrf_token() }}" })
+            .done(function (res) {
+                if (res.success === false || res.error) {
+                    showErrorToast(res.message || "{{ __('Could not apply the timetable.') }}");
+                    return;
+                }
+                batchRunId = null;
+                showSuccessToast(res.message || "{{ __('Timetable applied.') }}");
+                $('#batchGenerateModal').modal('hide');
+                batchShowStep('select');
+                $('#table_list').bootstrapTable('refresh');
+            })
+            .fail(function (xhr) {
+                showErrorToast((xhr.responseJSON && xhr.responseJSON.message) || "{{ __('Could not apply the timetable.') }}");
+            })
+            .always(function () { btn.prop('disabled', false); });
+    }
+
+    $('#batchGenerateModal').on('hidden.bs.modal', function () {
+        if (batchRunId) {
+            batchDiscard(true);
+        }
+        batchShowStep('select');
+    });
+
     function launchAutoGeneratorForSelected() {
         var id = $('#select_class_section_for_gen').val();
         if (!id) {

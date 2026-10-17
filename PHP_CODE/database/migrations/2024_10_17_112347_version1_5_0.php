@@ -13,7 +13,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('packages', static function (Blueprint $table) {
-            $table->float('charges', 64, 2)->change();
+            $table->float('charges', 53)->change(); // Laravel 11+: float($column, $precision); FLOAT(64) is invalid, 53 = double precision
         });
 
         if (!Schema::hasColumn('schools', 'type') && !Schema::hasColumn('schools', 'domain_type')) {

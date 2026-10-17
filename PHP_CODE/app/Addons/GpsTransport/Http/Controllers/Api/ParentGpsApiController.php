@@ -47,9 +47,7 @@ class ParentGpsApiController extends Controller
 
         try {
             // Find children linked to this parent/guardian
-            $children = Students::whereHas('guardian', function ($q) use ($user) {
-                $q->where('user_id', $user->id);
-            })
+            $children = Students::where('guardian_id', $user->id)
             ->with(['user', 'class_section.class', 'class_section.section'])
             ->get();
 
@@ -101,7 +99,7 @@ class ParentGpsApiController extends Controller
                     'trip_id'         => $trip?->id,
                     'trip_status'     => $trip?->status ?? 'NOT_STARTED',
                     'boarding_status' => $activeAttendance?->status ?? 'EXPECTED',
-                    'driver_name'     => $trip?->driver?->name ?? 'Assigned Driver',
+                    'driver_name'     => $trip?->driver?->full_name ?? 'Assigned Driver',
                     'eta'             => $currentState?->eta ?? 'N/A',
                 ];
             }
@@ -135,9 +133,7 @@ class ParentGpsApiController extends Controller
 
         // 1. Strict Authorization Verification: Verify child belongs to authenticated parent
         $child = Students::where('id', $request->student_id)
-            ->whereHas('guardian', function ($q) use ($user) {
-                $q->where('user_id', $user->id);
-            })
+            ->where('guardian_id', $user->id)
             ->with(['user'])
             ->first();
 
@@ -191,6 +187,12 @@ class ParentGpsApiController extends Controller
             ->where('student_id', $child->id)
             ->first();
 
+        // Parents see the bus only while it is actually running a trip (data minimisation),
+        // and are told when the last fix is too old to trust.
+        $live = $trip->status === 'ACTIVE' && $currentState?->last_location_at;
+        $lastAt = $currentState?->last_location_at;
+        $stale = !$lastAt || $lastAt->diffInSeconds(Carbon::now()) > (int) config('gpstransport.defaults.stale_threshold_seconds', 300);
+
         return response()->json([
             'error'           => false,
             'trip_active'     => true,
@@ -203,17 +205,23 @@ class ParentGpsApiController extends Controller
             'vehicle'         => [
                 'vehicle_id'     => $trip->vehicle_id,
                 'vehicle_number' => $trip->vehicle?->vehicle_number ?? 'School Bus',
-                'latitude'       => (float) ($currentState?->latitude ?? 0.0),
-                'longitude'      => (float) ($currentState?->longitude ?? 0.0),
-                'speed'          => (float) ($currentState?->speed ?? 0.0),
-                'heading'        => (float) ($currentState?->heading ?? 0.0),
-                'status'         => $currentState?->status ?? 'MOVING',
-                'gps_status'     => $currentState?->gps_status ?? 'CONNECTED',
-                'last_update'    => $currentState?->last_location_at ? $currentState->last_location_at->diffForHumans() : 'Just now',
+                'latitude'       => $live ? (float) $currentState->latitude : null,
+                'longitude'      => $live ? (float) $currentState->longitude : null,
+                'speed'          => $live ? (float) ($currentState->speed ?? 0.0) : 0.0,
+                'heading'        => $live ? (float) ($currentState->heading ?? 0.0) : 0.0,
+                'status'         => $currentState?->status ?? 'UNKNOWN',
+                'gps_status'     => $stale ? 'STALE' : ($currentState?->gps_status ?? 'CONNECTED'),
+                'stale'          => $stale,
+                'last_update'    => $lastAt ? $lastAt->diffForHumans() : 'No signal yet',
+                'last_update_at' => $lastAt?->toIso8601String(),
             ],
             'driver'          => [
-                'name'  => $trip->driver?->name ?? 'School Bus Driver',
-                'phone' => $trip->driver?->phone ?? '',
+                'name'  => $trip->driver?->full_name ?? 'School Bus Driver',
+                'phone' => $trip->driver?->mobile ?? '',
+            ],
+            'map'             => [
+                'tile_url'    => config('gpstransport.map.tile_url'),
+                'attribution' => config('gpstransport.map.attribution'),
             ],
             'child_stop'      => [
                 'name'      => $childStop?->name ?? 'Assigned Stop',
@@ -244,7 +252,7 @@ class ParentGpsApiController extends Controller
 
         // Verification
         $child = Students::where('id', $request->student_id)
-            ->whereHas('guardian', fn($q) => $q->where('user_id', $user->id))
+            ->where('guardian_id', $user->id)
             ->first();
 
         if (!$child) {

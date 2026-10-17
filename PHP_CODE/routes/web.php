@@ -552,6 +552,10 @@ Route::group(['middleware' => ['Role', 'checkSchoolStatus', 'status','SwitchData
             Route::post('/sync-teachers', [TimetableController::class, 'syncTeachers'])->name('timetable.sync-teachers');
             Route::get('/get-matrix/{class_section_id}', [TimetableController::class, 'getMatrix'])->name('timetable.get-matrix');
             Route::post('/quick-update', [TimetableController::class, 'quickUpdate'])->name('timetable.quick-update');
+            Route::get('/teacher-matrix', [TimetableController::class, 'teacherMatrix'])->name('timetable.teacher-matrix');
+            Route::get('/teacher-matrix/data', [TimetableController::class, 'teacherMatrixData'])->name('timetable.teacher-matrix.data');
+            Route::post('/move', [TimetableController::class, 'moveSlot'])->name('timetable.move');
+            Route::get('/substitutes', [TimetableController::class, 'substitutes'])->name('timetable.substitutes');
             Route::group(['prefix' => '/teacher'], static function () {
                 Route::get('/', [TimetableController::class, 'teacherIndex'])->name('timetable.teacher.index');
                 Route::get('/list', [TimetableController::class, 'teacherList'])->name('timetable.teacher.list');
@@ -799,6 +803,7 @@ Route::group(['middleware' => ['Role', 'checkSchoolStatus', 'status','SwitchData
             Route::get('/',[DatabaseBackupController::class, 'index'])->name('database-backup.index');
             Route::get('show',[DatabaseBackupController::class, 'show']);
             Route::get('store',[DatabaseBackupController::class, 'store']);
+            Route::get('download/{file}',[DatabaseBackupController::class, 'download'])->name('database-backup.download');
             Route::delete('/{id}',[DatabaseBackupController::class, 'destroy']);
             Route::post('restore/{id}',[DatabaseBackupController::class, 'restore'])->name('database-backup.restore');
         });

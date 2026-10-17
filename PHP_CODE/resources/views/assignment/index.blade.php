@@ -65,7 +65,7 @@
 
                                 <div class="form-group col-sm-12 col-md-4">
                                     <label>{{ __('files') }} </label>
-                                    <input type="file" name="file[]" class="form-control" multiple accept="image/*,application/pdf,.doc,.docx,.xml,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" value=""/>
+                                    <input type="file" name="file[]" class="form-control" multiple accept="image/*,application/pdf,.doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" value=""/>
                                 </div>
 
                                 <div class="form-group col-sm-12 col-md-4">

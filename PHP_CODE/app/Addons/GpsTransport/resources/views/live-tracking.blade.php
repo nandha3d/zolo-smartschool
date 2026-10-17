@@ -5,8 +5,8 @@
 @endsection
 
 @section('content')
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="stylesheet" href="{{ asset('assets/vendor/leaflet/leaflet.css') }}" />
+<script src="{{ asset('assets/vendor/leaflet/leaflet.js') }}"></script>
 
 <style>
     .tracking-container {
@@ -200,7 +200,7 @@
 
         map = L.map('live-fleet-map').setView([defaultLat, defaultLng], 13);
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        L.tileLayer(@json(config('gpstransport.map.tile_url')), {
             attribution: '© OpenStreetMap contributors',
             maxZoom: 19
         }).addTo(map);

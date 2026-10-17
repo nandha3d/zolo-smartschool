@@ -7,6 +7,7 @@ use App\Models\ClassSubject;
 use App\Models\Subject;
 use App\Models\SubjectScheduleRequirement;
 use App\Models\SubjectTeacher;
+use App\Models\SubjectTeacherAlternate;
 use App\Models\TeacherAvailability;
 use App\Models\ClassSectionAvailability;
 use App\Models\TimetableResourceAvailability;
@@ -412,18 +413,20 @@ class TimetableValidationService
         string $endTime,
         ?int $teacherId = null,
         ?int $resourceId = null,
-        ?int $excludeTimetableId = null,
+        int|array|null $excludeTimetableId = null,
         ?int $periodId = null
     ): array {
         $violations = [];
+        // One id, or several when validating a swap of two lessons.
+        $excludeIds = array_values(array_filter((array) $excludeTimetableId));
 
         // 1. Check Class conflict
         $classConflict = Timetable::where('school_id', $schoolId)
             ->where('class_section_id', $classSectionId)
             ->where('day', $day)
             ->where('type', 'Lecture')
-            ->when($excludeTimetableId, function ($q) use ($excludeTimetableId) {
-                $q->where('id', '!=', $excludeTimetableId);
+            ->when($excludeIds, function ($q) use ($excludeIds) {
+                $q->whereNotIn('id', $excludeIds);
             })
             ->where(function ($q) use ($startTime, $endTime) {
                 $q->where('start_time', '<', $endTime)
@@ -443,8 +446,8 @@ class TimetableValidationService
             $teacherConflict = Timetable::where('school_id', $schoolId)
                 ->where('day', $day)
                 ->where('type', 'Lecture')
-                ->when($excludeTimetableId, function ($q) use ($excludeTimetableId) {
-                    $q->where('id', '!=', $excludeTimetableId);
+                ->when($excludeIds, function ($q) use ($excludeIds) {
+                    $q->whereNotIn('id', $excludeIds);
                 })
                 ->whereHas('subject_teacher', function ($q) use ($teacherId) {
                     $q->where('teacher_id', $teacherId);
@@ -453,7 +456,7 @@ class TimetableValidationService
                     $q->where('start_time', '<', $endTime)
                       ->where('end_time', '>', $startTime);
                 })
-                ->with('class_section')
+                ->with(['class_section.class', 'class_section.section', 'class_section.medium'])
                 ->first();
 
             if ($teacherConflict) {
@@ -487,8 +490,8 @@ class TimetableValidationService
             $resourceConflict = Timetable::where('school_id', $schoolId)
                 ->where('day', $day)
                 ->where('resource_id', $resourceId)
-                ->when($excludeTimetableId, function ($q) use ($excludeTimetableId) {
-                    $q->where('id', '!=', $excludeTimetableId);
+                ->when($excludeIds, function ($q) use ($excludeIds) {
+                    $q->whereNotIn('id', $excludeIds);
                 })
                 ->where(function ($q) use ($startTime, $endTime) {
                     $q->where('start_time', '<', $endTime)

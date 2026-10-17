@@ -19,10 +19,9 @@ return [
 
     'allowed_methods' => ['*'],
 
-    // Set CORS_ALLOWED_ORIGINS to a comma separated list of your real origins in
-    // production. The wildcard is only workable because supports_credentials is
-    // false and the mobile clients authenticate with a bearer token.
-    'allowed_origins' => explode(',', env('CORS_ALLOWED_ORIGINS', '*')),
+    // Comma separated list of browser origins allowed to call the API. Defaults to the
+    // app's own origin; the mobile apps are not browsers and are unaffected by CORS.
+    'allowed_origins' => array_values(array_filter(array_map('trim', explode(',', (string) env('CORS_ALLOWED_ORIGINS', rtrim((string) env('APP_URL', 'http://localhost'), '/')))))),
 
     'allowed_origins_patterns' => [],
 

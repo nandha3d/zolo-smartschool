@@ -1,0 +1,9 @@
+/* Self-hosted copy of the Google Fonts stylesheet; every remote woff2 swapped for the local file beside it so pages never contact fonts.googleapis.com / fonts.gstatic.com. */
+/* fallback */
+@font-face {
+  font-family: 'Material Symbols Sharp';
+  font-style: normal;
+  font-weight: 400;
+  src: url(material-symbols-sharp-a83bb344.woff2) format('woff2');
+}
+

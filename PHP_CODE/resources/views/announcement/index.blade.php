@@ -34,7 +34,7 @@
                                 <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-6">
                                     <label>{{ __('files') }} </label>
                                     {{-- <input type="file" name="file[]" class="form-control" multiple/> --}}
-                                    <input type="file" name="file[]" multiple id="uploadInput" class="file-upload-default" accept="image/*,application/pdf,.doc,.docx,.xml,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"/>
+                                    <input type="file" name="file[]" multiple id="uploadInput" class="file-upload-default" accept="image/*,application/pdf,.doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"/>
                                     <div class="input-group col-xs-12">
                                         <input type="text" class="form-control file-upload-info" disabled=""
                                                placeholder="{{ __('File') }}"/>
@@ -235,7 +235,7 @@
 
                             <div class="form-group col-sm-12 col-md-12">
                                 <label>{{ __('upload_new_files') }} </label>
-                                <input type="file" name="file[]" multiple id="edit_uploadInput" class="file-upload-default" accept="image/*,application/pdf,.doc,.docx,.xml,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"/>
+                                <input type="file" name="file[]" multiple id="edit_uploadInput" class="file-upload-default" accept="image/*,application/pdf,.doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"/>
                                 <div class="input-group col-xs-12">
                                     <input type="text" class="form-control file-upload-info" disabled=""
                                            placeholder="{{ __('File') }}"/>

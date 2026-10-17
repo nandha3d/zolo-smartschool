@@ -478,7 +478,7 @@ class StudentApiController extends Controller
             'subject_id' => 'nullable|numeric',
             'files' => 'required|array',
             'files.*' => [
-                'mimes:jpeg,png,jpg,gif,webp,pdf,doc,docx,xml',
+                'mimes:jpeg,png,jpg,gif,webp,pdf,doc,docx',
                 'max:' . ($file_upload_size_limit * 1024) // Convert MB to KB
             ]
         ], [

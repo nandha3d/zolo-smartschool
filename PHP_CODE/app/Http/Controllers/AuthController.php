@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ProfileUpdateRequest;
 use App\Repositories\FormField\FormFieldsInterface;
 use App\Repositories\SystemSetting\SystemSettingInterface;
 use App\Repositories\User\UserInterface;
@@ -119,7 +120,7 @@ class AuthController extends Controller
         return view('auth.profile', compact('userData'));
     }
 
-    public function profileUpdate(Request $request)
+    public function profileUpdate(ProfileUpdateRequest $request)
     {
         if (config('app.demo_mode')) {
             return response()->json(array(
@@ -128,22 +129,8 @@ class AuthController extends Controller
                 'code' => 112
             ));
         }
-        $request->validate([
-            'first_name' => 'required',
-            'last_name' => 'required',
-            'mobile' => 'nullable|numeric|digits_between:1,16',
-            'gender' => 'required',
-            'dob' => 'required',
-            'email' => 'required|email|unique:users,email,' . Auth::user()->id,
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp',
-
-            'current_address' => 'required',
-            'permanent_address' => 'required',
-        ]);
         try {
-            $userData = array(
-                ...$request->all()
-            );
+            $userData = $request->userData();
             if (!empty($request->image)) {
                 $userData['image'] = $request->image;
             }

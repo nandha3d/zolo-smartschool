@@ -44,7 +44,9 @@ return [
     |
     */
 
-    'expiration' => null,
+    // Bearer tokens used by the mobile apps expire after 30 days by default, so a lost
+    // or stolen device does not keep access forever. tokens:prune-expired removes them.
+    'expiration' => env('SANCTUM_TOKEN_EXPIRATION', 60 * 24 * 30),
 
     /*
     |--------------------------------------------------------------------------

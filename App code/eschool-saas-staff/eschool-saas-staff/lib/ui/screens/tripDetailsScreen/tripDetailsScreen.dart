@@ -8,6 +8,11 @@ import 'package:zolo_smart_school_staff/ui/screens/tripDetailsScreen/widgets/tri
 import 'package:zolo_smart_school_staff/ui/screens/tripDetailsScreen/widgets/tripActionButtons.dart';
 import 'package:zolo_smart_school_staff/ui/screens/tripDetailsScreen/widgets/tripPassengersList.dart';
 import 'package:zolo_smart_school_staff/ui/screens/tripDetailsScreen/widgets/startTripBottomSheet.dart';
+import 'package:zolo_smart_school_staff/ui/screens/tripDetailsScreen/widgets/gpsTrackingCard.dart';
+import 'package:zolo_smart_school_staff/cubits/authentication/authCubit.dart';
+import 'package:zolo_smart_school_staff/data/repositories/gpsRepository.dart';
+import 'package:zolo_smart_school_staff/utils/gps/gpsTrackingService.dart';
+import 'package:zolo_smart_school_staff/utils/gps/gpsTripActions.dart';
 import 'package:zolo_smart_school_staff/cubits/transport/tripsCubit.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:zolo_smart_school_staff/utils/constants.dart';
@@ -37,6 +42,31 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
   late TripDetails _tripDetails;
   late Trip? _originalTrip; // Keep reference to original Trip object
   final ScrollController _scrollController = ScrollController();
+  final GlobalKey<GpsTrackingCardState> _gpsCardKey = GlobalKey<GpsTrackingCardState>();
+
+  /// Starting the transport trip also starts sharing the bus position (if the school
+  /// scheduled a GPS trip for this route); completing it stops sharing.
+  Future<void> _syncGpsWithTrip({required bool started}) async {
+    if (!context.read<AuthCubit>().isDriver()) return;
+    String? message;
+    if (started) {
+      message = await GpsTripActions.startForRoute(_originalTrip?.route.id);
+    } else if (GpsTrackingService.instance.activeTripId != null) {
+      try {
+        await GpsTripActions.end();
+      } on GpsApiException catch (e) {
+        message = e.stillOnboard
+            ? '${e.message} Use "Stop" on the live location card once everyone is off.'
+            : e.message;
+      }
+    }
+    _gpsCardKey.currentState?.reload();
+    if (message != null && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message), backgroundColor: Colors.orange),
+      );
+    }
+  }
 
   @override
   void initState() {
@@ -469,6 +499,7 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
           if (state.tripId != null) {
             context.read<TripsCubit>().fetchTripDetails(tripId: state.tripId!);
           }
+          _syncGpsWithTrip(started: true);
         } else if (state is TripStartFailure) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -525,6 +556,7 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                 .read<TripsCubit>()
                 .fetchTripDetails(tripId: _originalTrip!.tripId!);
           }
+          _syncGpsWithTrip(started: false);
         } else if (state is TripCompleteFailure) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -615,6 +647,13 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+                              // Live GPS sharing for parents (drivers only)
+                              if (context.read<AuthCubit>().isDriver())
+                                GpsTrackingCard(
+                                  key: _gpsCardKey,
+                                  routeId: _originalTrip?.route.id,
+                                ),
+
                               // Trip Status Header
                               TripStatusHeader(
                                 tripDetails: _tripDetails,

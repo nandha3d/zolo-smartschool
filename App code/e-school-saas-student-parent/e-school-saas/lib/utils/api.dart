@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:curl_logger_dio_interceptor/curl_logger_dio_interceptor.dart';
 import 'package:dio/dio.dart';
 import 'package:zolo_smart_school/data/repositories/authRepository.dart';
 import 'package:zolo_smart_school/utils/constants.dart';
@@ -205,8 +204,6 @@ class Api {
         print("API Called POST: $url with $body");
         print("Body Params: $body");
       }
-      dio.interceptors.add(CurlLoggerDioInterceptor(
-          printOnSuccess: true, convertFormData: true));
       final response = await dio.post(
         url,
         data: formData,
@@ -257,8 +254,6 @@ class Api {
         print(url);
         print(queryParameters);
       }
-      dio.interceptors.add(CurlLoggerDioInterceptor(
-          printOnSuccess: true, convertFormData: true));
       final response = await dio.get(
         url,
         queryParameters: queryParameters,

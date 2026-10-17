@@ -155,7 +155,7 @@
 
                 // Initialize Option
                 CKEDITOR.replace("option-{{ $key }}",{
-                    mathJaxLib: '//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS_HTML',
+                    mathJaxLib: '{{ asset('assets/vendor/mathjax/MathJax.js') }}?config=TeX-AMS_HTML',
                     extraPlugins: 'mathjax',
                     height: 100
                 });

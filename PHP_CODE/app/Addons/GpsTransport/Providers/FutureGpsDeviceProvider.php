@@ -29,7 +29,8 @@ class FutureGpsDeviceProvider implements LocationProviderInterface
             'altitude'          => isset($payload['altitude']) ? (float) $payload['altitude'] : null,
             'speed'             => (float) ($payload['speed'] ?? 0.0),
             'heading'           => (float) ($payload['heading'] ?? 0.0),
-            'timestamp'         => isset($payload['timestamp']) ? Carbon::parse($payload['timestamp']) : Carbon::now(),
+            // Devices send UTC / offset timestamps; store them in the app timezone like every other column.
+            'timestamp'         => isset($payload['timestamp']) ? Carbon::parse($payload['timestamp'])->setTimezone(config('app.timezone')) : Carbon::now(),
             'battery_level'     => isset($payload['device_battery']) ? (int) $payload['device_battery'] : 100,
             'is_mock_location'  => false, // Hardware GPS cannot use software mock locations
             'source_type'       => 'GPS_DEVICE',

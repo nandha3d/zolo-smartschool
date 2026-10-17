@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Throwable;
 use App\Services\PasswordService;
+use App\Http\Requests\GuardianRequest;
 
 class GuardianController extends Controller {
     protected UserInterface $user;
@@ -45,18 +46,15 @@ class GuardianController extends Controller {
         return view('guardian.index', compact('classes','class_sections'));
     }
 
-    public function store(Request $request) {
+    public function store(GuardianRequest $request) {
         ResponseService::noPermissionThenRedirect('guardian-create');
-        $request->validate([
-            'first_name' => 'required',
-            'email'      => 'required|email|max:255|regex:/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/|unique:users,email',
-            'last_name'  => 'required',
-            'gender'     => 'required',
-            'mobile'     => 'required|digits_between:6,15',
-        ]);
         try {
             DB::beginTransaction();
-            $guardian = $this->user->create($request->all());
+            $data = $request->userData();
+            if ($request->file('image')) {
+                $data['image'] = $request->file('image');
+            }
+            $guardian = $this->user->create($data);
             $guardian->assignRole('Guardian');
             $sessionYear = $this->cache->getDefaultSessionYear();
             $semester = $this->cache->getDefaultSemesterData();
@@ -133,19 +131,10 @@ class GuardianController extends Controller {
         return response()->json($bulkData);
     }
 
-    public function update(Request $request) {
+    public function update(GuardianRequest $request) {
         ResponseService::noPermissionThenSendJson('guardian-edit');
-        $request->validate([
-            'edit_id'    => 'required',
-            'first_name' => 'required',
-            'email'      => 'required|email|max:255|regex:/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/|unique:users,email,' . $request->edit_id,
-            'last_name'  => 'required',
-            'gender'     => 'required',
-            'mobile'     => 'required|digits_between:6,15',
-            'image'      => 'nullable|image|mimes:jpeg,png,jpg,gif,webp',
-        ]);
         try {
-            $data = $request->except('_token', 'edit_id', '_method','reset_password');
+            $data = $request->userData();
             $guardian = $this->user->guardian()->where('id', $request->edit_id)->firstOrFail();
             if (!empty($request->image)) {
                 if ($guardian->image) {

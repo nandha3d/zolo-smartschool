@@ -200,6 +200,12 @@
                                         {{ __('teacher_timetable') }}
                                     </a>
                                 </li>
+                                <li class="nav-item">
+                                    <a href="{{ route('timetable.teacher-matrix') }}" class="nav-link"
+                                        data-name="{{ Auth::user()->getRoleNames()[0] }}" data-access="@hasFeatureAccess('Timetable Management')">
+                                        {{ __('Teacher Matrix') }}
+                                    </a>
+                                </li>
                             @endcan
                         </ul>
                     </div>
@@ -971,6 +977,93 @@
                                 <a href="{{ route('transportation-expense.index') }}" class="nav-link"
                                     data-access="@hasFeatureAccess('Transportation Module')"> {{ __('transportation_expense') }}</a>
                             </li>
+                        @endcan
+                    </ul>
+                </div>
+            </li>
+        @endcanany
+
+        {{-- Library Management Addon --}}
+        @canany(['library-list', 'library-circulation'])
+            <li class="nav-item">
+                <a class="nav-link" data-toggle="collapse" href="#library-menu" aria-expanded="false"
+                    aria-controls="library-menu" data-access="@hasFeatureAccess('Library Management')">
+                    <i class="fa fa-book menu-icon"></i>
+                    <span class="menu-title">{{ __('Library') }}</span>
+                    <i class="menu-arrow"></i>
+                </a>
+                <div class="collapse" id="library-menu">
+                    <ul class="nav flex-column sub-menu">
+                        @can('library-list')
+                            <li class="nav-item"><a href="{{ route('library.dashboard') }}" class="nav-link" data-access="@hasFeatureAccess('Library Management')">{{ __('Overview') }}</a></li>
+                        @endcan
+                        @can('library-circulation')
+                            <li class="nav-item"><a href="{{ route('library.circulation') }}" class="nav-link" data-access="@hasFeatureAccess('Library Management')">{{ __('Issue / Return') }}</a></li>
+                        @endcan
+                        @can('library-list')
+                            <li class="nav-item"><a href="{{ route('library.catalog') }}" class="nav-link" data-access="@hasFeatureAccess('Library Management')">{{ __('Catalogue') }}</a></li>
+                            <li class="nav-item"><a href="{{ route('library.loans') }}" class="nav-link" data-access="@hasFeatureAccess('Library Management')">{{ __('Loans') }}</a></li>
+                            <li class="nav-item"><a href="{{ route('library.fines') }}" class="nav-link" data-access="@hasFeatureAccess('Library Management')">{{ __('Fines') }}</a></li>
+                        @endcan
+                    </ul>
+                </div>
+            </li>
+        @endcanany
+
+        {{-- Hostel Management Addon --}}
+        @canany(['hostel-list', 'hostel-attendance', 'hostel-gate-pass', 'hostel-fees'])
+            <li class="nav-item">
+                <a class="nav-link" data-toggle="collapse" href="#hostel-menu" aria-expanded="false"
+                    aria-controls="hostel-menu" data-access="@hasFeatureAccess('Hostel Management')">
+                    <i class="fa fa-bed menu-icon"></i>
+                    <span class="menu-title">{{ __('Hostel') }}</span>
+                    <i class="menu-arrow"></i>
+                </a>
+                <div class="collapse" id="hostel-menu">
+                    <ul class="nav flex-column sub-menu">
+                        @can('hostel-list')
+                            <li class="nav-item"><a href="{{ route('hostel.dashboard') }}" class="nav-link" data-access="@hasFeatureAccess('Hostel Management')">{{ __('Overview') }}</a></li>
+                            <li class="nav-item"><a href="{{ route('hostel.allocations') }}" class="nav-link" data-access="@hasFeatureAccess('Hostel Management')">{{ __('Beds & Residents') }}</a></li>
+                        @endcan
+                        @can('hostel-attendance')
+                            <li class="nav-item"><a href="{{ route('hostel.attendance') }}" class="nav-link" data-access="@hasFeatureAccess('Hostel Management')">{{ __('Roll Call') }}</a></li>
+                        @endcan
+                        @can('hostel-gate-pass')
+                            <li class="nav-item"><a href="{{ route('hostel.passes') }}" class="nav-link" data-access="@hasFeatureAccess('Hostel Management')">{{ __('Gate Passes') }}</a></li>
+                            <li class="nav-item"><a href="{{ route('hostel.visitors') }}" class="nav-link" data-access="@hasFeatureAccess('Hostel Management')">{{ __('Visitors') }}</a></li>
+                        @endcan
+                        @can('hostel-fees')
+                            <li class="nav-item"><a href="{{ route('hostel.fees') }}" class="nav-link" data-access="@hasFeatureAccess('Hostel Management')">{{ __('Hostel Fees') }}</a></li>
+                        @endcan
+                    </ul>
+                </div>
+            </li>
+        @endcanany
+
+        {{-- Canteen Management Addon --}}
+        @canany(['canteen-list', 'canteen-pos', 'canteen-wallet'])
+            <li class="nav-item">
+                <a class="nav-link" data-toggle="collapse" href="#canteen-menu" aria-expanded="false"
+                    aria-controls="canteen-menu" data-access="@hasFeatureAccess('Canteen Management')">
+                    <i class="fa fa-cutlery menu-icon"></i>
+                    <span class="menu-title">{{ __('Canteen') }}</span>
+                    <i class="menu-arrow"></i>
+                </a>
+                <div class="collapse" id="canteen-menu">
+                    <ul class="nav flex-column sub-menu">
+                        @can('canteen-list')
+                            <li class="nav-item"><a href="{{ route('canteen.dashboard') }}" class="nav-link" data-access="@hasFeatureAccess('Canteen Management')">{{ __('Overview') }}</a></li>
+                        @endcan
+                        @can('canteen-pos')
+                            <li class="nav-item"><a href="{{ route('canteen.pos') }}" class="nav-link" data-access="@hasFeatureAccess('Canteen Management')">{{ __('POS') }}</a></li>
+                            <li class="nav-item"><a href="{{ route('canteen.kitchen') }}" class="nav-link" data-access="@hasFeatureAccess('Canteen Management')">{{ __('Kitchen Board') }}</a></li>
+                        @endcan
+                        @can('canteen-wallet')
+                            <li class="nav-item"><a href="{{ route('canteen.wallets') }}" class="nav-link" data-access="@hasFeatureAccess('Canteen Management')">{{ __('Wallets') }}</a></li>
+                        @endcan
+                        @can('canteen-list')
+                            <li class="nav-item"><a href="{{ route('canteen.menu') }}" class="nav-link" data-access="@hasFeatureAccess('Canteen Management')">{{ __('Menu') }}</a></li>
+                            <li class="nav-item"><a href="{{ route('canteen.inventory') }}" class="nav-link" data-access="@hasFeatureAccess('Canteen Management')">{{ __('Inventory') }}</a></li>
                         @endcan
                     </ul>
                 </div>

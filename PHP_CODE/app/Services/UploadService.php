@@ -13,11 +13,12 @@ class UploadService {
      *
      * SVG is deliberately absent: it is an XML document that can carry script, and the
      * public disk is served from the application origin, so an uploaded SVG would be
-     * stored XSS against everyone who views it.
+     * stored XSS against everyone who views it. XML is absent for the same reason (an XHTML
+     * namespace makes the browser run embedded script) and because it invites XXE parsing.
      */
-    private const ALLOWED_EXTENSIONS = [
+    public const ALLOWED_EXTENSIONS = [
         'jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp',
-        'pdf', 'doc', 'docx', 'xls', 'xlsx', 'csv', 'txt', 'xml',
+        'pdf', 'doc', 'docx', 'xls', 'xlsx', 'csv', 'txt',
         'mp3', 'mp4', 'webm', 'ogg',
         'zip',
     ];

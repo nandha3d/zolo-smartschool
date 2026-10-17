@@ -751,7 +751,7 @@ class OnlineExamController extends Controller
             ResponseService::successResponse('Data Stored Successfully', array(
                 'exam_id' => $request->online_exam_id,
                 'question_id' => $onlineExamQuestion->id,
-                'question' => "<textarea id='qc" . $onlineExamQuestion->id . "'>" . htmlspecialchars_decode($onlineExamQuestion->question) . "</textarea><script>setTimeout(() => {equation_editor = CKEDITOR.inline('qc" . $onlineExamQuestion->id . "', { skin:'moono',extraPlugins: 'mathjax', mathJaxLib: 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS_HTML', readOnly:true, }); },1000);</script>"
+                'question' => "<textarea id='qc" . $onlineExamQuestion->id . "'>" . htmlspecialchars_decode($onlineExamQuestion->question) . "</textarea><script>setTimeout(() => {equation_editor = CKEDITOR.inline('qc" . $onlineExamQuestion->id . "', { skin:'moono',extraPlugins: 'mathjax', mathJaxLib: '" . asset('assets/vendor/mathjax/MathJax.js') . "?config=TeX-AMS_HTML', readOnly:true, }); },1000);</script>"
             ));
         } catch (Throwable $e) {
             DB::rollback();

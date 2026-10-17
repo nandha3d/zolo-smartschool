@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Pinyon%20Script:wght@900&family=Pinyon%20Script&display=swap');
+@import url('../fonts/pinyon-script/pinyon-script.css');
 
 .text-color-dashboard-counter-label {
     color: #585353 !important;

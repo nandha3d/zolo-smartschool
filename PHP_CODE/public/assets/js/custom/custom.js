@@ -76,7 +76,8 @@ $(function () {
                 'undo redo | cut copy paste | bold italic | alignleft aligncenter alignright alignjustify | table | image | fullscreen',
                 'bullist numlist | outdent indent | blockquote autolink | lists | fontfamily | fontsize | code | preview'
             ],
-            content_style: "@import url('https://fonts.googleapis.com/css2?family=Pinyon%20Script:wght@900&family=Pinyon%20Script&display=swap'); body { font-family: 'Lato', sans-serif; } h1,h2,h3,h4,h5,h6 { font-family: 'Pinyon%20Script', sans-serif; }",
+            content_css: [baseUrl + '/assets/fonts/pinyon-script/pinyon-script.css', baseUrl + '/assets/fonts/lato/lato.css'],
+            content_style: " body { font-family: 'Lato', sans-serif; } h1,h2,h3,h4,h5,h6 { font-family: 'Pinyon Script', sans-serif; }",
             font_family_formats: "Arial Black=arial black,avant garde; Courier New=courier new,courier; Lato=lato; Pinyon Script=Pinyon Script;",
             plugins: 'autolink link image lists code table fullscreen preview',
             font_size_formats: '8pt 10pt 12pt 14pt 16pt 18pt 24pt 28pt 36pt 48pt',

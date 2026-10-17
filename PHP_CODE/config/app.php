@@ -206,6 +206,9 @@ return [
         // Addons — self-contained; each loads its own routes, views and migrations.
         App\Addons\PhotoBooth\PhotoBoothServiceProvider::class,
         App\Addons\GpsTransport\GpsTransportServiceProvider::class,
+        App\Addons\Library\LibraryServiceProvider::class,
+        App\Addons\Hostel\HostelServiceProvider::class,
+        App\Addons\Canteen\CanteenServiceProvider::class,
     ],
 
     /*

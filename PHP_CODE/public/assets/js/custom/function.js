@@ -1,3 +1,6 @@
+// MathJax is self-hosted under /assets/vendor/mathjax so exam editors never contact a CDN.
+var zoloMathJaxLib = (typeof baseUrl !== 'undefined' ? baseUrl : window.location.origin) + '/assets/vendor/mathjax/MathJax.js?config=TeX-AMS_HTML';
+
 "use strict";
 
 var toast_position = 'top-right';
@@ -147,21 +150,21 @@ function createCkeditor() {
     }
     CKEDITOR.replaceAll(function (textarea, config) {
         if (textarea.className == "editor_question") {
-            config.mathJaxLib = '//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS_HTML';
+            config.mathJaxLib = zoloMathJaxLib;
             config.extraPlugins = 'mathjax';
             config.height = 200;
             config.contentsLangDirection = layout_direction;
             return true;
         }
         if (textarea.className == "editor_options") {
-            config.mathJaxLib = '//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS_HTML';
+            config.mathJaxLib = zoloMathJaxLib;
             config.extraPlugins = 'mathjax';
             config.height = 100;
             config.contentsLangDirection = layout_direction;
             return true;
         }
         if (textarea.className == "edit_editor_options") {
-            config.mathJaxLib = '//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS_HTML';
+            config.mathJaxLib = zoloMathJaxLib;
             config.extraPlugins = 'mathjax';
             config.height = 100;
             config.contentsLangDirection = layout_direction;
@@ -174,7 +177,7 @@ function createCkeditor() {
     let elements = CKEDITOR.document.find('.equation-editor-inline'), i = 0, element;
     while ((element = elements.getItem(i++))) {
         CKEDITOR.inline(element, {
-            mathJaxLib: '//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS_HTML',
+            mathJaxLib: zoloMathJaxLib,
             extraPlugins: 'mathjax',
             readOnly: true,
         });

@@ -34,6 +34,7 @@
                             @if ($paymentConfiguration && $paymentConfiguration->payment_method == 'Stripe')
                                 <a href="{{ url('subscriptions/pay-prepaid-upcoming-plan', $prepiad_upcoming_plan->package_id) . '/type/' . $prepiad_upcoming_plan_type . '/subscription/' . $prepiad_upcoming_plan->id }}" class="zolo-banner-btn">{{ __('Pay now') }}</a>
                             @else
+                                @php $needsRazorpay = true; @endphp
                                 <form action="{{ url('subscriptions/razorpay') }}" class="razorpay-form d-inline" method="POST">
                                     @csrf
                                     <input type="hidden" name="package_id" class="package_id" value="{{ $prepiad_upcoming_plan->package_id }}">
@@ -724,7 +725,8 @@
 @endsection
 @section('script')
 
-    @if (Auth::user()->school_id)
+    {{-- Only contact Razorpay when its pay button is actually on the page. --}}
+    @if (!empty($needsRazorpay))
         <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
     @endif

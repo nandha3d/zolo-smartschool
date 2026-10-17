@@ -84,7 +84,7 @@ class AnnouncementController extends Controller {
             'class_section_id' => 'required|array',
             'subject_id'       => Auth::user() && Auth::user()->hasRole('Teacher') ? 'required|exists:subjects,id' : 'nullable|exists:subjects,id',
             'file'             => 'nullable|array',
-            'file.*'           => ['mimes:jpeg,png,jpg,gif,webp,pdf,doc,docx,xml', new MaxFileSize($file_upload_size_limit) ],
+            'file.*'           => ['mimes:jpeg,png,jpg,gif,webp,pdf,doc,docx', new MaxFileSize($file_upload_size_limit) ],
             'add_url'          => $request->checkbox_add_url ? 'required' : 'nullable',
         ], [
             'class_section_id.required' => trans('the_class_section_field_id_required'),
@@ -251,7 +251,7 @@ class AnnouncementController extends Controller {
             'title'            => 'required',
             'class_section_id' => 'required',
             'file'             => 'nullable|array',
-            'file.*'           => ['mimes:jpeg,png,jpg,gif,webp,pdf,doc,docx,xml', new MaxFileSize($file_upload_size_limit) ]
+            'file.*'           => ['mimes:jpeg,png,jpg,gif,webp,pdf,doc,docx', new MaxFileSize($file_upload_size_limit) ]
         ],[
             'file.*' => trans('The file Uploaded must be less than :file_upload_size_limit MB.', [
                 'file_upload_size_limit' => $file_upload_size_limit,  

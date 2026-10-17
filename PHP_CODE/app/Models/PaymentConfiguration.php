@@ -24,6 +24,16 @@ class PaymentConfiguration extends Model
         'account_no',
     ];
 
+    /**
+     * Gateway secrets are encrypted at rest with APP_KEY, so a database dump or backup
+     * does not hand out live payment credentials. api_key stays plain: it is the
+     * publishable / key-id half, which is sent to the apps and checkout pages anyway.
+     */
+    protected $casts = [
+        'secret_key' => 'encrypted',
+        'webhook_secret_key' => 'encrypted',
+    ];
+
     public function getConnectionName()
     {
         // Replace this with your logic to determine the connection name

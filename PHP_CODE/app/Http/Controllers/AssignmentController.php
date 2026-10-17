@@ -93,7 +93,7 @@ class AssignmentController extends Controller
             "resubmission"                => 'nullable|boolean',
             "extra_days_for_resubmission" => 'nullable|numeric',
             'file'                        => 'nullable|array',
-            'file.*'                      => ['mimes:jpeg,png,jpg,gif,webp,pdf,doc,docx,xml', new MaxFileSize($file_upload_size_limit) ],
+            'file.*'                      => ['mimes:jpeg,png,jpg,gif,webp,pdf,doc,docx', new MaxFileSize($file_upload_size_limit) ],
             'add_url'          => $request->checkbox_add_url ? 'required' : 'nullable',
         ],[
             'file.*' => trans('The file Uploaded must be less than :file_upload_size_limit MB.', [
@@ -386,7 +386,7 @@ class AssignmentController extends Controller
             "resubmission"                => 'nullable|boolean',
             "extra_days_for_resubmission" => 'nullable|numeric',
             'file'                        => 'nullable|array',
-            'file.*'                      => ['mimes:jpeg,png,jpg,gif,webp,pdf,doc,docx,xml', new MaxFileSize($file_upload_size_limit) ]
+            'file.*'                      => ['mimes:jpeg,png,jpg,gif,webp,pdf,doc,docx', new MaxFileSize($file_upload_size_limit) ]
         ],[
             'file.*' => trans('The file Uploaded must be less than :file_upload_size_limit MB.', [
                 'file_upload_size_limit' => $file_upload_size_limit,  

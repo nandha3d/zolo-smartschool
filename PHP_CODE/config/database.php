@@ -56,7 +56,13 @@ return [
             'collation' => 'utf8mb4_unicode_ci',
             'prefix' => '',
             'prefix_indexes' => true,
-            'strict' => false,
+            // Opt-in strict mode (minus ONLY_FULL_GROUP_BY): rejects truncated values, zero
+            // dates and division by zero. Off by default because the tenant schema has 400+
+            // NOT NULL columns without defaults that some inserts omit (e.g. subjects.image);
+            // enable with DB_STRICT=true only after exercising the app on staging.
+            'strict' => env('DB_STRICT', false),
+            // 'modes' takes precedence over 'strict' in the connector, so only set it when on.
+            'modes' => env('DB_STRICT', false) ? ['STRICT_TRANS_TABLES', 'NO_ZERO_IN_DATE', 'NO_ZERO_DATE', 'ERROR_FOR_DIVISION_BY_ZERO', 'NO_ENGINE_SUBSTITUTION'] : null,
             'engine' => 'InnoDB',
             'options' => extension_loaded('pdo_mysql') ? array_filter([
                 PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
@@ -73,7 +79,13 @@ return [
             'charset' => 'utf8mb4',
             'collation' => 'utf8mb4_unicode_ci',
             'prefix' => '',
-            'strict' => false,
+            // Opt-in strict mode (minus ONLY_FULL_GROUP_BY): rejects truncated values, zero
+            // dates and division by zero. Off by default because the tenant schema has 400+
+            // NOT NULL columns without defaults that some inserts omit (e.g. subjects.image);
+            // enable with DB_STRICT=true only after exercising the app on staging.
+            'strict' => env('DB_STRICT', false),
+            // 'modes' takes precedence over 'strict' in the connector, so only set it when on.
+            'modes' => env('DB_STRICT', false) ? ['STRICT_TRANS_TABLES', 'NO_ZERO_IN_DATE', 'NO_ZERO_DATE', 'ERROR_FOR_DIVISION_BY_ZERO', 'NO_ENGINE_SUBSTITUTION'] : null,
             'engine' => 'InnoDB',
         ],
 

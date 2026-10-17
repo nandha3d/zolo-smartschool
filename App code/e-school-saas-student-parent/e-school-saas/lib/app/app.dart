@@ -53,7 +53,7 @@ import 'package:zolo_smart_school/utils/hiveBoxKeys.dart';
 import 'package:zolo_smart_school/utils/notificationUtility.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
-//to avoid handshake error on some devices
+// Debug builds only: lets the app talk to a local server with a self-signed certificate.
 class MyHttpOverrides extends HttpOverrides {
   @override
   HttpClient createHttpClient(SecurityContext? context) {
@@ -68,7 +68,11 @@ Future<void> initializeApp() async {
 
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
       overlays: SystemUiOverlay.values);
-  HttpOverrides.global = MyHttpOverrides();
+  // Accepting any certificate defeats TLS (tokens and passwords could be read by
+  // anyone on the network), so it is only allowed for local development builds.
+  if (kDebugMode) {
+    HttpOverrides.global = MyHttpOverrides();
+  }
   //Register the licence of font
   LicenseRegistry.addLicense(() async* {
     final license = await rootBundle.loadString('google_fonts/OFL.txt');
