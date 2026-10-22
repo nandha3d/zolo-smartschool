@@ -33,8 +33,8 @@ class TimetableGenerationService
     private const MAX_TEACHER_CONSECUTIVE = 3;
 
     // Safety limits
-    private int $maxSearchNodes = 100000;
-    private int $maxExecutionSeconds = 60;
+    private int $maxSearchNodes = 20000;
+    private int $maxExecutionSeconds = 5;
 
     public function __construct(
         TimetableFeasibilityService $feasibilityService,
@@ -140,22 +140,47 @@ class TimetableGenerationService
         $allPeriods = $template->periods;
 
         // Fetch locked timetable entries that must be preserved
-        $lockedSlots = Timetable::where('school_id', $schoolId)
+        $rawLockedSlots = Timetable::where('school_id', $schoolId)
             ->where('is_locked', true)
             ->when($semesterId, function ($q) use ($semesterId) {
                 $q->where(function ($sq) use ($semesterId) {
                     $sq->where('semester_id', $semesterId)->orWhereNull('semester_id');
                 });
             })
-            ->get()
-            ->toArray();
+            ->with('subject_teacher')
+            ->get();
 
-        // Also fetch any other classes' timetables if running in partial mode
+        $lockedSlots = [];
         $externalOccupancies = [];
+
+        // Partition locked slots: target classes go into candidate schedule;
+        // other classes become external teacher/room occupancies.
+        foreach ($rawLockedSlots as $lsRecord) {
+            $tId = $lsRecord->teacher_id ?? $lsRecord->subject_teacher?->teacher_id;
+            if (in_array($lsRecord->class_section_id, $classSectionIds)) {
+                $arr = $lsRecord->toArray();
+                $arr['teacher_id'] = $tId;
+                $lockedSlots[] = $arr;
+            } else {
+                $externalOccupancies[] = [
+                    'day'              => $lsRecord->day,
+                    'start_time'       => $lsRecord->start_time,
+                    'end_time'         => $lsRecord->end_time,
+                    'class_section_id' => $lsRecord->class_section_id,
+                    'teacher_id'       => $tId,
+                    'resource_id'      => $lsRecord->resource_id,
+                    'period_id'        => $lsRecord->period_id,
+                    'is_locked'        => true,
+                ];
+            }
+        }
+
+        // Also fetch any other classes' unlocked timetables if running in partial mode
         if ($preserveExisting) {
             $existingOthers = Timetable::where('school_id', $schoolId)
                 ->whereNotIn('class_section_id', $classSectionIds)
                 ->where('type', 'Lecture')
+                ->where('is_locked', false)
                 ->when($semesterId, function ($q) use ($semesterId) {
                     $q->where(function ($sq) use ($semesterId) {
                         $sq->where('semester_id', $semesterId)->orWhereNull('semester_id');
@@ -174,13 +199,13 @@ class TimetableGenerationService
                     'teacher_id'       => $tId,
                     'resource_id'      => $eo->resource_id,
                     'period_id'        => $eo->period_id,
-                    'is_locked'        => (bool)$eo->is_locked,
+                    'is_locked'        => false,
                 ];
             }
         }
 
         // 5. Build Lesson Blocks to Schedule
-        $blocks = $this->buildLessonBlocks($classSectionIds, $requirements, $lockedSlots);
+        $blocks = $this->buildLessonBlocks($classSectionIds, $requirements, $lockedSlots, $externalOccupancies);
 
         // 6. Run Deterministic Constraint Search Solver
         $solverResult = $this->solveDeterministic(
@@ -299,8 +324,62 @@ class TimetableGenerationService
             return $run;
         });
 
-        // 10. Return Preview Response
-        $entriesPreview = array_slice($finalSchedule, 0, 50);
+        // 10. Return Preview Response with Enriched Entries and Classes List
+        $enrichedEntries = TimetableGenerationEntry::where('generation_run_id', $generationRun->id)
+            ->with([
+                'class_section.class',
+                'class_section.section',
+                'class_section.medium',
+                'subject:id,name,type,bg_color',
+                'teacher:id,first_name,last_name',
+                'resource:id,name',
+                'period:id,period_number,name'
+            ])
+            ->orderBy('day')
+            ->orderBy('start_time')
+            ->get()
+            ->map(function ($entry) {
+                $cs = $entry->class_section;
+                $className = $cs?->full_name;
+                if (!$className && $cs) {
+                    $cName = $cs->class?->name ?? '';
+                    $sName = $cs->section?->name ?? '';
+                    $mName = $cs->medium?->name ?? '';
+                    $className = trim("{$cName} {$sName} " . ($mName ? "({$mName})" : ""));
+                }
+                $tName = $entry->teacher ? trim($entry->teacher->first_name . ' ' . ($entry->teacher->last_name ?? '')) : '';
+
+                return [
+                    'id'                 => $entry->id,
+                    'class_section_id'   => $entry->class_section_id,
+                    'class_name'         => $className ?: ('Class #' . $entry->class_section_id),
+                    'subject_id'         => $entry->subject_id,
+                    'subject_name'       => $entry->subject?->name ?? ($entry->type === 'Break' ? 'Break' : 'Lecture'),
+                    'subject_type'       => $entry->subject?->type,
+                    'subject_bg_color'   => $entry->subject?->bg_color,
+                    'teacher_id'         => $entry->teacher_id,
+                    'teacher_name'       => $tName,
+                    'resource_id'        => $entry->resource_id,
+                    'resource_name'      => $entry->resource?->name ?? '',
+                    'day'                => $entry->day,
+                    'period_id'          => $entry->period_id,
+                    'period_number'      => $entry->period?->period_number,
+                    'start_time'         => $entry->start_time,
+                    'end_time'           => $entry->end_time,
+                    'type'               => $entry->type,
+                    'is_locked'          => (bool)$entry->is_locked,
+                ];
+            });
+
+        $generatedClasses = [];
+        foreach ($enrichedEntries->groupBy('class_section_id') as $cId => $cEntries) {
+            $first = $cEntries->first();
+            $generatedClasses[] = [
+                'id'          => (int)$cId,
+                'name'        => $first['class_name'] ?? ('Class #' . $cId),
+                'slots_count' => $cEntries->count(),
+            ];
+        }
 
         return [
             'error'             => false,
@@ -310,9 +389,10 @@ class TimetableGenerationService
             'message'           => 'Timetable generated successfully with ' . count($finalSchedule) . ' slots across ' . count($classSectionIds) . ' classes.',
             'statistics'        => $generationRun->statistics,
             'conflicts'         => [],
-            'entries'           => $finalSchedule,
+            'entries'           => $enrichedEntries->values()->all(),
             'entries_count'     => count($finalSchedule),
-            'entries_preview'   => $entriesPreview,
+            'entries_preview'   => $enrichedEntries->take(50)->values()->all(),
+            'classes'           => $generatedClasses,
             'quality'           => $quality,
             'metrics'           => $quality,
         ];
@@ -321,7 +401,7 @@ class TimetableGenerationService
     /**
      * Build lesson blocks from requirements, deducting already-scheduled locked slots.
      */
-    private function buildLessonBlocks(array $classSectionIds, $requirements, array $lockedSlots): array
+    private function buildLessonBlocks(array $classSectionIds, $requirements, array $lockedSlots, array $externalOccupancies = []): array
     {
         // Count already locked slots by [class_section_id][subject_id]
         $lockedCounts = [];
@@ -379,6 +459,7 @@ class TimetableGenerationService
                     'avoid_first_period' => (bool)$req->avoid_first_period,
                     'avoid_last_period'  => (bool)$req->avoid_last_period,
                     'preferred_day'      => $req->preferred_day,
+                    'max_periods_per_day'=> max(1, (int)($req->max_periods_per_day ?? 2)),
                 ];
 
                 $remaining -= $blockSize;
@@ -386,17 +467,26 @@ class TimetableGenerationService
             }
         }
 
-        // Weekly periods each teacher must cover across every selected class. A teacher
-        // who takes Maths in 11-A, 11-B, 12-A and Chemistry in 10-A is the scarcest
-        // resource in a school-wide run, so their lessons are placed first (MRV).
-        $teacherLoad = [];
+        // External busy slots already assigned to teachers in previous classes
+        $teacherExternalOccupancy = [];
+        foreach ($externalOccupancies as $eo) {
+            if (!empty($eo['teacher_id'])) {
+                $teacherExternalOccupancy[$eo['teacher_id']] = ($teacherExternalOccupancy[$eo['teacher_id']] ?? 0) + 1;
+            }
+        }
+
+        // Weekly periods each teacher must cover across every selected class.
+        $teacherLoadInBlocks = [];
         foreach ($blocks as $block) {
             if ($block['teacher_id']) {
-                $teacherLoad[$block['teacher_id']] = ($teacherLoad[$block['teacher_id']] ?? 0) + $block['block_size'];
+                $teacherLoadInBlocks[$block['teacher_id']] = ($teacherLoadInBlocks[$block['teacher_id']] ?? 0) + $block['block_size'];
             }
         }
         foreach ($blocks as &$block) {
-            $block['teacher_load'] = $block['teacher_id'] ? $teacherLoad[$block['teacher_id']] : 0;
+            $tId = $block['teacher_id'];
+            // True MRV: External busy slots + new slots. The teacher with the highest total occupancy
+            // (fewest free remaining slots) is the most constrained resource and must be placed first!
+            $block['teacher_load'] = $tId ? (($teacherExternalOccupancy[$tId] ?? 0) + ($teacherLoadInBlocks[$tId] ?? 0)) : 0;
         }
         unset($block);
 
@@ -675,18 +765,38 @@ class TimetableGenerationService
                     // Soft score calculation
                     $softScore = 0;
 
-                    // Count how many times this subject is already placed on this day for this class
+                    // Count how many times this subject is already placed on this day for this class,
+                    // and track which periods it already occupies across other days
                     $countOnDay = 0;
+                    $placedPeriodIndices = [];
                     foreach ($placements as $placed) {
-                        if ($placed['class_section_id'] === $classId && $placed['day'] === $day && $placed['subject_id'] === $block['subject_id']) {
-                            $countOnDay++;
+                        if ($placed['class_section_id'] === $classId && $placed['subject_id'] === $block['subject_id']) {
+                            $placedPeriodIndices[] = $placed['period_id'] ?? $placed['period_number'];
+                            if ($placed['day'] === $day) {
+                                $countOnDay++;
+                            }
                         }
                     }
 
+                    $maxPerDay = $block['max_periods_per_day'] ?? 2;
+                    if ($countOnDay >= $maxPerDay) {
+                        continue; // Class already has max periods for this subject today
+                    }
+
                     if ($countOnDay === 0) {
-                        $softScore += 100; // spread reward
+                        $softScore += 80; // primary spread reward
                     } else {
-                        $softScore -= 80;  // penalty for multiple single periods on same day
+                        // Second period for this subject/teacher on this day (e.g. afternoon lab or double block)
+                        $softScore += 20;
+                    }
+
+                    // Never-Repeat / Anti-Monotony rotation:
+                    // Avoid placing the same subject at the exact same period across multiple days!
+                    $curPeriodIdentifier = $instPeriodsArr[$pIdx]->id ?? ($pIdx + 1);
+                    if (in_array($curPeriodIdentifier, $placedPeriodIndices)) {
+                        $softScore -= 50; // Discourage same period repetition every day
+                    } else {
+                        $softScore += 35; // Reward rotating periods throughout the week
                     }
 
                     if ($block['avoid_first_period'] && $instPeriodsArr[$pIdx]->period_number === 1) {
@@ -718,13 +828,17 @@ class TimetableGenerationService
             return false;
         }
 
-        // Deterministic candidate ordering:
+        // Candidate ordering:
         // 1. Highest soft score first
-        // 2. Earliest day order
-        // 3. Earliest period order
-        usort($candidates, function ($a, $b) {
+        // 2. Diversity tie-break (shuffling across periods) so subjects don't all cluster at period 0
+        usort($candidates, function ($a, $b) use ($classId, $block) {
             if ($a['score'] !== $b['score']) {
                 return $b['score'] <=> $a['score'];
+            }
+            $hashA = ($classId * 37 + $block['subject_id'] * 19 + $a['day_index'] * 13 + $a['period_index'] * 7) % 29;
+            $hashB = ($classId * 37 + $block['subject_id'] * 19 + $b['day_index'] * 13 + $b['period_index'] * 7) % 29;
+            if ($hashA !== $hashB) {
+                return $hashB <=> $hashA;
             }
             if ($a['day_index'] !== $b['day_index']) {
                 return $a['day_index'] <=> $b['day_index'];

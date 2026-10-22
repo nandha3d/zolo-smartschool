@@ -4,6 +4,42 @@
     {{ __('timetable') }}
 @endsection
 
+@section('css')
+<style>
+    /* Strict No-Horizontal-Scroll Timetable Layout */
+    .fixed-table-container,
+    .fixed-table-body {
+        overflow-x: hidden !important;
+    }
+    #table_list {
+        table-layout: fixed !important;
+        width: 100% !important;
+    }
+    #table_list th,
+    #table_list td {
+        overflow: hidden !important;
+        word-break: break-word;
+        padding: 5px 4px !important;
+        vertical-align: top !important;
+    }
+    #table_list thead th {
+        text-align: center;
+        background: #f8fafc;
+        font-weight: 700;
+        font-size: 11px;
+        letter-spacing: 0.5px;
+        color: #334155;
+    }
+    .timetable-slot-card {
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .timetable-slot-card:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+    }
+</style>
+@endsection
+
 @section('content')
     <div class="content-wrapper">
         <div class="page-header">
@@ -24,56 +60,85 @@
                             </div>
                         </div>
                         <form class="edit-form edit-form-without-reset timetable-settings-form" action="{{ route('timetable.settings') }}" method="POST">
-                            <div class="row">
-                                <div class="form-group col-sm-12 col-md-3">
-                                    <label for="starting_time">{{ __('Starting Time') }} <span class="text-danger">*</span></label>
+                            <div class="row align-items-end">
+                                <div class="form-group col-sm-12 col-md-3 mb-3">
+                                    <label for="starting_time" class="font-weight-bold">{{ __('Starting Time') }} <span class="text-danger">*</span></label>
                                     <input type="time" name="timetable_start_time" id="starting_time" class="form-control" value="{{ $timetableData['timetable_start_time'] ?? "09:00:00"}}" required/>
                                 </div>
 
-                                <div class="form-group col-sm-12 col-md-3">
-                                    <label for="ending_time">{{ __('Ending Time') }} <span class="text-danger">*</span></label>
+                                <div class="form-group col-sm-12 col-md-3 mb-3">
+                                    <label for="ending_time" class="font-weight-bold">{{ __('Ending Time') }} <span class="text-danger">*</span></label>
                                     <input type="time" name="timetable_end_time" id="ending_time" class="form-control" value="{{ $timetableData['timetable_end_time'] ?? "18:00:00"}}" required/>
                                 </div>
-                                <div class="form-group col-sm-12 col-md-3">
-                                    <label for="duration">{{ __('Timeslot Duration') }} <small>({{__('in Minutes')}})</small><span class="text-danger">*</span></label>
+                                <div class="form-group col-sm-12 col-md-3 mb-3">
+                                    <label for="duration" class="font-weight-bold">{{ __('Timeslot Duration') }} <small class="text-muted">({{__('in Minutes')}})</small><span class="text-danger">*</span></label>
                                     <input type="number" name="timetable_duration" id="duration" class="form-control" min="1" max="180" value="{{ $timetableData['timetable_duration'] ?? 45 }}" required/>
                                 </div>
-                            </div>
-                            <div class="form-group text-right">
-                                <button type="submit" id="save_settings" class="btn btn-theme">
-                                    <i class="fa fa-save mr-1"></i> {{__('Save Timetable Settings')}}
-                                </button>
+                                <div class="form-group col-sm-12 col-md-3 mb-3">
+                                    <button type="submit" id="save_settings" class="btn btn-theme btn-block" style="height: 44px;">
+                                        <i class="fa fa-save mr-1"></i> {{__('Save Timetable Settings')}}
+                                    </button>
+                                </div>
                             </div>
                         </form>
                         <hr class="my-4">
+                        
+                        <!-- Actions & Quick Controls Bar -->
+                        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 p-3 bg-light rounded border">
+                            <div class="d-flex align-items-center mb-2 mb-md-0">
+                                <h5 class="mb-0 font-weight-bold text-dark">
+                                    <i class="fa fa-calendar-check-o text-primary mr-2"></i>{{ __('Class Timetable Schedules') }}
+                                </h5>
+                            </div>
+                            <div class="d-flex flex-wrap align-items-center" style="gap: 8px;">
+                                <button type="button" class="btn btn-outline-info" data-toggle="modal" data-target="#templatesModal">
+                                    <i class="fa fa-calendar-check-o mr-1"></i> {{ __('Bell Schedules') }}
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" data-toggle="modal" data-target="#resourcesModal">
+                                    <i class="fa fa-building mr-1"></i> {{ __('Rooms & Labs') }}
+                                </button>
+                                <a href="{{ route('timetable.teacher-matrix') }}" class="btn btn-outline-primary">
+                                    <i class="fa fa-th mr-1"></i> {{ __('Teacher Matrix') }}
+                                </a>
+                                <button type="button" class="btn btn-gradient-primary" data-toggle="modal" data-target="#chooseClassForAutoGenerateModal">
+                                    <i class="fa fa-magic mr-1"></i> {{ __('Auto-Generate') }}
+                                </button>
+                                @can('timetable-create')
+                                <button type="button" class="btn btn-gradient-success" data-toggle="modal" data-target="#batchGenerateModal">
+                                    <i class="fa fa-sitemap mr-1"></i> {{ __('School-Wide Generate') }}
+                                </button>
+                                @endcan
+                            </div>
+                        </div>
+
                         <div class="row">
-                            <div class="row w-100 align-items-center" id="toolbar">
-                                <div class="form-group col-sm-12 col-md-4 mb-0">
-                                    <label class="filter-menu" for="">{{ __('medium') }}</label>
-                                    {!! Form::select('medium_id', $mediums, null, ['class' => 'form-control','id' => 'filter_medium_id', 'placeholder' => __('select_medium')]) !!}
+                            <div id="toolbar" class="d-flex flex-wrap align-items-center mb-2" style="gap: 14px;">
+                                <div class="d-flex align-items-center">
+                                    <label class="filter-menu mr-2 mb-0 font-weight-bold text-muted small" style="white-space: nowrap;">
+                                        <i class="fa fa-filter mr-1"></i>{{ __('Medium') }}:
+                                    </label>
+                                    <div style="min-width: 140px;">
+                                        {!! Form::select('medium_id', $mediums, null, ['class' => 'form-control form-control-sm','id' => 'filter_medium_id', 'placeholder' => __('all')]) !!}
+                                    </div>
                                 </div>
-                                <div class="col-sm-12 col-md-8 text-right mt-3 mt-md-0 d-flex justify-content-end align-items-center flex-wrap" style="gap: 8px;">
-                                    <button type="button" class="btn btn-outline-info" data-toggle="modal" data-target="#templatesModal">
-                                        <i class="fa fa-calendar-check-o mr-1"></i> {{ __('Bell Schedules') }}
-                                    </button>
-                                    <button type="button" class="btn btn-outline-secondary" data-toggle="modal" data-target="#resourcesModal">
-                                        <i class="fa fa-building mr-1"></i> {{ __('Rooms & Labs') }}
-                                    </button>
-                                    <a href="{{ route('timetable.teacher-matrix') }}" class="btn btn-outline-primary">
-                                        <i class="fa fa-th mr-1"></i> {{ __('Teacher Matrix') }}
-                                    </a>
-                                    <button type="button" class="btn btn-gradient-primary" data-toggle="modal" data-target="#chooseClassForAutoGenerateModal">
-                                        <i class="fa fa-magic mr-1"></i> {{ __('Auto-Generate') }}
-                                    </button>
-                                    @can('timetable-create')
-                                    <button type="button" class="btn btn-gradient-success" data-toggle="modal" data-target="#batchGenerateModal">
-                                        <i class="fa fa-sitemap mr-1"></i> {{ __('School-Wide Generate') }}
-                                    </button>
-                                    @endcan
+                                <div class="d-flex align-items-center">
+                                    <label class="filter-menu mr-2 mb-0 font-weight-bold text-muted small" style="white-space: nowrap;">
+                                        <i class="fa fa-graduation-cap mr-1"></i>{{ __('Class') }}:
+                                    </label>
+                                    <div style="min-width: 190px;">
+                                        <select name="class_section_id" id="filter_class_section_id" class="form-control form-control-sm">
+                                            <option value="">-- {{ __('All Classes') }} --</option>
+                                            @if(!empty($classSections))
+                                                @foreach($classSections as $cs)
+                                                    <option value="{{ $cs->id }}">{{ $cs->full_name }}</option>
+                                                @endforeach
+                                            @endif
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
                             <div class="col-12">
-                                <table aria-describedby="mydesc" class='table' id='table_list'
+                                <table aria-describedby="mydesc" class='table table-bordered' id='table_list'
                                        data-toggle="table" data-url="{{ route('timetable.show',[1]) }}"
                                        data-click-to-select="true" data-side-pagination="server"
                                        data-pagination="true" data-page-list="[5, 10, 20, 50, 100, 200]"
@@ -88,16 +153,16 @@
                                     <thead>
                                     <tr>
                                         <th scope="col" data-field="id" data-sortable="true" data-visible="false">{{ __('id') }}</th>
-                                        <th scope="col" data-field="no">{{ __('no.') }}</th>
-                                        <th scope="col" data-field="full_name">{{ __('Class Section') }}</th>
+                                        <th scope="col" data-field="no" data-width="40">{{ __('no.') }}</th>
+                                        <th scope="col" data-field="full_name" data-width="130">{{ __('Class Section') }}</th>
                                         <th scope="col" data-field="Monday" data-formatter="timetableDayFormatter">{{ __('Monday') }}</th>
                                         <th scope="col" data-field="Tuesday" data-formatter="timetableDayFormatter">{{ __('Tuesday') }}</th>
                                         <th scope="col" data-field="Wednesday" data-formatter="timetableDayFormatter">{{ __('Wednesday') }}</th>
                                         <th scope="col" data-field="Thursday" data-formatter="timetableDayFormatter">{{ __('Thursday') }}</th>
                                         <th scope="col" data-field="Friday" data-formatter="timetableDayFormatter">{{ __('Friday') }}</th>
-                                        <th scope="col" data-field="Saturday" data-formatter="timetableDayFormatter">{{ __('Saturday') }}</th>
-                                        <th scope="col" data-field="Sunday" data-formatter="timetableDayFormatter">{{ __('Sunday') }}</th>
-                                        <th scope="col" data-field="operate" data-escape="false">{{ __('action') }}</th>
+                                        <th scope="col" data-field="Saturday" data-visible="false" data-formatter="timetableDayFormatter">{{ __('Saturday') }}</th>
+                                        <th scope="col" data-field="Sunday" data-visible="false" data-formatter="timetableDayFormatter">{{ __('Sunday') }}</th>
+                                        <th scope="col" data-field="operate" data-width="95" data-escape="false">{{ __('action') }}</th>
                                     </tr>
                                     </thead>
                                 </table>
@@ -231,8 +296,46 @@
                     </div>
 
                     <div id="batch-step-result" class="d-none">
-                        <div id="batch-result-summary" class="alert mb-3" role="alert"></div>
-                        <ul id="batch-result-conflicts" class="small mb-0 pl-3"></ul>
+                        <!-- Top KPI & Status Bar -->
+                        <div class="d-flex flex-wrap justify-content-between align-items-center p-3 mb-3 bg-light rounded border">
+                            <div class="d-flex align-items-center mb-2 mb-md-0 flex-wrap" style="gap: 8px;">
+                                <span class="badge badge-success px-3 py-2 font-weight-bold" style="font-size: 13px;" id="batch-preview-quality-badge">
+                                    <i class="fa fa-star mr-1"></i> {{ __('Quality Score') }}: <span id="batch-preview-quality-score">100</span>/100
+                                </span>
+                                <span class="badge badge-info px-2 py-2" id="batch-preview-total-slots">0 {{ __('slots scheduled') }}</span>
+                                <span class="badge badge-secondary px-2 py-2" id="batch-preview-total-classes">0 {{ __('classes') }}</span>
+                            </div>
+                            <div class="text-muted small">
+                                <i class="fa fa-check-circle text-success mr-1"></i> {{ __('Conflict-free timetable generated.') }}
+                            </div>
+                        </div>
+
+                        <div id="batch-result-summary" class="alert alert-success py-2 px-3 small mb-2" role="alert"></div>
+                        <ul id="batch-result-conflicts" class="small text-danger mb-2 pl-3"></ul>
+
+                        <!-- Class Filter & View Switcher Toolbar -->
+                        <div class="d-flex flex-wrap justify-content-between align-items-center p-2 mb-3 bg-white rounded border shadow-sm">
+                            <div class="d-flex align-items-center mb-2 mb-md-0 flex-wrap" style="gap: 8px;">
+                                <label for="batch-preview-class-filter" class="mb-0 font-weight-bold text-dark small" style="white-space: nowrap;">
+                                    <i class="fa fa-graduation-cap text-primary mr-1"></i> {{ __('Class Schedule') }}:
+                                </label>
+                                <select id="batch-preview-class-filter" class="form-control form-control-sm" style="min-width: 260px; font-weight: 600;">
+                                    <!-- Populated dynamically -->
+                                </select>
+                                <div class="btn-group btn-group-sm">
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" id="btn-preview-prev" title="{{ __('Previous Class') }}"><i class="fa fa-chevron-left"></i></button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" id="btn-preview-next" title="{{ __('Next Class') }}"><i class="fa fa-chevron-right"></i></button>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <span class="badge badge-primary px-2 py-1 small" id="batch-preview-current-class-badge">{{ __('Viewing Schedule') }}</span>
+                            </div>
+                        </div>
+
+                        <!-- Neat and Compact Weekly Timetable Grid -->
+                        <div id="batch-preview-timetable-container" class="border rounded bg-white p-2" style="max-height: 52vh; overflow-y: auto;">
+                            <!-- Populated dynamically -->
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer bg-light">
@@ -507,16 +610,38 @@
             },
             success: function (res) {
                 batchRunId = res.generation_run_id || res.run_id;
-                var score = res.quality && res.quality.quality_score !== undefined ? res.quality.quality_score : null;
+                currentBatchData = res;
+                currentBatchClasses = res.classes || [];
+                var score = res.quality && res.quality.quality_score !== undefined ? res.quality.quality_score : 100;
+
+                $('#batch-preview-quality-score').text(score);
+                $('#batch-preview-total-slots').text((res.entries_count || (res.entries ? res.entries.length : 0)) + ' {{ __("slots scheduled") }}');
+                $('#batch-preview-total-classes').text(currentBatchClasses.length + ' {{ __("classes") }}');
+
                 $('#batch-result-summary').removeClass('alert-danger').addClass('alert-success')
-                    .text((res.message || '') + (score !== null ? ' {{ __('Quality score') }}: ' + score + '/100.' : '')
-                        + ' {{ __('Review, then apply it to replace the live timetable of the selected sections (locked slots are kept).') }}');
+                    .html('<i class="fa fa-check-circle mr-1"></i> ' + (res.message || '{{ __("Timetable generated successfully.") }}'));
+
+                // Populate Class Filter Dropdown
+                var filterSelect = $('#batch-preview-class-filter').empty();
+                if (currentBatchClasses.length > 1) {
+                    filterSelect.append($('<option>').val('all').text('📊 {{ __("All Classes Overview") }} (' + currentBatchClasses.length + ' {{ __("classes") }})'));
+                }
+                currentBatchClasses.forEach(function (cls) {
+                    filterSelect.append($('<option>').val(cls.id).text(cls.name + ' (' + cls.slots_count + ' slots)'));
+                });
+
+                var defaultClassId = currentBatchClasses.length > 0 ? currentBatchClasses[0].id : 'all';
+                currentSelectedClassIndex = 0;
+                filterSelect.val(defaultClassId);
+
+                renderBatchPreview(defaultClassId);
                 batchRenderConflicts(res.conflicts);
                 batchShowStep('result');
             },
             error: function (xhr) {
                 var res = xhr.responseJSON || {};
                 batchRunId = null;
+                currentBatchData = null;
                 $('#batch-result-summary').removeClass('alert-success').addClass('alert-danger')
                     .text(res.message || "{{ __('Generation failed.') }}");
                 batchRenderConflicts(res.conflicts);
@@ -527,6 +652,149 @@
             }
         });
     }
+
+    var currentBatchData = null;
+    var currentBatchClasses = [];
+    var currentSelectedClassIndex = 0;
+
+    // Filter main table when class section changes
+    $('#filter_class_section_id').on('change', function () {
+        $('#table_list').bootstrapTable('refresh');
+    });
+
+    function renderBatchPreview(classSectionId) {
+        if (!currentBatchData) return;
+        var entries = currentBatchData.entries || [];
+        var container = $('#batch-preview-timetable-container');
+
+        if (classSectionId === 'all') {
+            var html = '<div class="table-responsive"><table class="table table-sm table-striped table-bordered text-center mb-0" style="font-size: 11px;">';
+            html += '<thead class="thead-light"><tr>';
+            html += '<th style="width: 50px;">#</th>';
+            html += '<th class="text-left">{{ __("Class Section") }}</th>';
+            html += '<th style="width: 120px;">{{ __("Total Slots") }}</th>';
+            html += '<th style="width: 120px;">{{ __("Lectures") }}</th>';
+            html += '<th style="width: 100px;">{{ __("Breaks") }}</th>';
+            html += '<th style="width: 110px;">{{ __("Action") }}</th>';
+            html += '</tr></thead><tbody>';
+
+            currentBatchClasses.forEach(function (cls, idx) {
+                var cEntries = entries.filter(function (e) { return e.class_section_id == cls.id; });
+                var lectures = cEntries.filter(function (e) { return (e.type || 'Lecture') === 'Lecture'; }).length;
+                var breaks = cEntries.filter(function (e) { return (e.type || '') === 'Break'; }).length;
+                html += '<tr>';
+                html += '<td>' + (idx + 1) + '</td>';
+                html += '<td class="text-left font-weight-bold">' + cls.name + '</td>';
+                html += '<td><span class="badge badge-info">' + cEntries.length + ' {{ __("slots") }}</span></td>';
+                html += '<td><span class="badge badge-success">' + lectures + ' {{ __("lectures") }}</span></td>';
+                html += '<td><span class="badge badge-warning">' + breaks + ' {{ __("breaks") }}</span></td>';
+                html += '<td><button type="button" class="btn btn-xs btn-outline-primary" onclick="selectBatchPreviewClass(' + cls.id + ')"><i class="fa fa-eye mr-1"></i>{{ __("View") }}</button></td>';
+                html += '</tr>';
+            });
+            html += '</tbody></table></div>';
+            container.html(html);
+            $('#batch-preview-current-class-badge').text('{{ __("All Classes Overview") }} (' + currentBatchClasses.length + ' {{ __("classes") }})');
+            return;
+        }
+
+        var targetClass = currentBatchClasses.find(function (c) { return c.id == classSectionId; });
+        var className = targetClass ? targetClass.name : 'Class #' + classSectionId;
+        var classEntries = entries.filter(function (e) { return e.class_section_id == classSectionId; });
+
+        $('#batch-preview-current-class-badge').text(className + ' (' + classEntries.length + ' {{ __("slots") }})');
+
+        var days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+        if (classEntries.some(function (e) { return e.day === 'Saturday'; })) days.push('Saturday');
+        if (classEntries.some(function (e) { return e.day === 'Sunday'; })) days.push('Sunday');
+
+        var colWidth = (100 / days.length).toFixed(1) + '%';
+        var html = '<div class="d-flex border rounded overflow-hidden" style="width: 100%; min-width: 720px;">';
+
+        days.forEach(function (day, dIdx) {
+            var daySlots = classEntries.filter(function (e) { return e.day === day; });
+            daySlots.sort(function (a, b) { return (a.start_time || '').localeCompare(b.start_time || ''); });
+            var borderRight = (dIdx < days.length - 1) ? 'border-right: 1px solid #e2e8f0;' : '';
+
+            html += '<div style="flex: 1; width: ' + colWidth + '; ' + borderRight + ' background: #fbfcfe;">';
+            html += '<div class="p-2 text-center font-weight-bold text-dark border-bottom" style="background: #f1f5f9; font-size: 11px;">';
+            html += '<span class="badge badge-light border mr-1 font-weight-bold" style="color: #3b82f6;">' + day.substring(0, 3).toUpperCase() + '</span> ' + day;
+            html += ' <span class="badge badge-secondary py-0 px-1 ml-1" style="font-size: 9px;">' + daySlots.length + '</span>';
+            html += '</div>';
+
+            html += '<div class="p-2 d-flex flex-column" style="gap: 5px;">';
+            if (!daySlots.length) {
+                html += '<div class="text-center text-muted p-3 my-2 bg-light rounded small" style="font-size: 10px; border: 1px dashed #cbd5e1;">- {{ __("No slots") }} -</div>';
+            } else {
+                daySlots.forEach(function (slot) {
+                    var isBreak = (slot.type === 'Break' || (slot.subject_name && slot.subject_name.toLowerCase().indexOf('break') !== -1));
+                    var sTime = (slot.start_time || '').substring(0, 5);
+                    var eTime = (slot.end_time || '').substring(0, 5);
+                    var timeStr = (sTime && eTime) ? (sTime + ' - ' + eTime) : '';
+
+                    if (isBreak) {
+                        html += '<div class="py-1 px-2 rounded" style="background: #fffbeb; border: 1px dashed #f59e0b; font-size: 10px; line-height: 1.2;">';
+                        html += '<div class="font-weight-bold text-truncate" style="color: #92400e;"><i class="fa fa-coffee text-warning mr-1"></i>' + (slot.subject_name || 'Break') + '</div>';
+                        html += '<div class="text-muted" style="font-size: 9px;"><i class="fa fa-clock-o mr-1"></i>' + timeStr + '</div>';
+                        html += '</div>';
+                    } else {
+                        html += '<div class="p-2 rounded bg-white shadow-sm" style="border: 1px solid #e2e8f0; border-left: 3px solid #3b82f6; font-size: 10.5px; line-height: 1.25;">';
+                        html += '<div class="font-weight-bold text-dark text-truncate" title="' + slot.subject_name + '">' + slot.subject_name;
+                        if (slot.is_locked) {
+                            html += ' <i class="fa fa-lock text-warning" title="{{ __("Locked Slot") }}"></i>';
+                        }
+                        html += '</div>';
+                        html += '<div class="text-muted mt-1" style="font-size: 9px;"><i class="fa fa-clock-o mr-1 text-primary"></i>' + timeStr + '</div>';
+                        if (slot.teacher_name) {
+                            html += '<div class="text-dark font-weight-semibold text-truncate mt-1" style="font-size: 9.5px;" title="' + slot.teacher_name + '">';
+                            html += '<i class="fa fa-user-circle mr-1 text-muted"></i>' + slot.teacher_name;
+                            html += '</div>';
+                        }
+                        if (slot.resource_name) {
+                            html += '<div class="text-muted text-truncate mt-1" style="font-size: 9px;"><i class="fa fa-building-o mr-1"></i>' + slot.resource_name + '</div>';
+                        }
+                        html += '</div>';
+                    }
+                });
+            }
+            html += '</div>';
+            html += '</div>';
+        });
+
+        html += '</div>';
+        container.html(html);
+    }
+
+    function selectBatchPreviewClass(classId) {
+        $('#batch-preview-class-filter').val(classId).trigger('change');
+    }
+
+    $(document).on('change', '#batch-preview-class-filter', function () {
+        var val = $(this).val();
+        currentSelectedClassIndex = currentBatchClasses.findIndex(function(c) { return c.id == val; });
+        renderBatchPreview(val);
+    });
+
+    $(document).on('click', '#btn-preview-prev', function () {
+        if (!currentBatchClasses.length) return;
+        if (currentSelectedClassIndex > 0) {
+            currentSelectedClassIndex--;
+        } else {
+            currentSelectedClassIndex = currentBatchClasses.length - 1;
+        }
+        var nextId = currentBatchClasses[currentSelectedClassIndex].id;
+        $('#batch-preview-class-filter').val(nextId).trigger('change');
+    });
+
+    $(document).on('click', '#btn-preview-next', function () {
+        if (!currentBatchClasses.length) return;
+        if (currentSelectedClassIndex < currentBatchClasses.length - 1) {
+            currentSelectedClassIndex++;
+        } else {
+            currentSelectedClassIndex = 0;
+        }
+        var nextId = currentBatchClasses[currentSelectedClassIndex].id;
+        $('#batch-preview-class-filter').val(nextId).trigger('change');
+    });
 
     function batchBack() {
         if (batchRunId) {

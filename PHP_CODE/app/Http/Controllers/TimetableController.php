@@ -7,6 +7,7 @@ use App\Models\SubjectTeacher;
 use App\Models\User;
 use App\Models\ClassSubject;
 use App\Models\ClassSection;
+use App\Models\ClassTeacher;
 use App\Models\TimetableTemplate;
 use App\Models\TimetablePeriod;
 use App\Models\TimetableResource;
@@ -261,7 +262,20 @@ class TimetableController extends Controller
             $timetableSettingsData['timetable_duration'] = '00:45:00';
         }
 
-        $allTeachers = $this->user->builder()->role('Teacher')->get(['id', 'first_name', 'last_name']);
+        $allTeachers = $this->user->builder()->role('Teacher')
+            ->with([
+                'subject_teachers.subject:id,name,type',
+                'class_teacher.class_section',
+                'staff:id,user_id,qualification'
+            ])
+            ->get(['id', 'first_name', 'last_name']);
+
+        $classTeacherRecord = ClassTeacher::where('class_section_id', $classSectionID)
+            ->with('teacher:id,first_name,last_name')
+            ->first();
+        $classTeacherId = $classTeacherRecord ? $classTeacherRecord->teacher_id : null;
+        $classTeacherName = $classTeacherRecord && $classTeacherRecord->teacher ? ($classTeacherRecord->teacher->first_name . ' ' . $classTeacherRecord->teacher->last_name) : null;
+
         $allClassSubjects = ClassSubject::where('class_id', $classSection->class_id)
             ->with(['subject:id,name,type,bg_color'])
             ->whereNull('deleted_at')
@@ -281,6 +295,9 @@ class TimetableController extends Controller
             'timetableSettingsData',
             'currentSemester',
             'allTeachers',
+            'classTeacherRecord',
+            'classTeacherId',
+            'classTeacherName',
             'allClassSubjects',
             'templates',
             'resources',
@@ -375,16 +392,16 @@ class TimetableController extends Controller
             $sql = $sql->where('medium_id', $request->medium_id);
         }
 
+        if (!empty($request->class_section_id)) {
+            $sql = $sql->where('id', $request->class_section_id);
+        }
+
         if (!empty($request->class_id)) {
             $sql = $sql->where('class_id', $request->class_id);
         }
 
         if (!empty($request->section_id)) {
             $sql = $sql->where('section_id', $request->section_id);
-        }
-
-        if (!empty($request->medium_id)) {
-            $sql = $sql->where('medium_id', $request->medium_id);
         }
 
         if (!empty($request->teacher_id)) {
@@ -422,9 +439,11 @@ class TimetableController extends Controller
         $rows = array();
         $no = 1;
         foreach ($res as $row) {
-            $operate = '<a href="' . route('timetable.edit', $row->id) . '?autogen=1" class="btn btn-xs btn-gradient-primary mr-1" title="' . trans("Auto-Generate Timetable") . '"><i class="fa fa-magic"></i> ' . trans("Generate") . '</a>';
-            $operate .= BootstrapTableService::editButton(route('timetable.edit', $row->id), false);
-            $operate .= BootstrapTableService::button('fa fa-trash', '#', ['delete-class-timetable', 'btn-gradient-danger'], ['title' => trans("Delete Class Timetable"), 'data-id' => $row->id]);
+            $operate = '<div class="d-inline-flex align-items-center" style="gap: 4px; white-space: nowrap;">'
+                . '<a href="' . route('timetable.edit', $row->id) . '?autogen=1" class="btn btn-xs btn-gradient-primary" title="' . trans("Auto-Generate Timetable") . '"><i class="fa fa-magic mr-1"></i>' . trans("Generate") . '</a>'
+                . BootstrapTableService::editButton(route('timetable.edit', $row->id), false)
+                . BootstrapTableService::button('fa fa-trash', '#', ['delete-class-timetable', 'btn-gradient-danger'], ['title' => trans("Delete Class Timetable"), 'data-id' => $row->id])
+                . '</div>';
             $tempRow = $row->toArray();
             $timetable = $row->timetable->groupBy('day')->sortBy('start_time');
             $tempRow['no'] = $no++;

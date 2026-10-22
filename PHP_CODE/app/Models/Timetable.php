@@ -161,7 +161,12 @@ class Timetable extends Model {
             }
             return trans("Break");
         }
-        return $this->note;
+
+        if (!empty($this->note) && !str_starts_with(trim($this->note), '{')) {
+            return $this->note;
+        }
+
+        return trans("Lecture");
     }
 
     public function scopeCurrentSemesterData($query){

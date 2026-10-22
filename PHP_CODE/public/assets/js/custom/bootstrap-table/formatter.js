@@ -1,16 +1,16 @@
 // Bootstrap Custom Column Formatters
 // noinspection JSUnusedGlobalSymbols
 
-// Ensure bootstrap-table never escapes operate/action HTML columns even when data-escape="true" is set on <table>
+// Ensure bootstrap-table never escapes operate/action/assigned_classes_subjects HTML columns even when data-escape="true" is set on <table>
 (function ($) {
     if ($ && $.fn && $.fn.bootstrapTable && $.fn.bootstrapTable.utils) {
         var originalGetItemField = $.fn.bootstrapTable.utils.getItemField;
         $.fn.bootstrapTable.utils.getItemField = function (item, field, escape) {
-            if (field === 'operate' || field === 'action' || field === 'actions') {
+            if (field === 'operate' || field === 'action' || field === 'actions' || field === 'assigned_classes_subjects') {
                 escape = false;
             }
             var val = originalGetItemField.call(this, item, field, escape);
-            if ((field === 'operate' || field === 'action' || field === 'actions') && typeof val === 'string' && val.indexOf('&lt;') !== -1) {
+            if ((field === 'operate' || field === 'action' || field === 'actions' || field === 'assigned_classes_subjects') && typeof val === 'string' && val.indexOf('&lt;') !== -1) {
                 var txt = document.createElement('textarea');
                 txt.innerHTML = val;
                 val = txt.value;
@@ -20,12 +20,17 @@
     }
 
     $(document).on('post-body.bs.table', function (e, data) {
-        $(this).find('td[data-field="operate"], td.operate-column, td:last-child').each(function () {
+        $(this).find('td[data-field="operate"], td[data-field="assigned_classes_subjects"], td.operate-column, td:last-child').each(function () {
             var content = $(this).html();
-            if (content && typeof content === 'string' && content.indexOf('&lt;a ') !== -1) {
+            if (content && typeof content === 'string' && (content.indexOf('&lt;') !== -1 || content.indexOf('&amp;lt;') !== -1)) {
                 var txt = document.createElement('textarea');
                 txt.innerHTML = content;
-                $(this).html(txt.value);
+                var unescaped = txt.value;
+                if (unescaped.indexOf('&lt;') !== -1) {
+                    txt.innerHTML = unescaped;
+                    unescaped = txt.value;
+                }
+                $(this).html(unescaped);
             }
         });
     });
@@ -335,6 +340,10 @@ function TeacherNameFormatter(value, row) {
     let html = '';
     html = '<div class="d-flex align-items-center"> ' + imageFormatter(row.image) + ' <div class="ms-3"> <h6 class="mb-0">' + row.full_name + '</h6> <small class="text-muted"> ' + row.email + ' </small> </div> </div>';
     return html;
+}
+
+function assignedClassesSubjectsFormatter(value, row) {
+    return value || '<span class="text-muted small">-</span>';
 }
 
 function GuardianNameFormatter(value, row) {
@@ -775,20 +784,67 @@ function addStaffIdInputAttendance(value, row) {
 }
 
 function timetableDayFormatter(value) {
-    let html = "<ol>";
+    if (!value || !value.length) return '<span class="text-muted small">-</span>';
+    let html = '<div class="d-flex flex-column" style="gap: 3px;">';
     value.forEach(function (data) {
-        html += "<li><b>" + data.title + " : </b><small>" + data.start_time + " - " + data.end_time + "</small></li>";
-    })
-    html += "</ol>";
+        let isBreak = (data.type === 'Break' || (data.title && data.title.toLowerCase().indexOf('break') !== -1));
+        let startTime = (data.start_time || '').replace(/:00$/, '');
+        let endTime = (data.end_time || '').replace(/:00$/, '');
+        let timeRange = (startTime && endTime) ? (startTime + ' - ' + endTime) : '';
+        let title = data.title || (isBreak ? 'Break' : 'Lecture');
+        if (typeof title === 'string' && title.trim().startsWith('{')) {
+            title = isBreak ? 'Break' : (data.subject ? data.subject.name : 'Lecture');
+        }
+        let teacherName = data.primary_teacher_name || (data.subject_teacher && data.subject_teacher.teacher ? (data.subject_teacher.teacher.first_name + ' ' + (data.subject_teacher.teacher.last_name || '')) : '');
+        let isLocked = data.is_locked ? ' <i class="fa fa-lock text-warning" title="Locked Slot"></i>' : '';
+        let subjectColor = (data.subject && data.subject.bg_color) ? data.subject.bg_color : '#3b82f6';
+
+        if (isBreak) {
+            html += '<div class="py-1 px-2 rounded" style="background: #fffbeb; border: 1px solid #fef3c7; border-left: 3px solid #f59e0b; font-size: 10px; line-height: 1.2;">' +
+                '<div class="font-weight-bold text-truncate" style="color: #92400e;"><i class="fa fa-coffee text-warning mr-1"></i>' + title + '</div>' +
+                '<div class="text-muted" style="font-size: 9px;"><i class="fa fa-clock-o mr-1"></i>' + timeRange + '</div>' +
+            '</div>';
+        } else {
+            html += '<div class="py-1 px-2 rounded bg-white shadow-sm timetable-slot-card" style="border: 1px solid #e2e8f0; border-left: 3px solid ' + subjectColor + '; font-size: 10px; line-height: 1.2;">' +
+                '<div class="font-weight-bold text-dark text-truncate" title="' + title + '">' + title + isLocked + '</div>' +
+                '<div class="d-flex justify-content-between align-items-center mt-1 text-muted" style="font-size: 9px;">' +
+                    '<span><i class="fa fa-clock-o mr-1"></i>' + timeRange + '</span>' +
+                    (teacherName ? '<span class="text-truncate ml-1 font-weight-bold" style="max-width: 55px; color: #475569;" title="' + teacherName + '"><i class="fa fa-user-circle mr-1 text-primary"></i>' + teacherName + '</span>' : '') +
+                '</div>' +
+            '</div>';
+        }
+    });
+    html += '</div>';
     return html;
 }
 
 function teacherTimetableDayFormatter(value) {
-    let html = "<ol>";
+    if (!value || !value.length) return '<span class="text-muted small">-</span>';
+    let html = '<div class="d-flex flex-column" style="gap: 3px;">';
     value.forEach(function (data) {
-        html += "<li><b>" + data.class_section.name + " - " + data.title + " : </b><small>" + data.start_time + " - " + data.end_time + "</small></li>";
-    })
-    html += "</ol>";
+        let isBreak = (data.type === 'Break' || (data.title && data.title.toLowerCase().indexOf('break') !== -1));
+        let startTime = (data.start_time || '').replace(/:00$/, '');
+        let endTime = (data.end_time || '').replace(/:00$/, '');
+        let timeRange = (startTime && endTime) ? (startTime + ' - ' + endTime) : '';
+        let className = (data.class_section && data.class_section.name) ? data.class_section.name : '';
+        let title = data.title || (isBreak ? 'Break' : 'Lecture');
+
+        if (isBreak) {
+            html += '<div class="py-1 px-2 rounded" style="background: #fffbeb; border: 1px solid #fef3c7; border-left: 3px solid #f59e0b; font-size: 10px; line-height: 1.2;">' +
+                '<div class="font-weight-bold" style="color: #92400e;"><i class="fa fa-coffee text-warning mr-1"></i>' + title + '</div>' +
+                '<div class="text-muted" style="font-size: 9px;"><i class="fa fa-clock-o mr-1"></i>' + timeRange + '</div>' +
+            '</div>';
+        } else {
+            html += '<div class="p-1 px-2 rounded" style="background: #ffffff; border: 1px solid #e2e8f0; border-left: 3px solid #6366f1; font-size: 11px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">' +
+                '<div class="font-weight-bold text-dark text-truncate" title="' + (className ? className + ' - ' : '') + title + '">' +
+                    (className ? '<span class="badge badge-light border text-primary py-0 px-1 mr-1" style="font-size: 9px;">' + className + '</span>' : '') +
+                    title +
+                '</div>' +
+                '<div class="text-muted mt-1" style="font-size: 10px;"><i class="fa fa-clock-o mr-1"></i>' + timeRange + '</div>' +
+            '</div>';
+        }
+    });
+    html += '</div>';
     return html;
 }
 

@@ -540,6 +540,32 @@
             </div>
             <div class="modal-body p-4">
                 <form id="teacherAssignmentForm">
+                    <!-- Smart Teacher Matching Toolbar -->
+                    <div class="d-flex flex-wrap align-items-center justify-content-between p-2 mb-3 bg-light rounded border">
+                        <div class="d-flex align-items-center gap-2">
+                            <button type="button" class="btn btn-sm btn-primary font-weight-bold" onclick="smartAutoAssignTeachers()">
+                                <i class="fa fa-magic mr-1"></i> {{ __('⚡ Smart Auto-Assign Teachers') }}
+                            </button>
+                            <div class="custom-control custom-switch ml-3 d-inline-block">
+                                <input type="checkbox" class="custom-control-input filter-specialists-toggle" id="filterSpecialistsToggleSetup" checked onchange="toggleSpecialistFilter(this.checked)">
+                                <label class="custom-control-label small font-weight-bold text-dark" for="filterSpecialistsToggleSetup">
+                                    {{ __('Filter: Only Subject Specialists') }}
+                                </label>
+                            </div>
+                        </div>
+                        <div>
+                            @if($classTeacherName)
+                                <span class="badge badge-warning px-2 py-1 font-weight-bold text-dark" style="border: 1px solid #F59E0B; font-size: 11px;">
+                                    ⭐ {{ __('Class Teacher:') }} {{ $classTeacherName }}
+                                </span>
+                            @else
+                                <span class="badge badge-light border text-muted" style="font-size: 11px;">
+                                    {{ __('No Class Teacher designated') }}
+                                </span>
+                            @endif
+                        </div>
+                    </div>
+
                     <div class="alert alert-info py-2 px-3 small mb-3">
                         <i class="fa fa-info-circle mr-1"></i>
                         {{ __('Saving here directly updates the official Subject-Teacher records in the system. The Timetable Auto-Generator will use these assignments.') }}
@@ -561,7 +587,7 @@
                                         $existingSt = $subjectTeachers->firstWhere('subject_id', $cs->subject_id);
                                         $primaryTeacherId = $existingSt ? $existingSt->teacher_id : null;
                                     @endphp
-                                    <tr class="subject-setup-row" data-subject-id="{{ $cs->subject_id }}">
+                                    <tr class="subject-setup-row" data-subject-id="{{ $cs->subject_id }}" data-subject-name="{{ $cs->subject->name }}">
                                         <td>
                                             <div class="d-flex align-items-center">
                                                 <span class="d-inline-block mr-2" style="width: 12px; height: 12px; border-radius: 3px; background: {{ $cs->subject->bg_color ?? '#3B82F6' }};"></span>
@@ -570,7 +596,7 @@
                                             <small class="text-muted">({{ $cs->subject->type }})</small>
                                         </td>
                                         <td>
-                                            <select class="form-control select-primary-teacher select2-basic" name="primary_teacher_{{ $cs->subject_id }}" required>
+                                            <select class="form-control select-primary-teacher" name="primary_teacher_{{ $cs->subject_id }}" data-subject-id="{{ $cs->subject_id }}" data-subject-name="{{ $cs->subject->name }}" data-selected="{{ $primaryTeacherId }}" required>
                                                 <option value="">{{ __('-- Select Primary Teacher --') }}</option>
                                                 @foreach($allTeachers as $t)
                                                     <option value="{{ $t->id }}" {{ $primaryTeacherId == $t->id ? 'selected' : '' }}>
@@ -580,7 +606,7 @@
                                             </select>
                                         </td>
                                         <td>
-                                            <select class="form-control select-alt-teacher" name="alt_teacher_{{ $cs->subject_id }}">
+                                            <select class="form-control select-alt-teacher" name="alt_teacher_{{ $cs->subject_id }}" data-subject-id="{{ $cs->subject_id }}" data-subject-name="{{ $cs->subject->name }}" data-selected="">
                                                 <option value="">{{ __('-- Optional Alternate --') }}</option>
                                                 @foreach($allTeachers as $t)
                                                     <option value="{{ $t->id }}" {{ ($primaryTeacherId != $t->id) ? '' : 'disabled' }}>
@@ -744,10 +770,27 @@
 
                 <!-- STEP 2: Subject & Teacher Distribution -->
                 <div id="wizardStep2" class="d-none">
-                    <div class="d-flex align-items-center justify-content-between mb-2">
-                        <small class="text-muted">{{ __('Configure weekly period quotas and teachers for each subject.') }}</small>
-                        <div id="quotaStatusBadge" class="quota-badge quota-ok">
-                            <span id="allocatedQuota">0</span> / <span id="totalAvailableQuota">30</span> {{ __('Periods Assigned') }}
+                    <div class="d-flex flex-wrap align-items-center justify-content-between mb-2 p-2 bg-light rounded border">
+                        <div class="d-flex align-items-center gap-2">
+                            <button type="button" class="btn btn-sm btn-primary font-weight-bold mr-2" onclick="smartAutoAssignTeachers()">
+                                <i class="fa fa-magic mr-1"></i> {{ __('⚡ Smart Auto-Assign') }}
+                            </button>
+                            <div class="custom-control custom-switch d-inline-block">
+                                <input type="checkbox" class="custom-control-input filter-specialists-toggle" id="filterSpecialistsToggleWizard" checked onchange="toggleSpecialistFilter(this.checked)">
+                                <label class="custom-control-label small font-weight-bold text-dark" for="filterSpecialistsToggleWizard">
+                                    {{ __('Filter: Only Specialists') }}
+                                </label>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            @if($classTeacherName)
+                                <span class="badge badge-warning text-dark font-weight-bold mr-2 px-2 py-1" style="border: 1px solid #F59E0B; font-size: 11px;">
+                                    ⭐ {{ __('Class Teacher:') }} {{ $classTeacherName }}
+                                </span>
+                            @endif
+                            <div id="quotaStatusBadge" class="quota-badge quota-ok">
+                                <span id="allocatedQuota">0</span> / <span id="totalAvailableQuota">30</span> {{ __('Periods Assigned') }}
+                            </div>
                         </div>
                     </div>
                     <div class="table-responsive" style="max-height: 340px; overflow-y: auto;">
@@ -1065,6 +1108,266 @@
     const classSectionId = "{{ $classSection->id }}";
     let currentWizardStep = 1;
 
+    // Smart Teacher Specialization & Class Teacher Engine
+    const rawTeachers = @json($allTeachers);
+    const classTeacherId = {{ $classTeacherId ?? 'null' }};
+    const classTeacherName = {!! json_encode($classTeacherName ?? null) !!};
+    window.isSpecialistFilterActive = true;
+
+    // Subject aliases map for smart matching
+    const subjectAliases = {
+        'math': ['math', 'mathematics', 'algebra', 'geometry', 'calculus'],
+        'mathematics': ['math', 'mathematics', 'algebra', 'geometry', 'calculus'],
+        'science': ['science', 'physics', 'chemistry', 'biology', 'general science'],
+        'physics': ['physics', 'science', 'physical science'],
+        'chemistry': ['chemistry', 'science', 'chemical science'],
+        'biology': ['biology', 'science', 'botany', 'zoology', 'life science'],
+        'computer': ['computer', 'information technology', 'it', 'informatics', 'cs', 'coding', 'software'],
+        'english': ['english', 'literature', 'grammar', 'communicative english'],
+        'social': ['social', 'history', 'geography', 'civics', 'economics', 'sst'],
+        'hindi': ['hindi'],
+        'tamil': ['tamil'],
+        'french': ['french'],
+        'commerce': ['commerce', 'accountancy', 'accounts', 'business studies', 'economics'],
+        'economics': ['economics', 'commerce', 'business studies'],
+        'accountancy': ['accountancy', 'accounts', 'commerce']
+    };
+
+    function isTeacherSpecialistForSubject(teacher, subjectId, subjectName) {
+        if (!teacher) return false;
+        const sName = (subjectName || '').toLowerCase().trim();
+
+        // 1. Exact subject_id match in subject_teachers
+        if (teacher.subject_teachers && teacher.subject_teachers.some(st => st.subject_id == subjectId)) {
+            return true;
+        }
+
+        // 2. Subject name direct or substring match
+        if (teacher.subject_teachers && teacher.subject_teachers.some(st => {
+            if (!st.subject || !st.subject.name) return false;
+            const tName = st.subject.name.toLowerCase().trim();
+            return tName === sName || tName.includes(sName) || sName.includes(tName);
+        })) {
+            return true;
+        }
+
+        // 3. Alias dictionary matching
+        for (const [key, aliasList] of Object.entries(subjectAliases)) {
+            if (sName.includes(key)) {
+                if (teacher.subject_teachers && teacher.subject_teachers.some(st => {
+                    if (!st.subject || !st.subject.name) return false;
+                    const tName = st.subject.name.toLowerCase();
+                    return aliasList.some(alias => tName.includes(alias));
+                })) {
+                    return true;
+                }
+                if (teacher.staff && teacher.staff.qualification) {
+                    const qual = teacher.staff.qualification.toLowerCase();
+                    if (aliasList.some(alias => qual.includes(alias))) return true;
+                }
+            }
+        }
+
+        // 4. Direct qualification string match
+        if (teacher.staff && teacher.staff.qualification) {
+            const qual = teacher.staff.qualification.toLowerCase();
+            if (qual.includes(sName)) return true;
+        }
+
+        return false;
+    }
+
+    function buildTeacherSelectOptions(subjectId, subjectName, selectedTeacherId, isFilterActive, isAlternate = false) {
+        const specialists = [];
+        const others = [];
+
+        rawTeachers.forEach(t => {
+            const isSpecialist = isTeacherSpecialistForSubject(t, subjectId, subjectName);
+            const isCT = (classTeacherId && t.id == classTeacherId);
+
+            let label = `${t.first_name} ${t.last_name}`;
+            if (isCT && isSpecialist) {
+                label = `⭐ ${label} (Class Teacher & Specialist)`;
+            } else if (isCT) {
+                label = `⭐ ${label} (Class Teacher)`;
+            } else if (isSpecialist) {
+                label = `${label} (${subjectName} Specialist)`;
+            }
+
+            if (t.staff && t.staff.qualification) {
+                label += ` [${t.staff.qualification}]`;
+            }
+
+            const item = { id: t.id, label: label, isCT: isCT, isSpecialist: isSpecialist };
+            if (isSpecialist) {
+                if (isCT) specialists.unshift(item);
+                else specialists.push(item);
+            } else {
+                if (isCT) others.unshift(item);
+                else others.push(item);
+            }
+        });
+
+        const defaultLabel = isAlternate ? '-- None (Optional Alternate) --' : '-- Select Primary Teacher --';
+        let html = `<option value="">${defaultLabel}</option>`;
+
+        // When Filter is Active and we found specialists
+        if (isFilterActive && specialists.length > 0) {
+            html += `<optgroup label="✨ ${subjectName} Specialist Teachers">`;
+            specialists.forEach(item => {
+                const sel = (selectedTeacherId == item.id) ? 'selected' : '';
+                html += `<option value="${item.id}" ${sel}>${item.label}</option>`;
+            });
+            html += `</optgroup>`;
+
+            html += `<optgroup label="── Force Change / Manual Override ──">`;
+            if (selectedTeacherId && !specialists.some(s => s.id == selectedTeacherId)) {
+                const cur = others.find(o => o.id == selectedTeacherId);
+                if (cur) {
+                    html += `<option value="${cur.id}" selected>⚠️ ${cur.label} (Manual Override)</option>`;
+                }
+            }
+            html += `<option value="__SHOW_ALL__" class="text-primary font-weight-bold">⚡ Show all other teachers (${others.length} available)...</option>`;
+            html += `</optgroup>`;
+        } else {
+            // Unfiltered / Show all mode
+            if (specialists.length > 0) {
+                html += `<optgroup label="✨ Recommended (${subjectName} Specialists)">`;
+                specialists.forEach(item => {
+                    const sel = (selectedTeacherId == item.id) ? 'selected' : '';
+                    html += `<option value="${item.id}" ${sel}>${item.label}</option>`;
+                });
+                html += `</optgroup>`;
+            }
+
+            html += `<optgroup label="── All Other Teachers ──">`;
+            others.forEach(item => {
+                const sel = (selectedTeacherId == item.id) ? 'selected' : '';
+                html += `<option value="${item.id}" ${sel}>${item.label}</option>`;
+            });
+            html += `</optgroup>`;
+        }
+
+        return html;
+    }
+
+    function smartAutoAssignTeachers(showNotice = true) {
+        let assignedCount = 0;
+        let ctAssigned = false;
+
+        // Process both Setup Modal and Wizard Rows
+        const targets = $('.wizard-subject-row').length > 0 ? $('.wizard-subject-row') : $('.subject-setup-row');
+
+        targets.each(function() {
+            const subId = $(this).data('subject-id');
+            const subName = $(this).find('strong').text().trim() || $(this).data('subject-name');
+            const primarySelect = $(this).find('.select-primary-teacher, .wizard-primary-teacher');
+            const altSelect = $(this).find('.select-alt-teacher, .wizard-alt-teacher');
+
+            const specialists = rawTeachers.filter(t => isTeacherSpecialistForSubject(t, subId, subName));
+
+            // Determine best primary teacher
+            let targetPrimaryId = primarySelect.val();
+
+            // Priority 1: If class teacher is a specialist in this subject, assign Class Teacher!
+            const ctSpecialist = specialists.find(t => classTeacherId && t.id == classTeacherId);
+            if (ctSpecialist) {
+                targetPrimaryId = ctSpecialist.id;
+                ctAssigned = true;
+            } else if (!targetPrimaryId && specialists.length > 0) {
+                // Priority 2: Pick first matching specialist
+                targetPrimaryId = specialists[0].id;
+            }
+
+            if (targetPrimaryId) {
+                primarySelect.val(targetPrimaryId);
+                $(`.subject-setup-row[data-subject-id="${subId}"] .select-primary-teacher`).val(targetPrimaryId);
+                assignedCount++;
+            }
+
+            // Determine best alternate teacher (next available specialist)
+            const altSpecialist = specialists.find(t => t.id != targetPrimaryId);
+            if (altSpecialist && !altSelect.val()) {
+                altSelect.val(altSpecialist.id);
+                $(`.subject-setup-row[data-subject-id="${subId}"] .select-alt-teacher`).val(altSpecialist.id);
+            }
+        });
+
+        if (typeof calculateWizardQuota === 'function') {
+            calculateWizardQuota();
+        }
+
+        if (showNotice) {
+            let msg = `⚡ Smart Assignment: Successfully auto-matched ${assignedCount} subjects with qualified specialist teachers!`;
+            if (classTeacherName && ctAssigned) {
+                msg += ` Class Teacher (${classTeacherName}) has been prioritized for their specialized subjects.`;
+            }
+            showToast(msg, 'success');
+        }
+    }
+
+    function toggleSpecialistFilter(isChecked) {
+        window.isSpecialistFilterActive = isChecked;
+        $('.filter-specialists-toggle').prop('checked', isChecked);
+
+        // Re-render Modal 1 selects
+        $('.subject-setup-row').each(function() {
+            const subId = $(this).data('subject-id');
+            const subName = $(this).find('strong').text().trim() || $(this).data('subject-name');
+            const primarySelect = $(this).find('.select-primary-teacher');
+            const altSelect = $(this).find('.select-alt-teacher');
+            const curP = primarySelect.val();
+            const curA = altSelect.val();
+
+            primarySelect.html(buildTeacherSelectOptions(subId, subName, curP, isChecked, false));
+            altSelect.html(buildTeacherSelectOptions(subId, subName, curA, isChecked, true));
+        });
+
+        // Re-render Modal 2 selects if open
+        $('.wizard-subject-row').each(function() {
+            const subId = $(this).data('subject-id');
+            const subName = $(this).find('strong').text().trim() || $(this).data('subject-name');
+            const primarySelect = $(this).find('.wizard-primary-teacher');
+            const altSelect = $(this).find('.wizard-alt-teacher');
+            const curP = primarySelect.val();
+            const curA = altSelect.val();
+
+            primarySelect.html(buildTeacherSelectOptions(subId, subName, curP, isChecked, false));
+            altSelect.html(buildTeacherSelectOptions(subId, subName, curA, isChecked, true));
+        });
+
+        const stateMsg = isChecked ? 'Filter Active: Showing only qualified subject specialists.' : 'Displaying all school teachers (Force Override mode).';
+        showToast(stateMsg, 'info');
+    }
+
+    function initSmartTeacherSelects() {
+        $('.subject-setup-row').each(function() {
+            const subId = $(this).data('subject-id');
+            const subName = $(this).find('strong').text().trim() || $(this).data('subject-name');
+            const primarySelect = $(this).find('.select-primary-teacher');
+            const altSelect = $(this).find('.select-alt-teacher');
+
+            const currentPrimary = primarySelect.val() || primarySelect.data('selected');
+            const currentAlt = altSelect.val() || altSelect.data('selected');
+
+            primarySelect.html(buildTeacherSelectOptions(subId, subName, currentPrimary, window.isSpecialistFilterActive, false));
+            altSelect.html(buildTeacherSelectOptions(subId, subName, currentAlt, window.isSpecialistFilterActive, true));
+        });
+    }
+
+    // Listen for "__SHOW_ALL__" force override selection
+    $(document).on('change', '.select-primary-teacher, .wizard-primary-teacher, .select-alt-teacher, .wizard-alt-teacher', function() {
+        if ($(this).val() === '__SHOW_ALL__') {
+            const subId = $(this).data('subject-id') || $(this).closest('tr').data('subject-id');
+            const subName = $(this).data('subject-name') || $(this).closest('tr').find('strong').text().trim();
+            const isAlt = $(this).hasClass('select-alt-teacher') || $(this).hasClass('wizard-alt-teacher');
+
+            $(this).html(buildTeacherSelectOptions(subId, subName, '', false, isAlt));
+            $(this).focus();
+            showToast('Showing all teachers for manual override.', 'info');
+        }
+    });
+
     // Switch between Compact Matrix View and Legacy FullCalendar View
     function switchTimetableView(viewType) {
         if (viewType === 'matrix') {
@@ -1343,28 +1646,25 @@
 
         $('.subject-setup-row').each(function() {
             const subId = $(this).data('subject-id');
-            const subName = $(this).find('strong').text();
-            const primaryId = $(this).find('.select-primary-teacher').val();
-            const altId = $(this).find('.select-alt-teacher').val();
+            const subName = $(this).find('strong').text().trim() || $(this).data('subject-name');
+            const primaryId = $(this).find('.select-primary-teacher').val() || $(this).find('.select-primary-teacher').data('selected');
+            const altId = $(this).find('.select-alt-teacher').val() || $(this).find('.select-alt-teacher').data('selected');
             const periods = $(this).find('.input-weekly-periods').val() || 5;
 
+            const primaryOptions = buildTeacherSelectOptions(subId, subName, primaryId, window.isSpecialistFilterActive, false);
+            const altOptions = buildTeacherSelectOptions(subId, subName, altId, window.isSpecialistFilterActive, true);
+
             rowsHtml += `
-                <tr class="wizard-subject-row" data-subject-id="${subId}">
+                <tr class="wizard-subject-row" data-subject-id="${subId}" data-subject-name="${subName}">
                     <td><strong>${subName}</strong></td>
                     <td>
-                        <select class="form-control form-control-sm wizard-primary-teacher">
-                            <option value="">-- Select --</option>
-                            @foreach($allTeachers as $t)
-                                <option value="{{ $t->id }}" ${primaryId == {{ $t->id }} ? 'selected' : ''}>{{ $t->first_name }} {{ $t->last_name }}</option>
-                            @endforeach
+                        <select class="form-control form-control-sm wizard-primary-teacher" data-subject-id="${subId}" data-subject-name="${subName}">
+                            ${primaryOptions}
                         </select>
                     </td>
                     <td>
-                        <select class="form-control form-control-sm wizard-alt-teacher">
-                            <option value="">-- None --</option>
-                            @foreach($allTeachers as $t)
-                                <option value="{{ $t->id }}" ${altId == {{ $t->id }} ? 'selected' : ''}>{{ $t->first_name }} {{ $t->last_name }}</option>
-                            @endforeach
+                        <select class="form-control form-control-sm wizard-alt-teacher" data-subject-id="${subId}" data-subject-name="${subName}">
+                            ${altOptions}
                         </select>
                     </td>
                     <td>
@@ -1376,6 +1676,15 @@
 
         $('#wizardSubjectList').html(rowsHtml);
         calculateWizardQuota();
+
+        // Check if any primary teacher is unassigned, if so auto-assign intelligently!
+        let hasUnassigned = false;
+        $('.wizard-primary-teacher').each(function() {
+            if (!$(this).val()) hasUnassigned = true;
+        });
+        if (hasUnassigned) {
+            smartAutoAssignTeachers(false); // quiet auto-assign on first open
+        }
     }
 
     function calculateWizardQuota() {
@@ -1804,6 +2113,9 @@
 
     // FullCalendar Events Initialization (Preserved for Timeline View)
     $(document).ready(function () {
+        if (typeof initSmartTeacherSelects === 'function') {
+            initSmartTeacherSelects();
+        }
         loadMatrixData();
 
         @if(isset($timetables))

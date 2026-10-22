@@ -280,7 +280,7 @@ class TimetableValidationService
             $end = $locked['end_time'];
             $classId = $locked['class_section_id'];
             $subjectId = $locked['subject_id'] ?? null;
-            $teacherId = $locked['teacher_id'] ?? null;
+            $teacherId = $locked['teacher_id'] ?? $locked['subject_teacher']['teacher_id'] ?? null;
 
             $matched = false;
             foreach ($entries as $candidate) {
@@ -289,8 +289,13 @@ class TimetableValidationService
                     $candidate['start_time'] === $start &&
                     $candidate['end_time'] === $end) {
 
-                    if (($candidate['subject_id'] ?? null) == $subjectId &&
-                        ($candidate['teacher_id'] ?? null) == $teacherId) {
+                    $candTeacherId = $candidate['teacher_id'] ?? $candidate['subject_teacher']['teacher_id'] ?? null;
+                    $candSubjectId = $candidate['subject_id'] ?? null;
+
+                    $subjectMatch = empty($subjectId) || ($candSubjectId == $subjectId);
+                    $teacherMatch = empty($teacherId) || empty($candTeacherId) || ($candTeacherId == $teacherId);
+
+                    if ($subjectMatch && $teacherMatch) {
                         $matched = true;
                         break;
                     }

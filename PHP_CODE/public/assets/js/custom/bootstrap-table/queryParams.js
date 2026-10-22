@@ -130,7 +130,8 @@ function timetableQueryParams(p) {
         order: p.order,
         offset: p.offset,
         search: p.search,
-        medium_id: $('#filter_medium_id').val()
+        medium_id: $('#filter_medium_id').val(),
+        class_section_id: $('#filter_class_section_id').val()
     };
 }
 

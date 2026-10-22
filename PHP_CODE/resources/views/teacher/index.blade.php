@@ -389,7 +389,7 @@
                                        data-mobile-responsive="true" data-sort-name="id" data-sort-order="desc"
                                        data-maintain-selected="true" data-export-data-type='all' data-show-export="true"
                                        data-export-options='{ "fileName": "teacher-list-<?= date('d-m-y') ?>" ,"ignoreColumn":["operate"]}'
-                                       data-query-params="activeDeactiveQueryParams" data-escape="true">
+                                       data-query-params="activeDeactiveQueryParams" data-escape="false">
                                     <thead>
                                     <tr>
                                         <th data-field="state" data-checkbox="true"></th>
@@ -402,7 +402,7 @@
                                         <th scope="col" data-field="staff.qualification">{{ __('qualification') }}</th>
                                         <th scope="col" data-field="current_address">{{ __('current_address') }}</th>
                                         <th scope="col" data-field="permanent_address">{{ __('permanent_address') }}</th>
-                                        <th scope="col" data-field="assigned_classes_subjects" data-escape="false">{{ __('Classes & Subjects') }}</th>
+                                        <th scope="col" data-field="assigned_classes_subjects" data-formatter="assignedClassesSubjectsFormatter" data-escape="false">{{ __('Classes & Subjects') }}</th>
                                         <th scope="col" data-field="staff.salary" data-visible="false"> {{ __('Salary') }}</th>
                                         <th data-events="teacherEvents" scope="col" data-formatter="actionColumnFormatter" data-field="operate" data-escape="false">{{ __('action') }}</th>
                                     </tr>
@@ -1046,3 +1046,4 @@
         });
     </script>
 @endsection
+
