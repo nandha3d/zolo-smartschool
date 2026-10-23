@@ -48,10 +48,10 @@
         border-color: #CBD5E1;
     }
     .view-mode-switcher .btn.active {
-        background: #2563EB !important;
-        border-color: #2563EB !important;
+        background: var(--theme-color, #22577A) !important;
+        border-color: var(--theme-color, #22577A) !important;
         color: #ffffff !important;
-        box-shadow: 0 2px 4px rgba(37, 99, 235, 0.25);
+        box-shadow: 0 2px 4px rgba(34, 87, 122, 0.25);
     }
 
     /* =========================================================

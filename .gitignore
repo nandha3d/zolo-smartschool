@@ -18,7 +18,10 @@ GoogleService-Info.plist
 # Archives / release bundles (kept out of git; ~280 MB)
 # ---------------------------------------------------------------
 *.zip
+*.bundle
 Updates/
+/backups/snapshots/
+/backups/git_bundles/
 
 # ---------------------------------------------------------------
 # Laravel (PHP_CODE)

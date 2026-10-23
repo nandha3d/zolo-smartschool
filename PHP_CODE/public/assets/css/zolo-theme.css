@@ -1,17 +1,17 @@
 /*
- * Zolo Console redesign — design-system foundation.
+ * Zolo Console redesign â€” design-system foundation.
  * Loaded after style.min.css / custom.css so it wins on equal specificity.
  * New markup should prefer the zolo-* classes below over fighting the
  * legacy admin-theme selectors; Bootstrap primitives (.btn, .card, .table,
- * .badge, .form-control …) are re-skinned here so unmodified CRUD views
+ * .badge, .form-control â€¦) are re-skinned here so unmodified CRUD views
  * inherit the new look for free.
  */
 
 :root {
-  --zolo-accent: #2563EB;
-  --zolo-accent-hover: #1D4ED8;
-  --zolo-accent-soft: #EFF6FF;
-  --zolo-accent-soft-border: #BFDBFE;
+  --zolo-accent: var(--theme-color, #22577A);
+  --zolo-accent-hover: #163C55;
+  --zolo-accent-soft: rgba(34, 87, 122, 0.09);
+  --zolo-accent-soft-border: rgba(34, 87, 122, 0.28);
   --zolo-ink: #0F172A;
   --zolo-ink-2: #334155;
   --zolo-muted: #64748B;
@@ -62,7 +62,7 @@ html, body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Page headings: 24–30px, weight 600–700 */
+/* Page headings: 24â€“30px, weight 600â€“700 */
 h1, .page-title, .zolo-page-title, .page-header h3, .page-header h4, .zolo-heading {
   font-family: var(--zolo-font-heading) !important;
   font-size: 26px !important;
@@ -89,7 +89,7 @@ h3 {
   color: var(--zolo-ink) !important;
 }
 
-/* Dashboard card titles: 14–16px, weight 500–600 */
+/* Dashboard card titles: 14â€“16px, weight 500â€“600 */
 h4, h5, .card-title, .zolo-card-header .card-title, .modal-title, .zolo-section-title, .zolo-card-title {
   font-family: var(--zolo-font-heading) !important;
   font-size: 15px !important;
@@ -121,8 +121,8 @@ a:hover { color: var(--zolo-accent-hover); }
    ZOLO UNIFIED BUTTON SYSTEM (DUAL COLOR THEME - NO GRADIENTS)
    ========================================================= */
 :root {
-  --btn-primary-bg: #2563EB;
-  --btn-primary-hover: #1D4ED8;
+  --btn-primary-bg: var(--theme-color, #22577A);
+  --btn-primary-hover: #163C55;
   --btn-secondary-bg: #475569;
   --btn-secondary-hover: #334155;
   --btn-success-bg: #10B981;
@@ -133,7 +133,7 @@ a:hover { color: var(--zolo-accent-hover); }
   --btn-warning-hover: #D97706;
   --btn-help-bg: #9333EA;
   --btn-help-hover: #7E22CE;
-  --btn-disabled-bg: #93C5FD;
+  --btn-disabled-bg: rgba(34, 87, 122, 0.45);
   --btn-radius: 8px;
 }
 
@@ -600,7 +600,7 @@ label, .form-group > label, .col-form-label, .custom-control-label {
 a.text-primary:hover, a.text-primary:focus { color: var(--zolo-accent-hover) !important; }
 .bg-primary, .settings-panel .color-tiles .tiles.primary { background: var(--zolo-accent) !important; }
 .border-primary { border-color: var(--zolo-accent) !important; }
-.badge-primary { color: var(--zolo-info-ink) !important; background: var(--zolo-info-bg) !important; border-color: var(--zolo-info-border) !important; }
+.badge-primary { color: var(--zolo-accent) !important; background: var(--zolo-accent-soft) !important; border-color: var(--zolo-accent-soft-border) !important; }
 .blockquote-primary { border-color: var(--zolo-accent) !important; }
 .image-grouped .text-avatar { background: var(--zolo-accent) !important; }
 
@@ -728,7 +728,7 @@ a.text-primary:hover, a.text-primary:focus { color: var(--zolo-accent-hover) !im
 .zolo-locked { opacity: 0.75; cursor: not-allowed !important; }
 
 /* =====================================================================
-   Shell — sidebar + topbar (Phase 2)
+   Shell â€” sidebar + topbar (Phase 2)
    ===================================================================== */
 
 /* --- Sidebar in Theme Color --- */
@@ -1037,7 +1037,7 @@ a.text-primary:hover, a.text-primary:focus { color: var(--zolo-accent-hover) !im
 /* =====================================================================
    Shared module chrome (Phase 4)
 
-   Every CRUD module renders the same handful of wrappers — a .page-header,
+   Every CRUD module renders the same handful of wrappers â€” a .page-header,
    a bootstrap-table with its toolbar/search/pagination, nav-tabs, select2
    inputs and Bootstrap modals. Restyling those here rolls the redesign
    across all ~75 modules without editing each view.
@@ -1090,7 +1090,7 @@ a.text-primary:hover, a.text-primary:focus { color: var(--zolo-accent-hover) !im
 .fixed-table-pagination .pagination { font-size: 12.5px; color: var(--zolo-muted-2); }
 .bootstrap-table .table > tbody > tr > td { border-color: var(--zolo-border-soft-2); }
 
-/* --- Tabs (fees, exams, reports, settings …) --- */
+/* --- Tabs (fees, exams, reports, settings â€¦) --- */
 .nav-tabs { border-bottom: 1px solid var(--zolo-border); gap: 4px; }
 .nav-tabs .nav-link {
   border: 0 !important;
@@ -1334,11 +1334,11 @@ hr { border-color: var(--zolo-border-soft); }
 .zolo-expire-banner .zolo-banner-text strong { font-weight: 700; }
 .zolo-expire-banner .zolo-banner-btn {
   flex: none; font-size: 12.5px; font-weight: 600;
-  background: #2F6BFF; color: #fff !important; border: 0;
+  background: var(--theme-color, #22577A); color: #fff !important; border: 0;
   border-radius: 8px; padding: 8px 14px; text-decoration: none !important;
   transition: background 0.15s ease;
 }
-.zolo-expire-banner .zolo-banner-btn:hover { background: #1B4ED1; }
+.zolo-expire-banner .zolo-banner-btn:hover { background: var(--btn-primary-hover, #163C55); }
 
 /* --- Expense Card & Bars --- */
 .zolo-expense-card {
@@ -1358,7 +1358,7 @@ hr { border-color: var(--zolo-border-soft); }
 }
 .zolo-tab-item:first-child { border-left: 0; }
 .zolo-tab-item.active, .zolo-tab-item:hover {
-  background: #EAF0FF; color: #1B4ED1;
+  background: rgba(34, 87, 122, 0.1); color: var(--theme-color, #22577A);
 }
 .zolo-expense-total {
   font-family: var(--zolo-font-heading);
@@ -1378,7 +1378,7 @@ hr { border-color: var(--zolo-border-soft); }
   gap: 6px; cursor: pointer; height: 100%; justify-content: flex-end;
 }
 .zolo-bar-amt {
-  font-size: 10px; font-weight: 700; color: #2F6BFF;
+  font-size: 10px; font-weight: 700; color: var(--theme-color, #22577A);
   font-variant-numeric: tabular-nums; min-height: 14px;
 }
 .zolo-bar-pillar {
@@ -1387,7 +1387,7 @@ hr { border-color: var(--zolo-border-soft); }
 }
 .zolo-bar-col.active .zolo-bar-pillar,
 .zolo-bar-col:hover .zolo-bar-pillar {
-  background: #2F6BFF;
+  background: var(--theme-color, #22577A);
 }
 .zolo-bar-col.active .zolo-bar-amt {
   visibility: visible;
@@ -1406,7 +1406,7 @@ hr { border-color: var(--zolo-border-soft); }
   color: #8A94A6; font-weight: 500;
 }
 .zolo-bar-lbl.active {
-  color: #1B4ED1; font-weight: 700;
+  color: var(--theme-color, #22577A); font-weight: 700;
 }
 
 /* --- Dark Navy Attendance Card --- */
@@ -1482,12 +1482,12 @@ select#attendance-class-select.zolo-att-select option {
 }
 .zolo-dash-att-btn {
   margin-top: 5px; font-family: inherit; font-size: 12.5px;
-  font-weight: 600; color: #fff !important; background: #2F6BFF;
+  font-weight: 600; color: #fff !important; background: var(--theme-color, #22577A);
   border: 0; border-radius: 8px; padding: 9px 12px;
   cursor: pointer; text-align: center; text-decoration: none !important;
   display: block; transition: background 0.15s ease;
 }
-.zolo-dash-att-btn:hover { background: #1B4ED1; }
+.zolo-dash-att-btn:hover { background: var(--btn-primary-hover, #163C55); }
 
 /* --- Leaves List & Avatar Initials --- */
 .zolo-leave-item {
@@ -1526,7 +1526,7 @@ select#attendance-class-select.zolo-att-select option {
   height: 6px; background: #EEF1F6; border-radius: 99px; overflow: hidden;
 }
 .zolo-exam-fill {
-  height: 6px; border-radius: 99px; background: #2F6BFF;
+  height: 6px; border-radius: 99px; background: var(--theme-color, #22577A);
 }
 
 /* --- Fees Overdue Checklist --- */
@@ -1544,7 +1544,7 @@ select#attendance-class-select.zolo-att-select option {
   flex: none; cursor: pointer; transition: all 0.15s ease;
 }
 .zolo-overdue-item.selected .zolo-custom-check {
-  background: #2F6BFF; border-color: #2F6BFF; color: #fff;
+  background: var(--theme-color, #22577A); border-color: var(--theme-color, #22577A); color: #fff;
 }
 .zolo-custom-check .ms { font-size: 12px; line-height: 1; }
 
@@ -1628,16 +1628,16 @@ a.btn-icon i,
 .edit-data,
 a.edit-data,
 .btn-action.edit-data {
-  background: #EAF0FF !important;
-  color: #2F6BFF !important;
-  border: 1px solid #C9D9FF !important;
+  background: rgba(34, 87, 122, 0.08) !important;
+  color: var(--theme-color, #22577A) !important;
+  border: 1px solid rgba(34, 87, 122, 0.25) !important;
 }
 .table .btn-icon.btn-primary:hover,
 .edit-data:hover,
 a.edit-data:hover {
-  background: #2F6BFF !important;
+  background: var(--theme-color, #22577A) !important;
   color: #ffffff !important;
-  border-color: #2F6BFF !important;
+  border-color: var(--theme-color, #22577A) !important;
   transform: translateY(-1px);
 }
 .edit-data:hover i {
@@ -1757,9 +1757,9 @@ a.restore-data:hover,
 }
 .table-action-column button:hover,
 .action-column-menu button#dropdownMenuButton:hover {
-  background: #EAF0FF !important;
-  color: #2F6BFF !important;
-  border-color: #C9D9FF !important;
+  background: rgba(34, 87, 122, 0.08) !important;
+  color: var(--theme-color, #22577A) !important;
+  border-color: rgba(34, 87, 122, 0.25) !important;
 }
 
 /* Action Dropdown Menu & Menu Items (Fix overlap) */
@@ -1810,7 +1810,7 @@ a.restore-data:hover,
 .action-column-menu .dropdown-menu a.dropdown-item:hover,
 .action-column-menu .dropdown-menu button.dropdown-item:hover {
   background: #F1F5F9 !important;
-  color: #2F6BFF !important;
+  color: var(--theme-color, #22577A) !important;
 }
 
 .action-column-dropdown-menu .dropdown-item.delete-form,
@@ -1878,7 +1878,7 @@ a.restore-data:hover,
 
 #toolbar select:focus,
 #toolbar .form-control:focus {
-  border-color: #2F6BFF !important;
+  border-color: var(--theme-color, #22577A) !important;
   box-shadow: 0 0 0 3px rgba(47, 107, 255, 0.12) !important;
 }
 
@@ -1921,8 +1921,8 @@ a.restore-data:hover,
   transition: all 0.15s ease !important;
 }
 .table-list-type.active {
-  color: #2F6BFF !important;
-  background: #EAF0FF !important;
+  color: var(--theme-color, #22577A) !important;
+  background: rgba(34, 87, 122, 0.1) !important;
   font-weight: 700 !important;
 }
 
@@ -1954,7 +1954,7 @@ a.restore-data:hover,
 }
 
 .bootstrap-table .fixed-table-toolbar .search input:focus {
-  border-color: #2F6BFF !important;
+  border-color: var(--theme-color, #22577A) !important;
   box-shadow: 0 0 0 3px rgba(47, 107, 255, 0.12) !important;
 }
 
@@ -2042,7 +2042,7 @@ a.restore-data:hover,
 .bootstrap-table .bs-checkbox input[type="checkbox"],
 th.bs-checkbox input[type="checkbox"],
 td.bs-checkbox input[type="checkbox"] {
-  accent-color: #2F6BFF !important;
+  accent-color: var(--theme-color, #22577A) !important;
   width: 16px !important;
   height: 16px !important;
   cursor: pointer !important;
@@ -2084,8 +2084,8 @@ td.bs-checkbox input[type="checkbox"] {
 }
 
 .pagination .page-item.active .page-link {
-  background: #2F6BFF !important;
-  border-color: #2F6BFF !important;
+  background: var(--theme-color, #22577A) !important;
+  border-color: var(--theme-color, #22577A) !important;
   color: #ffffff !important;
   box-shadow: 0 2px 6px rgba(47, 107, 255, 0.28) !important;
 }
@@ -2145,7 +2145,7 @@ td.bs-checkbox input[type="checkbox"] {
   text-decoration: none !important;
 }
 .breadcrumb-item a:hover {
-  color: #2F6BFF !important;
+  color: var(--theme-color, #22577A) !important;
 }
 .breadcrumb-item.active {
   color: #0F172A !important;
@@ -2253,7 +2253,7 @@ select.form-control {
 .form-control:focus,
 .form-select:focus,
 select.form-control:focus {
-  border-color: #2F6BFF !important;
+  border-color: var(--theme-color, #22577A) !important;
   outline: none !important;
   box-shadow: 0 0 0 3px rgba(47, 107, 255, 0.12) !important;
 }
@@ -2381,14 +2381,14 @@ textarea.form-control {
 /* Active State via CSS :has() or .active class */
 .zolo-segment-btn:has(.zolo-segment-input:checked),
 .zolo-segment-btn.active {
-  background: #2563EB !important;
+  background: var(--theme-color, #22577A) !important;
 }
 
 .zolo-segment-btn:has(.zolo-segment-input:checked) .zolo-segment-content,
 .zolo-segment-btn.active .zolo-segment-content {
-  background: #2563EB !important;
+  background: var(--theme-color, #22577A) !important;
   color: #FFFFFF !important;
-  box-shadow: 0 1px 3px rgba(37, 99, 235, 0.3) !important;
+  box-shadow: 0 1px 3px rgba(34, 87, 122, 0.3) !important;
 }
 
 .zolo-segment-btn:has(.zolo-segment-input:checked) .segment-icon,
@@ -2399,7 +2399,7 @@ textarea.form-control {
 
 /* Icon specific colors when inactive */
 .zolo-segment-btn:not(.active):not(:has(.zolo-segment-input:checked)) .icon-male {
-  color: #2563EB !important;
+  color: var(--theme-color, #22577A) !important;
 }
 .zolo-segment-btn:not(.active):not(:has(.zolo-segment-input:checked)) .icon-female {
   color: #EC4899 !important;
@@ -2432,10 +2432,10 @@ textarea.form-control {
 .form-check-inline:has(input[type="radio"]:checked),
 .form-check-inline:has(input[type="checkbox"]:checked),
 .form-check-inline.active {
-  background: #2563EB !important;
-  border-color: #2563EB !important;
+  background: var(--theme-color, #22577A) !important;
+  border-color: var(--theme-color, #22577A) !important;
   color: #FFFFFF !important;
-  box-shadow: 0 1px 3px rgba(37, 99, 235, 0.25) !important;
+  box-shadow: 0 1px 3px rgba(34, 87, 122, 0.3) !important;
 }
 
 .form-check-inline:has(input[type="radio"]:checked) .form-check-label,
@@ -2475,7 +2475,7 @@ textarea.form-control {
 
 .form-check:not(.form-check-inline) input[type="checkbox"],
 .form-check:not(.form-check-inline) input[type="radio"] {
-  accent-color: #2563EB !important;
+  accent-color: var(--theme-color, #22577A) !important;
   width: 16px !important;
   height: 16px !important;
   margin: 0 !important;
@@ -2596,9 +2596,9 @@ textarea.form-control {
 }
 
 .nav-tabs .nav-link.active {
-  color: #2F6BFF !important;
-  background: #EAF0FF !important;
-  box-shadow: inset 0 -2px 0 #2F6BFF !important;
+  color: var(--theme-color, #22577A) !important;
+  background: rgba(34, 87, 122, 0.08) !important;
+  box-shadow: inset 0 -2px 0 var(--theme-color, #22577A) !important;
   font-weight: 700 !important;
 }
 
@@ -2645,9 +2645,9 @@ textarea.form-control {
 .badge-gradient-primary,
 .badge.bg-info,
 .badge.bg-primary {
-  background: #EAF0FF !important;
-  color: #2F6BFF !important;
-  border-color: #C9D9FF !important;
+  background: rgba(34, 87, 122, 0.1) !important;
+  color: var(--theme-color, #22577A) !important;
+  border-color: rgba(34, 87, 122, 0.25) !important;
 }
 
 .badge.badge-secondary,
@@ -2668,15 +2668,15 @@ textarea.form-control {
   font-size: 12px !important;
   font-weight: 600 !important;
   padding: 6px 12px !important;
-  background: #EAF0FF !important;
-  color: #2F6BFF !important;
-  border: 1px solid #C9D9FF !important;
+  background: rgba(34, 87, 122, 0.08) !important;
+  color: var(--theme-color, #22577A) !important;
+  border: 1px solid rgba(34, 87, 122, 0.25) !important;
   display: inline-flex !important;
   align-items: center !important;
   gap: 6px !important;
 }
 .navbar.default-layout-navbar .cache-clear .btn-inverse-info:hover {
-  background: #2F6BFF !important;
+  background: var(--theme-color, #22577A) !important;
   color: #ffffff !important;
 }
 
@@ -2717,9 +2717,9 @@ textarea.form-control {
 }
 .zolo-session-pill #sessionYearNameHeader {
   font-weight: 700;
-  color: #2F6BFF;
-  background: #EAF0FF;
-  border: 1px solid #C9D9FF;
+  color: var(--theme-color, #22577A);
+  background: rgba(34, 87, 122, 0.08);
+  border: 1px solid rgba(34, 87, 122, 0.25);
   padding: 2px 7px;
   border-radius: 5px;
   margin-left: 5px;
@@ -2749,8 +2749,8 @@ textarea.form-control {
 }
 
 .navbar-dropdown .dropdown-item:hover {
-  background: #EAF0FF !important;
-  color: #2F6BFF !important;
+  background: rgba(34, 87, 122, 0.08) !important;
+  color: var(--theme-color, #22577A) !important;
 }
 
 .navbar-dropdown .dropdown-divider {
@@ -2799,12 +2799,12 @@ textarea.form-control {
   color: #8A94A6 !important;
 }
 .footer a {
-  color: #2F6BFF !important;
+  color: var(--theme-color, #22577A) !important;
   font-weight: 600;
   text-decoration: none;
 }
 .footer a:hover {
-  color: #1B4ED1 !important;
+  color: var(--btn-primary-hover, #163C55) !important;
 }
 
 /* ---------- DatePicker & DateRangePicker ---------- */
@@ -2817,13 +2817,13 @@ textarea.form-control {
 .datepicker table tr td.active.active,
 .datepicker table tr td.active:hover,
 .datepicker table tr td.today {
-  background-color: #2F6BFF !important;
+  background-color: var(--theme-color, #22577A) !important;
   background-image: none !important;
   color: #fff !important;
   border-radius: 6px !important;
 }
 .datepicker table tr td.day:hover {
-  background: #EAF0FF !important;
+  background: rgba(34, 87, 122, 0.08) !important;
   border-radius: 6px !important;
 }
 .daterangepicker {
@@ -2834,7 +2834,7 @@ textarea.form-control {
 }
 .daterangepicker td.active,
 .daterangepicker td.active:hover {
-  background-color: #2F6BFF !important;
+  background-color: var(--theme-color, #22577A) !important;
   border-radius: 6px !important;
 }
 
@@ -2862,7 +2862,7 @@ textarea.form-control {
 }
 
 /* =====================================================================
-   Zolo Attendance Suite — Modern, Feature-Rich Component System
+   Zolo Attendance Suite â€” Modern, Feature-Rich Component System
    ===================================================================== */
 .zolo-att-hero {
   background: linear-gradient(135deg, #FAFBFD 0%, #F1F5F9 100%);
@@ -2905,7 +2905,7 @@ textarea.form-control {
   font-size: 18px;
   flex: none;
 }
-.zolo-att-stat-icon.total { background: #EAF0FF; color: #2F6BFF; }
+.zolo-att-stat-icon.total { background: rgba(34, 87, 122, 0.1); color: var(--theme-color, #22577A); }
 .zolo-att-stat-icon.present { background: #E6F6F0; color: #047857; }
 .zolo-att-stat-icon.absent { background: #FDECEC; color: #B91C1C; }
 .zolo-att-stat-icon.rate { background: #FEF3E2; color: #B45309; }
@@ -3021,7 +3021,7 @@ textarea.form-control {
 }
 .zolo-att-filter-item.active {
   background: #FFFFFF;
-  color: #2F6BFF;
+  color: var(--theme-color, #22577A);
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
 }
 
@@ -3091,15 +3091,15 @@ textarea.form-control {
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  background: #EAF0FF;
-  color: #2F6BFF;
+  background: rgba(34, 87, 122, 0.1);
+  color: var(--theme-color, #22577A);
   font-weight: 700;
   font-size: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex: none;
-  border: 1.5px solid #C9D9FF;
+  border: 1.5px solid rgba(34, 87, 122, 0.25);
 }
 
 /* Sticky Bottom Submission Bar */
@@ -3183,8 +3183,8 @@ textarea.form-control {
 }
 
 .bootstrap-table .fixed-table-toolbar .search input.search-input:focus {
-  border-color: #2563EB !important;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12) !important;
+  border-color: var(--theme-color, #22577A) !important;
+  box-shadow: 0 0 0 3px rgba(34, 87, 122, 0.15) !important;
 }
 
 .bootstrap-table .fixed-table-toolbar .columns {
@@ -3270,15 +3270,15 @@ textarea.form-control {
 /* Active / Checked State */
 .zolo-selection-pill.active .pill-content,
 .zolo-selection-pill input:checked ~ .pill-content {
-  border-color: #2563EB !important;
-  background: #EFF6FF !important;
-  color: #1D4ED8 !important;
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15) !important;
+  border-color: var(--theme-color, #22577A) !important;
+  background: rgba(34, 87, 122, 0.08) !important;
+  color: var(--theme-color, #22577A) !important;
+  box-shadow: 0 0 0 2px rgba(34, 87, 122, 0.15) !important;
 }
 .zolo-selection-pill.active .pill-indicator,
 .zolo-selection-pill input:checked ~ .pill-content .pill-indicator {
-  border-color: #2563EB !important;
-  background: #2563EB !important;
+  border-color: var(--theme-color, #22577A) !important;
+  background: var(--theme-color, #22577A) !important;
 }
 .zolo-selection-pill.active .radio-dot,
 .zolo-selection-pill input:checked ~ .pill-content .radio-dot {
@@ -3290,7 +3290,7 @@ textarea.form-control {
 }
 .zolo-selection-pill.active .pill-icon,
 .zolo-selection-pill input:checked ~ .pill-content .pill-icon {
-  color: #2563EB !important;
+  color: var(--theme-color, #22577A) !important;
 }
 
 /* Section Chip with optional Block Assignment */
@@ -3310,9 +3310,9 @@ textarea.form-control {
   background: #F8FAFC;
 }
 .zolo-section-card.active {
-  border-color: #2563EB !important;
+  border-color: var(--theme-color, #22577A) !important;
   background: #F8FAFC !important;
-  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.12) !important;
+  box-shadow: 0 2px 6px rgba(34, 87, 122, 0.15) !important;
 }
 
 /* Zolo Modern Tabs */
@@ -3337,7 +3337,7 @@ textarea.form-control {
 }
 .zolo-tabs .zolo-tab-btn.active {
   background: #FFFFFF !important;
-  color: #2563EB !important;
+  color: var(--theme-color, #22577A) !important;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
 }
 
@@ -3496,16 +3496,16 @@ textarea.form-control {
 }
 
 .term-preset-card:hover {
-  border-color: #2563EB;
+  border-color: var(--theme-color, #22577A);
   background: #F8FAFC;
   transform: translateY(-1px);
-  box-shadow: 0 2px 5px rgba(37, 99, 235, 0.08);
+  box-shadow: 0 2px 5px rgba(34, 87, 122, 0.1);
 }
 
 .term-preset-card.active {
-  border-color: #2563EB !important;
-  background: #EFF6FF !important;
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15) !important;
+  border-color: var(--theme-color, #22577A) !important;
+  background: rgba(34, 87, 122, 0.08) !important;
+  box-shadow: 0 0 0 2px rgba(34, 87, 122, 0.18) !important;
 }
 
 .term-preset-card .preset-icon {
@@ -3513,7 +3513,7 @@ textarea.form-control {
   height: 32px;
   border-radius: 8px;
   background: #F1F5F9;
-  color: #2563EB;
+  color: var(--theme-color, #22577A);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -3522,7 +3522,7 @@ textarea.form-control {
 }
 
 .term-preset-card.active .preset-icon {
-  background: #2563EB;
+  background: var(--theme-color, #22577A);
   color: #FFFFFF;
 }
 
@@ -3619,8 +3619,8 @@ textarea.form-control {
 }
 
 .zolo-compact-modal .form-control:focus {
-  border-color: #2563EB !important;
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15) !important;
+  border-color: var(--theme-color, #22577A) !important;
+  box-shadow: 0 0 0 2px rgba(34, 87, 122, 0.15) !important;
 }
 
 .zolo-compact-modal textarea.form-control {
@@ -3650,9 +3650,10 @@ textarea.form-control {
   letter-spacing: 0.5px !important;
 }
 .zolo-section-divider i {
-  color: #2563EB !important;
+  color: var(--theme-color, #22577A) !important;
   font-size: 13px !important;
 }
+
 
 
 

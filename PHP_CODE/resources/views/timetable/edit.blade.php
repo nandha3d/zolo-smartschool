@@ -36,9 +36,9 @@
         border-radius: 8px;
     }
     .view-switcher-btn-group .btn.active {
-        background: #2F6BFF !important;
+        background: var(--theme-color, #22577A) !important;
         color: #ffffff !important;
-        border-color: #2F6BFF !important;
+        border-color: var(--theme-color, #22577A) !important;
     }
 
     /* Compact Interactive Matrix Table */

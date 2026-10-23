@@ -981,7 +981,7 @@
 
                         {{-- GPS Transport Tracking Integrated Section --}}
                         <li class="nav-item nav-item-divider" style="margin-top: 6px; padding-top: 6px; border-top: 1px dashed rgba(203, 213, 225, 0.4);">
-                            <span class="nav-link text-uppercase font-weight-bold" style="font-size: 10px; letter-spacing: 0.6px; color: #2563EB; pointer-events: none; padding-top: 4px; padding-bottom: 4px;">
+                            <span class="nav-link text-uppercase font-weight-bold" style="font-size: 10px; letter-spacing: 0.6px; color: rgba(255, 255, 255, 0.7); pointer-events: none; padding-top: 4px; padding-bottom: 4px;">
                                 <i class="fa fa-map-marker text-primary mr-1"></i> {{ __('GPS Live Tracking') }}
                             </span>
                         </li>

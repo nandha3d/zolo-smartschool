@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100" role="img" aria-label="Zolo Schools">
   <title>Zolo Schools</title>
-  <rect x="28" y="14" width="44" height="44" rx="11.66" fill="#2F6BFF"/><path d="M40.94,26.94 L59.06,26.94 L59.06,31.34 L47.93,40.66 L59.06,40.66 L59.06,45.06 L40.94,45.06 L40.94,40.66 L52.07,31.34 L40.94,31.34 Z" fill="#ffffff"/>
-  <text x="50" y="80" text-anchor="middle" font-family="Instrument Sans, Figtree, -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#0F172A" letter-spacing="-0.2">Zolo Schools</text>
+  <rect x="28" y="14" width="44" height="44" rx="11.66" fill="#22577A"/><path d="M40.94,26.94 L59.06,26.94 L59.06,31.34 L47.93,40.66 L59.06,40.66 L59.06,45.06 L40.94,45.06 L40.94,40.66 L52.07,31.34 L40.94,31.34 Z" fill="#ffffff"/>
+  <text x="50" y="80" text-anchor="middle" font-family="'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#0F172A" letter-spacing="-0.2">Zolo Schools</text>
 </svg>
