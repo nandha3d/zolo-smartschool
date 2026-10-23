@@ -227,6 +227,12 @@ class ClassSectionController extends Controller {
             // Check that Class Section has semester or not
             $isClassSemester = $this->classSection->findById($id, ['*'], ['class'])->class->include_semesters;
 
+            if ($request->has('block')) {
+                $this->classSection->update($id, [
+                    'block' => $request->filled('block') ? trim($request->block) : null
+                ]);
+            }
+
             if (!empty($request->class_teacher_id)) {
                 // Loop on the Class Teacher and add Data as Multi Dimensional Array in classTeachersData Array
                 foreach ($request->class_teacher_id as $teacherId) {

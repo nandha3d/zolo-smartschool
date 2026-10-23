@@ -67,7 +67,9 @@
                             <form action="{{ url('staff/generate-id-card') }}" target="_blank" method="post">
                                 @csrf
                                 <textarea id="user_id" name="user_id" style="display: none"></textarea>
-                                <input type="submit" class="btn btn-theme mt-4 float-right" value="{{ __('Generate') }}">
+                                <div class="mt-4 text-right">
+                                    <x-button buttonType="submit" type="primary" size="md" icon="fa fa-print" :label="__('Generate Staff ID Cards')" />
+                                </div>
                             </form>
                         </div>
                     </div>

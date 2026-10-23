@@ -6,11 +6,11 @@
     if ($ && $.fn && $.fn.bootstrapTable && $.fn.bootstrapTable.utils) {
         var originalGetItemField = $.fn.bootstrapTable.utils.getItemField;
         $.fn.bootstrapTable.utils.getItemField = function (item, field, escape) {
-            if (field === 'operate' || field === 'action' || field === 'actions' || field === 'assigned_classes_subjects') {
+            if (field === 'operate' || field === 'action' || field === 'actions' || field === 'assigned_classes_subjects' || field === 'blocks') {
                 escape = false;
             }
             var val = originalGetItemField.call(this, item, field, escape);
-            if ((field === 'operate' || field === 'action' || field === 'actions' || field === 'assigned_classes_subjects') && typeof val === 'string' && val.indexOf('&lt;') !== -1) {
+            if ((field === 'operate' || field === 'action' || field === 'actions' || field === 'assigned_classes_subjects' || field === 'blocks') && typeof val === 'string' && val.indexOf('&lt;') !== -1) {
                 var txt = document.createElement('textarea');
                 txt.innerHTML = val;
                 val = txt.value;
@@ -847,6 +847,12 @@ function teacherTimetableDayFormatter(value) {
     html += '</div>';
     return html;
 }
+function classSectionBlockFormatter(value, row) {
+    if (value) {
+        return '<span class="badge badge-light border text-dark font-weight-bold"><i class="fa fa-map-marker text-danger mr-1"></i>' + value + '</span>';
+    }
+    return '<span class="text-muted small">-</span>';
+}
 
 function classTeacherListFormatter(value, row) {
     if (row.class_teachers_list.length) {
@@ -1297,4 +1303,21 @@ function RouteNameFormatter(value, row) {
     } else {
         return row.route.name;
     }
+}
+
+function classBlockFormatter(value, row) {
+    var list = [];
+    if (row && row.blocks && Array.isArray(row.blocks) && row.blocks.length > 0) {
+        list = row.blocks;
+    } else if (value && Array.isArray(value) && value.length > 0) {
+        list = value;
+    } else if (typeof value === 'string' && value.trim()) {
+        list = [value.trim()];
+    }
+    if (list.length > 0) {
+        return list.map(function (b) {
+            return '<span class="badge badge-info mr-1" style="font-size: 11px;"><i class="fa fa-building-o mr-1"></i>' + b + '</span>';
+        }).join(' ');
+    }
+    return '<span class="text-muted small">-</span>';
 }

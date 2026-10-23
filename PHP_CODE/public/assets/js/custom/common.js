@@ -17,6 +17,33 @@ $(document).ready(function () {
     $(function () {
         $('[data-toggle="tooltip"]').tooltip()
     })
+
+    // Zolo Segmented Radio & Button Pill Synchronization
+    $(document).on('change', '.zolo-segment-input, input[type="radio"], input[type="checkbox"]', function () {
+        let name = $(this).attr('name');
+        if (name) {
+            $(`input[name="${name}"]`).each(function () {
+                let parent = $(this).closest('.zolo-segment-btn, .form-check-inline');
+                if (this.checked) {
+                    parent.addClass('active');
+                } else {
+                    parent.removeClass('active');
+                }
+            });
+        }
+    });
+
+    // Auto-sync active state on modal show
+    $(document).on('shown.bs.modal', function (e) {
+        $(e.target).find('.zolo-segment-input, input[type="radio"], input[type="checkbox"]').each(function () {
+            let parent = $(this).closest('.zolo-segment-btn, .form-check-inline');
+            if (this.checked) {
+                parent.addClass('active');
+            } else {
+                parent.removeClass('active');
+            }
+        });
+    });
 })
 
 //Setup CSRF Token default in AJAX Request

@@ -62,7 +62,8 @@ class ClassSchoolController extends Controller {
         $semesters = $this->semester->all();
         $shifts = $this->shift->active();
         $streams = $this->stream->all();
-        return response(view('class.index', compact('classes', 'sections', 'mediums', 'subjects', 'semesters', 'shifts', 'streams')));
+        $availableBlocks = $this->classSection->builder()->whereNotNull('block')->where('block', '!=', '')->distinct()->pluck('block')->sort()->values();
+        return response(view('class.index', compact('classes', 'sections', 'mediums', 'subjects', 'semesters', 'shifts', 'streams', 'availableBlocks')));
     }
 
 
@@ -103,10 +104,12 @@ class ClassSchoolController extends Controller {
                     $class_section = array();
                     if (!empty($request->section_id[$stream])) {
                         foreach ($request->section_id[$stream] as $section_id) {
-                            $class_section[] = array('class_id' => $class->id, 'section_id' => $section_id, 'medium_id' => $request->medium_id);
+                            $block = $request->section_block[$stream][$section_id] ?? $request->block ?? null;
+                            $class_section[] = array('class_id' => $class->id, 'section_id' => $section_id, 'medium_id' => $request->medium_id, 'block' => $block);
                         }
                     } else {
-                        $class_section[] = array('class_id' => $class->id, 'medium_id' => $request->medium_id);
+                        $block = $request->block ?? null;
+                        $class_section[] = array('class_id' => $class->id, 'medium_id' => $request->medium_id, 'block' => $block);
                     }
 
                     $this->classSection->createBulk($class_section);
@@ -123,10 +126,12 @@ class ClassSchoolController extends Controller {
                 $class_section = array();
                 if (!empty($request->section_id[0])) {
                     foreach ($request->section_id[0] as $section_id) {
-                        $class_section[] = array('class_id' => $class->id, 'section_id' => $section_id, 'medium_id' => $request->medium_id);
+                        $block = $request->section_block[0][$section_id] ?? $request->section_block[$section_id] ?? $request->block ?? null;
+                        $class_section[] = array('class_id' => $class->id, 'section_id' => $section_id, 'medium_id' => $request->medium_id, 'block' => $block);
                     }
                 } else {
-                    $class_section[] = array('class_id' => $class->id, 'medium_id' => $request->medium_id);
+                    $block = $request->block ?? null;
+                    $class_section[] = array('class_id' => $class->id, 'medium_id' => $request->medium_id, 'block' => $block);
                 }
 
                 $this->classSection->createBulk($class_section);
@@ -143,14 +148,17 @@ class ClassSchoolController extends Controller {
 
     public function edit($id) {
         ResponseService::noPermissionThenRedirect('class-edit');
-        $class = $this->class->findById($id, ['*'], ['stream', 'sections', 'core_subjects:id', 'elective_subject_groups.subjects:id']);
+        $class = $this->class->findById($id, ['*'], ['stream', 'sections', 'core_subjects:id', 'elective_subject_groups.subjects:id', 'class_sections']);
         $class_section = $class->sections->pluck('id');
+        $class_sections_by_section = $class->class_sections ? $class->class_sections->keyBy('section_id') : collect();
+        $default_block = $class->class_sections ? $class->class_sections->pluck('block')->filter()->first() : null;
         $subjects = $this->subject->builder()->where('medium_id', $class->medium_id)->orderBy('id', 'ASC')->get();
         $sections = $this->section->builder()->orderBy('id', 'ASC')->get();
         $semesters = $this->semester->all();
         $shifts = $this->shift->active();
         $streams = $this->stream->all();
-        return response(view('class.edit', compact('class', 'subjects', 'sections', 'class_section', 'id', 'semesters', 'shifts', 'streams')));
+        $availableBlocks = $this->classSection->builder()->whereNotNull('block')->where('block', '!=', '')->distinct()->pluck('block')->sort()->values();
+        return response(view('class.edit', compact('class', 'subjects', 'sections', 'class_section', 'class_sections_by_section', 'default_block', 'availableBlocks', 'id', 'semesters', 'shifts', 'streams')));
     }
 
     public function update(Request $request, $id) {
@@ -187,13 +195,15 @@ class ClassSchoolController extends Controller {
             if (!empty($request->section_id)) {
                 $class_section = array();
                 foreach ($request->section_id ?? [] as $section_id) {
+                    $block = $request->section_block[$section_id] ?? $request->block ?? null;
                     $class_section[] = array(
                         'class_id'   => $id,
                         'section_id' => $section_id,
                         'medium_id' => $class->medium_id,
+                        'block'      => $block,
                         'deleted_at' => null);
                 }
-                $this->classSection->upsert($class_section, ['class_id', 'section_id'], ['deleted_at']);
+                $this->classSection->upsert($class_section, ['class_id', 'section_id'], ['deleted_at', 'block']);
             }
 
 
@@ -253,7 +263,7 @@ class ClassSchoolController extends Controller {
 
 //        $currentSemester = $this->cache->getDefaultSemesterData();
         $semesters = $this->semester->all();
-        $sql = $this->class->builder()->with('stream', 'sections', 'medium', 'stream:id,name', 'shift:id,name')
+        $sql = $this->class->builder()->with('stream', 'sections', 'medium', 'stream:id,name', 'shift:id,name', 'class_sections:id,class_id,section_id,block')
             ->where(function ($query) use ($search) {
                 $query->when($search, function ($q) use ($search) {
                     $q->where('id', 'LIKE', "%$search%")->orwhere('name', 'LIKE', "%$search%")->orWhereHas('sections', function ($q) use ($search) {
@@ -305,6 +315,7 @@ class ClassSchoolController extends Controller {
             } else {
                 $tempRow['section_names'] = $row->section->pluck('name');
             }
+            $tempRow['blocks'] = $row->class_sections ? $row->class_sections->pluck('block')->filter()->unique()->values() : [];
             
             
             $tempRow['semesters'] = $semesters;

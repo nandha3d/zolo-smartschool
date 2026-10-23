@@ -978,6 +978,53 @@
                                     data-access="@hasFeatureAccess('Transportation Module')"> {{ __('transportation_expense') }}</a>
                             </li>
                         @endcan
+
+                        {{-- GPS Transport Tracking Integrated Section --}}
+                        <li class="nav-item nav-item-divider" style="margin-top: 6px; padding-top: 6px; border-top: 1px dashed rgba(203, 213, 225, 0.4);">
+                            <span class="nav-link text-uppercase font-weight-bold" style="font-size: 10px; letter-spacing: 0.6px; color: #2563EB; pointer-events: none; padding-top: 4px; padding-bottom: 4px;">
+                                <i class="fa fa-map-marker text-primary mr-1"></i> {{ __('GPS Live Tracking') }}
+                            </span>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('gps.dashboard') }}" class="nav-link" data-access="@hasFeatureAccess('GPS Transport Tracking')">
+                                {{ __('Control Center') }}
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('gps.live-tracking') }}" class="nav-link" data-access="@hasFeatureAccess('GPS Transport Tracking')">
+                                {{ __('Live Fleet Map') }}
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('gps.trips.index') }}" class="nav-link" data-access="@hasFeatureAccess('GPS Transport Tracking')">
+                                {{ __('Trips & Rosters') }}
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('gps.routes.index') }}" class="nav-link" data-access="@hasFeatureAccess('GPS Transport Tracking')">
+                                {{ __('Route & Geofences') }}
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('gps.history.index') }}" class="nav-link" data-access="@hasFeatureAccess('GPS Transport Tracking')">
+                                {{ __('Trip History & Replay') }}
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('gps.emergency.index') }}" class="nav-link" data-access="@hasFeatureAccess('GPS Transport Tracking')">
+                                {{ __('SOS & Breakdown') }}
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('gps.alerts.index') }}" class="nav-link" data-access="@hasFeatureAccess('GPS Transport Tracking')">
+                                {{ __('Safety Alerts') }}
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('gps.settings.index') }}" class="nav-link" data-access="@hasFeatureAccess('GPS Transport Tracking')">
+                                {{ __('GPS Settings') }}
+                            </a>
+                        </li>
                     </ul>
                 </div>
             </li>
@@ -1070,61 +1117,7 @@
             </li>
         @endcanany
 
-        {{-- GPS Transport Tracking Addon --}}
-        @canany(['vehicles-list', 'route-list', 'RouteVehicle-list'])
-            <li class="nav-item">
-                <a class="nav-link" data-toggle="collapse" href="#gps-transport-menu" aria-expanded="false"
-                    aria-controls="gps-transport-menu" data-access="@hasFeatureAccess('GPS Transport Tracking')">
-                    <i class="fa fa-map-marker-alt menu-icon"></i>
-                    <span class="menu-title">{{ __('GPS Tracking') }}</span>
-                    <i class="menu-arrow"></i>
-                </a>
-                <div class="collapse" id="gps-transport-menu">
-                    <ul class="nav flex-column sub-menu">
-                        <li class="nav-item">
-                            <a href="{{ route('gps.dashboard') }}" class="nav-link" data-access="@hasFeatureAccess('GPS Transport Tracking')">
-                                {{ __('Control Center') }}
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{{ route('gps.live-tracking') }}" class="nav-link" data-access="@hasFeatureAccess('GPS Transport Tracking')">
-                                {{ __('Live Fleet Map') }}
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{{ route('gps.trips.index') }}" class="nav-link" data-access="@hasFeatureAccess('GPS Transport Tracking')">
-                                {{ __('Trips & Rosters') }}
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{{ route('gps.routes.index') }}" class="nav-link" data-access="@hasFeatureAccess('GPS Transport Tracking')">
-                                {{ __('Route & Geofences') }}
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{{ route('gps.history.index') }}" class="nav-link" data-access="@hasFeatureAccess('GPS Transport Tracking')">
-                                {{ __('Trip History & Replay') }}
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{{ route('gps.emergency.index') }}" class="nav-link" data-access="@hasFeatureAccess('GPS Transport Tracking')">
-                                {{ __('SOS & Breakdown') }}
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{{ route('gps.alerts.index') }}" class="nav-link" data-access="@hasFeatureAccess('GPS Transport Tracking')">
-                                {{ __('Safety Alerts') }}
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{{ route('gps.settings.index') }}" class="nav-link" data-access="@hasFeatureAccess('GPS Transport Tracking')">
-                                {{ __('GPS Settings') }}
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </li>
-        @endcanany
+
 
         {{-- Certificate --}}
         @canany(['certificate-create', 'certificate-list', 'certificate-edit', 'certificate-delete', 'student-list',

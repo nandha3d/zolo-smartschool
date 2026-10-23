@@ -13,7 +13,7 @@ class ClassSection extends Model {
     use SoftDeletes;
     use HasFactory, DateFormatTrait;
 
-    protected $fillable = ['class_id', 'section_id', 'class_teacher_id', 'school_id', 'medium_id'];
+    protected $fillable = ['class_id', 'section_id', 'class_teacher_id', 'school_id', 'medium_id', 'block'];
     protected $appends = ['name', 'full_name'];
     protected $hidden = ['created_at','updated_at'];
 
@@ -35,6 +35,10 @@ class ClassSection extends Model {
 
     public function class_teachers() {
         return $this->hasMany(ClassTeacher::class, 'class_section_id');
+    }
+
+    public function teachers() {
+        return $this->belongsToMany(User::class, 'class_teachers', 'class_section_id', 'teacher_id');
     }
 
     public function announcement() {

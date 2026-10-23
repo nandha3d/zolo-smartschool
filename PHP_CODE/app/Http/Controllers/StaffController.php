@@ -710,11 +710,20 @@ class StaffController extends Controller
         try {
             $user_ids = explode(",", $request->user_id);
             $settings = $this->cache->getSchoolSettings();
-            if (!isset($settings['staff_id_card_fields'])) {
-                return redirect()->route('id-card-settings')->with('error', trans('settings_not_found'));
+
+            if (empty($settings['staff_id_card_fields'])) {
+                $settings['staff_id_card_fields'] = 'name,role,email,mobile,dob,gender';
+            }
+            if (empty($settings['staff_page_width'])) {
+                $settings['staff_page_width'] = 54;
+            }
+            if (empty($settings['staff_page_height'])) {
+                $settings['staff_page_height'] = 85.6;
             }
 
-            $settings['staff_id_card_fields'] = explode(",", $settings['staff_id_card_fields']);
+            $settings['staff_id_card_fields'] = is_array($settings['staff_id_card_fields'])
+                ? $settings['staff_id_card_fields']
+                : explode(",", $settings['staff_id_card_fields']);
 
             $data = explode("storage/", $settings['signature'] ?? '');
             $settings['signature'] = end($data);
@@ -726,10 +735,9 @@ class StaffController extends Controller
             $settings['horizontal_logo'] = end($data);
 
             $sessionYear = $this->cache->getDefaultSessionYear();
-            $valid_until = date('F j, Y', strtotime($sessionYear->end_date));
-            $height = $settings['staff_page_height'] * 2.8346456693;
-            $width = $settings['staff_page_width'] * 2.8346456693;
-            // $customPaper = array(0,0,360,200);
+            $valid_until = $sessionYear ? date('F j, Y', strtotime($sessionYear->end_date)) : date('F j, Y', strtotime('+1 year'));
+            $height = floatval($settings['staff_page_height']) * 2.8346456693;
+            $width = floatval($settings['staff_page_width']) * 2.8346456693;
             $customPaper = array(0, 0, $width, $height);
             $users = $this->user->builder()->select('id', 'first_name', 'last_name', 'image', 'school_id', 'gender', 'dob', 'mobile', 'email')->whereIn('id', $user_ids)->with([
                 'roles',

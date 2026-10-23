@@ -216,7 +216,7 @@
                             <div class="card-body">
                                 <div class="d-flex align-items-start justify-content-between flex-wrap gap-2">
                                     <div>
-                                        <h2 style="margin:0; font-family:'Instrument Sans'; font-size:16px; font-weight:700">{{ __('expense') }}</h2>
+                                        <h2 style="margin:0; font-family:'Inter'; font-size:16px; font-weight:700">{{ __('expense') }}</h2>
                                         <div style="font-size:12.5px; color:#8A94A6">{{ __('Monthly spend across the session year') }}</div>
                                     </div>
                                     <div class="d-flex align-items-center gap-2">
@@ -255,9 +255,9 @@
                 <div class="col-lg-4 grid-margin d-flex flex-column gap-3">
                     {{-- Attendance Dark Navy Card --}}
                     <div class="zolo-att-card">
-                        <div class="d-flex align-items-center justify-content-between mb-3">
-                            <h2 style="margin:0; font-family:'Instrument Sans'; font-size:16px; font-weight:700; color:#fff">{{ __('attendance') }}</h2>
-                            {!! Form::select('class_id', count($class_names) > 0 ? $class_names : ['' => 'Not Data Available'], null, ['class' => 'form-control form-control-sm class-section-attendance zolo-att-select', 'id' => 'attendance-class-select']) !!}
+                        <div class="d-flex align-items-center justify-content-between mb-3" style="min-width: 0; gap: 8px;">
+                            <h2 style="margin:0; font-family:'Inter'; font-size:16px; font-weight:700; color:#fff; white-space:nowrap; flex-shrink:0;">{{ __('attendance') }}</h2>
+                            {!! Form::select('class_id', count($class_names) > 0 ? $class_names : ['' => 'Not Data Available'], null, ['class' => 'form-control form-control-sm class-section-attendance zolo-att-select', 'id' => 'attendance-class-select', 'style' => 'width:auto; max-width:145px;']) !!}
                         </div>
                         <div class="d-flex align-items-center gap-3">
                             <div class="zolo-att-donut">
@@ -292,9 +292,9 @@
                     {{-- Leaves Card --}}
                     <div class="card flex-1">
                         <div class="card-body">
-                            <div class="d-flex align-items-center justify-content-between mb-2">
-                                <h2 style="margin:0; font-family:'Instrument Sans'; font-size:16px; font-weight:700">{{ __('leaves') }}</h2>
-                                {!! Form::select('leave_filter', ['Today' => __('today'), 'Tomorrow' => __('tomorrow'), 'Upcoming' => __('upcoming')], 'Today', ['class' => 'form-control form-control-sm filter_leaves', 'style' => 'width:auto; font-size:12px; font-weight:600; border-radius:7px;']) !!}
+                            <div class="d-flex align-items-center justify-content-between mb-3" style="min-width: 0; gap: 8px;">
+                                <h2 style="margin:0; font-family:'Inter'; font-size:16px; font-weight:700; white-space:nowrap; flex-shrink:0;">{{ __('leaves') }}</h2>
+                                {!! Form::select('leave_filter', ['Today' => __('today'), 'Tomorrow' => __('tomorrow'), 'Upcoming' => __('upcoming')], 'Today', ['class' => 'form-control form-control-sm filter_leaves', 'style' => 'width:auto; max-width:125px; font-size:12px; font-weight:600; border-radius:7px; height:32px;']) !!}
                             </div>
                             <div class="sc" style="max-height: 222px; overflow-y: auto;">
                                 <div class="leave-list">
@@ -312,14 +312,14 @@
                 <div class="col-md-4 grid-margin stretch-card">
                     <div class="card w-100">
                         <div class="card-body">
-                            <div class="d-flex align-items-center justify-content-between mb-3">
-                                <h2 style="margin:0; font-family:'Instrument Sans'; font-size:16px; font-weight:700">{{ __('exam_result') }}</h2>
+                            <div class="d-flex align-items-center justify-content-between mb-3" style="min-width: 0; gap: 8px;">
+                                <h2 style="margin:0; font-family:'Inter'; font-size:16px; font-weight:700; white-space:nowrap; flex-shrink:0;">{{ __('exam_result') }}</h2>
                                 <select name="session_year_id" id="exam_result_session_year_id" style="display:none;">
                                     @foreach ($sessionYear as $session)
                                         <option value="{{ $session->id }}" {{ $session->default == 1 ? 'selected' : '' }}>{{ $session->name }}</option>
                                     @endforeach
                                 </select>
-                                <select name="exam_name" id="exam_reuslt_exam_name" class="form-control form-control-sm" style="width:auto; font-size:12px; font-weight:600; border-radius:7px;">
+                                <select name="exam_name" id="exam_reuslt_exam_name" class="form-control form-control-sm" style="width:auto; max-width:155px; font-size:12px; font-weight:600; border-radius:7px; height:32px;">
                                     <option value="">{{ __('select') . ' ' . __('exam') }}</option>
                                     @foreach ($exams as $exam)
                                         <option value="{{ $exam->name }}" data-session-year="{{ $exam->session_year_id }}">{{ $exam->name }}</option>
@@ -339,11 +339,11 @@
                 <div class="col-md-4 grid-margin stretch-card">
                     <div class="card w-100">
                         <div class="card-body d-flex flex-column">
-                            <div class="d-flex align-items-center justify-content-between mb-1">
-                                <h2 style="margin:0; font-family:'Instrument Sans'; font-size:16px; font-weight:700">{{ __('fees_over_due') }}</h2>
-                                {!! Form::select('class_section_id', $class_section_names, null, ['class' => 'form-control form-control-sm fees-over-due-class', 'id' => 'fees-over-due-class-section', 'style' => 'width:auto; font-size:12px; font-weight:600; border-radius:7px;']) !!}
+                            <div class="d-flex align-items-center justify-content-between mb-2" style="min-width: 0; gap: 8px;">
+                                <h2 style="margin:0; font-family:'Inter'; font-size:16px; font-weight:700; white-space:nowrap; flex-shrink:0;">{{ __('fees_over_due') }}</h2>
+                                {!! Form::select('class_section_id', $class_section_names, null, ['class' => 'form-control form-control-sm fees-over-due-class', 'id' => 'fees-over-due-class-section', 'style' => 'width:auto; max-width:145px; font-size:12px; font-weight:600; border-radius:7px; height:32px;']) !!}
                             </div>
-                            <div style="font-size:12px; color:#8A94A6; margin-bottom:8px">{{ __('Select students to deactivate their account') }}</div>
+                            <div style="font-size:12px; color:#8A94A6; margin-bottom:12px">{{ __('Select students to deactivate their account') }}</div>
                             
                             <form method="POST" id="fees-overdue-form" class="fees-overdue-form flex-1 d-flex flex-column" action="{{ route('deactivate-student-account') }}">
                                 @csrf
@@ -365,14 +365,14 @@
                 <div class="col-md-4 grid-margin stretch-card">
                     <div class="card w-100">
                         <div class="card-body">
-                            <h2 style="margin:0 0 3px; font-family:'Instrument Sans'; font-size:16px; font-weight:700">{{ __('fees_details') }}</h2>
-                            <div style="font-size:12px; color:#8A94A6; margin-bottom:16px">Session {{ $sessionYear->firstWhere('default', 1)->name ?? '2025-2026' }}</div>
+                            <h2 style="margin:0 0 4px; font-family:'Inter'; font-size:16px; font-weight:700">{{ __('fees_details') }}</h2>
+                            <div style="font-size:12px; color:#8A94A6; margin-bottom:18px">Session {{ $sessionYear->firstWhere('default', 1)->name ?? '2025-2026' }}</div>
                             
                             <div class="d-flex align-items-center gap-3">
                                 <div style="position:relative; width:108px; height:108px; flex:none;">
                                     <div id="zolo-fee-conic" style="position:absolute; inset:0; border-radius:50%; background:conic-gradient(#2F6BFF 0 230deg, #D97706 230deg 309deg, #DC2626 309deg 360deg);"></div>
                                     <div style="position:absolute; inset:13px; border-radius:50%; background:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center;">
-                                        <div id="zolo-fee-collected-pct" style="font-family:'Instrument Sans'; font-size:21px; font-weight:700; line-height:1; font-variant-numeric:tabular-nums">64%</div>
+                                        <div id="zolo-fee-collected-pct" style="font-family:'Inter'; font-size:21px; font-weight:700; line-height:1; font-variant-numeric:tabular-nums">64%</div>
                                         <div style="font-size:9.5px; color:#8A94A6; letter-spacing:0.08em; text-transform:uppercase; margin-top:2px">{{ __('Collected') }}</div>
                                     </div>
                                 </div>
@@ -408,7 +408,7 @@
                     <div class="card w-100">
                         <div class="card-body">
                             <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
-                                <h2 style="margin:0; font-family:'Instrument Sans'; font-size:16px; font-weight:700">{{ __('announcement') }}</h2>
+                                <h2 style="margin:0; font-family:'Inter'; font-size:16px; font-weight:700">{{ __('announcement') }}</h2>
                                 <a href="{{ url('announcement') }}" style="font-size:12.5px; font-weight:600; display:flex; align-items:center; gap:4px">
                                     <span class="ms" style="font-size:16px">add</span> {{ __('New announcement') }}
                                 </a>
@@ -450,7 +450,7 @@
                     <div class="card">
                         <div class="card-body">
                             <div class="d-flex align-items-center justify-content-between mb-2">
-                                <h2 style="margin:0; font-family:'Instrument Sans'; font-size:16px; font-weight:700">{{ __('birthday') }}</h2>
+                                <h2 style="margin:0; font-family:'Inter'; font-size:16px; font-weight:700">{{ __('birthday') }}</h2>
                                 {!! Form::select('birthday_filter', ['today' => __('today'), 'this_month' => __('this_month'), 'next_month' => __('next_month')], 'today', ['class' => 'form-control form-control-sm filter_birthday', 'style' => 'width:auto; font-size:12px; font-weight:600; border-radius:7px;']) !!}
                             </div>
                             <div class="sc" style="max-height: 160px; overflow-y: auto;">
@@ -464,7 +464,7 @@
                     {{-- Holiday Card --}}
                     <div class="card">
                         <div class="card-body">
-                            <h2 style="margin:0 0 8px; font-family:'Instrument Sans'; font-size:16px; font-weight:700">{{ __('holiday') }}</h2>
+                            <h2 style="margin:0 0 8px; font-family:'Inter'; font-size:16px; font-weight:700">{{ __('holiday') }}</h2>
                             <div class="sc" style="max-height: 160px; overflow-y: auto;">
                                 @forelse ($holiday as $h)
                                     @php
@@ -488,7 +488,7 @@
                     {{-- Student Gender Card --}}
                     <div class="card">
                         <div class="card-body">
-                            <h2 style="margin:0 0 14px; font-family:'Instrument Sans'; font-size:16px; font-weight:700">{{ __('student_gender') }}</h2>
+                            <h2 style="margin:0 0 14px; font-family:'Inter'; font-size:16px; font-weight:700">{{ __('student_gender') }}</h2>
                             @php
                                 $boysPct = $boys ?: 54;
                                 $girlsPct = $girls ?: 46;
@@ -505,7 +505,7 @@
                                         <span style="width:7px; height:7px; border-radius:2px; background:#2F6BFF;"></span>
                                         {{ __('Boys') }}
                                     </div>
-                                    <div style="font-family:'Instrument Sans'; font-size:20px; font-weight:700; margin-top:2px; font-variant-numeric:tabular-nums; color:#0F172A;">
+                                    <div style="font-family:'Inter'; font-size:20px; font-weight:700; margin-top:2px; font-variant-numeric:tabular-nums; color:#0F172A;">
                                         {{ $boysCnt }}
                                     </div>
                                 </div>
@@ -514,7 +514,7 @@
                                         <span style="width:7px; height:7px; border-radius:2px; background:#5B8CFF;"></span>
                                         {{ __('Girls') }}
                                     </div>
-                                    <div style="font-family:'Instrument Sans'; font-size:20px; font-weight:700; margin-top:2px; font-variant-numeric:tabular-nums; color:#0F172A;">
+                                    <div style="font-family:'Inter'; font-size:20px; font-weight:700; margin-top:2px; font-variant-numeric:tabular-nums; color:#0F172A;">
                                         {{ $girlsCnt }}
                                     </div>
                                 </div>
@@ -974,12 +974,13 @@
                 var pctText = $wrapper.find('small:last').text().trim();
                 var pctNum = parseFloat(pctText) || 75;
                 var barColor = pctNum >= 75 ? '#2F6BFF' : (pctNum >= 60 ? '#D97706' : '#DC2626');
+                var clsDisplay = clsText.toLowerCase().startsWith('class') ? clsText : ('Class ' + clsText);
 
                 var newHtml = `
                     <div class="zolo-exam-row">
                         <div class="zolo-exam-head">
-                            <span style="font-size:13px; font-weight:600; flex:1; color:#0F172A;">Class ${clsText}</span>
-                            <span style="font-family:'Instrument Sans'; font-size:13.5px; font-weight:700; font-variant-numeric:tabular-nums; color:#0F172A;">${pctText}</span>
+                            <span style="font-size:13px; font-weight:600; flex:1; color:#0F172A;">${clsDisplay}</span>
+                            <span style="font-family:'Inter'; font-size:13.5px; font-weight:700; font-variant-numeric:tabular-nums; color:#0F172A;">${pctText}</span>
                             <span style="font-size:11px; color:#8A94A6;">38 students</span>
                         </div>
                         <div class="zolo-exam-track">

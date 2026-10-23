@@ -23,15 +23,29 @@
     $cardBorder = $theme['border'] ?? '#CBD5E1';
     $textColor = $theme['text'] ?? '#FFFFFF';
 
-    // Student Photo resolution
-    $photoPath = public_path('assets/mock_student.jpg');
-    if ($student->getRawOriginal('image')) {
-        $checkPath = public_path('storage/' . $student->getRawOriginal('image'));
-        if (file_exists($checkPath)) {
-            $photoPath = $checkPath;
+    // Student Photo resolution (Check tenant storage, public storage, direct path)
+    $photoPath = null;
+    $rawImage = $student->getRawOriginal('image');
+    if (!empty($rawImage)) {
+        $candidates = [
+            storage_path('app/public/' . $rawImage),
+            public_path('storage/' . $rawImage),
+            public_path($rawImage),
+            storage_path('app/' . $rawImage),
+        ];
+        if (!empty($student->school_id)) {
+            $candidates[] = storage_path('app/public/' . $student->school_id . '/' . ltrim($rawImage, '/'));
+            $candidates[] = public_path('storage/' . $student->school_id . '/' . ltrim($rawImage, '/'));
+        }
+        foreach ($candidates as $cand) {
+            if (file_exists($cand)) {
+                $photoPath = $cand;
+                break;
+            }
         }
     }
-    if (!file_exists($photoPath)) {
+    // If no custom photo uploaded, fall back to neutral silhouette placeholder (never mock demo student)
+    if (!$photoPath || !file_exists($photoPath)) {
         $photoPath = public_path('assets/dummy_logo.jpg');
     }
 

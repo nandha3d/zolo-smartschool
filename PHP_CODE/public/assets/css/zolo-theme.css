@@ -8,27 +8,27 @@
  */
 
 :root {
-  --zolo-accent: #2F6BFF;
-  --zolo-accent-hover: #1B4ED1;
-  --zolo-accent-soft: #EAF0FF;
-  --zolo-accent-soft-border: #C9D9FF;
+  --zolo-accent: #2563EB;
+  --zolo-accent-hover: #1D4ED8;
+  --zolo-accent-soft: #EFF6FF;
+  --zolo-accent-soft-border: #BFDBFE;
   --zolo-ink: #0F172A;
   --zolo-ink-2: #334155;
-  --zolo-muted: #5B6577;
-  --zolo-muted-2: #8A94A6;
-  --zolo-muted-3: #A3AEC0;
-  --zolo-label: #64748B;
-  --zolo-bg: #F4F6FA;
+  --zolo-muted: #64748B;
+  --zolo-muted-2: #94A3B8;
+  --zolo-muted-3: #CBD5E1;
+  --zolo-label: #475569;
+  --zolo-bg: #EEF2F6;
   --zolo-surface: #ffffff;
-  --zolo-border: #E3E8F0;
-  --zolo-border-soft: #EEF1F6;
-  --zolo-border-soft-2: #F1F4F9;
+  --zolo-border: #D8E2EC;
+  --zolo-border-soft: #E2E8F0;
+  --zolo-border-soft-2: #EDF2F7;
 
   --zolo-ok-ink: #047857;    --zolo-ok-bg: #E6F6F0;    --zolo-ok-border: #BCE5D6;
   --zolo-bad-ink: #B91C1C;   --zolo-bad-bg: #FDECEC;   --zolo-bad-border: #F6C9C9;
   --zolo-warn-ink: #B45309;  --zolo-warn-bg: #FEF3E2;  --zolo-warn-border: #FADFB4;
-  --zolo-info-ink: #1B4ED1;  --zolo-info-bg: #EAF0FF;  --zolo-info-border: #C9D9FF;
-  --zolo-flat-ink: #475569;  --zolo-flat-bg: #F4F6FA;  --zolo-flat-border: #E3E8F0;
+  --zolo-info-ink: #1D4ED8;  --zolo-info-bg: #EFF6FF;  --zolo-info-border: #BFDBFE;
+  --zolo-flat-ink: #475569;  --zolo-flat-bg: #EEF2F6;  --zolo-flat-border: #D8E2EC;
 
   --zolo-radius-sm: 7px;
   --zolo-radius: 9px;
@@ -36,8 +36,8 @@
   --zolo-radius-pill: 99px;
   --zolo-shadow-modal: 0 20px 50px rgba(15, 23, 42, 0.28);
 
-  --zolo-font-heading: 'Instrument Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --zolo-font-body: 'Figtree', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --zolo-font-heading: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --zolo-font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
 /* --theme-color is deliberately NOT redefined here: it holds the school's
@@ -46,97 +46,435 @@
    setting. The redesign's accent lives in --zolo-accent instead. */
 
 /* ---------- Icons ----------
-   The design mock used Material Symbols from a font CDN, but this app
-   self-hosts its icon fonts on purpose — a blocked CDN would render every
-   icon as its raw literal name ("shield_person") in the UI. So the redesign
-   uses the Material Design Icons set already bundled at
-   /assets/css/materialdesignicons.min.css (mdi mdi-*) instead. */
+   The redesign uses the Material Design Icons set bundled at
+   /assets/css/materialdesignicons.min.css (mdi mdi-*) and font-awesome. */
 .mdi { line-height: 1; vertical-align: middle; }
 
-/* ---------- Base ---------- */
-body {
-  background: var(--zolo-bg);
-  color: var(--zolo-ink);
-  font-family: var(--zolo-font-body);
+/* ---------- Base Inter Typography System ---------- */
+html, body {
+  background: var(--zolo-bg) !important;
+  color: var(--zolo-ink) !important;
+  font-family: var(--zolo-font-body) !important;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-h1, h2, h3, h4, h5, h6,
-.zolo-heading {
-  font-family: var(--zolo-font-heading);
-  font-weight: 700;
-  letter-spacing: -0.4px;
-  color: var(--zolo-ink);
+/* Page headings: 24–30px, weight 600–700 */
+h1, .page-title, .zolo-page-title, .page-header h3, .page-header h4, .zolo-heading {
+  font-family: var(--zolo-font-heading) !important;
+  font-size: 26px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.025em !important;
+  line-height: 1.25 !important;
+  color: var(--zolo-ink) !important;
 }
 
-a { color: var(--zolo-accent); }
+h2 {
+  font-family: var(--zolo-font-heading) !important;
+  font-size: 22px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.02em !important;
+  line-height: 1.3 !important;
+  color: var(--zolo-ink) !important;
+}
+
+h3 {
+  font-family: var(--zolo-font-heading) !important;
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.015em !important;
+  color: var(--zolo-ink) !important;
+}
+
+/* Dashboard card titles: 14–16px, weight 500–600 */
+h4, h5, .card-title, .zolo-card-header .card-title, .modal-title, .zolo-section-title, .zolo-card-title {
+  font-family: var(--zolo-font-heading) !important;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.01em !important;
+  color: var(--zolo-ink) !important;
+}
+
+h6 {
+  font-family: var(--zolo-font-heading) !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: var(--zolo-ink-2) !important;
+}
+
+p, .card-text, .text-body {
+  font-family: var(--zolo-font-body);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.55;
+}
+
+a { color: var(--zolo-accent); text-decoration: none; }
 a:hover { color: var(--zolo-accent-hover); }
 
 .zolo-tabular { font-variant-numeric: tabular-nums; }
 
-/* ---------- Buttons ---------- */
-.btn {
-  border-radius: var(--zolo-radius) !important;
-  font-weight: 600;
-  font-size: 0.83rem;
+/* =========================================================
+   ZOLO UNIFIED BUTTON SYSTEM (DUAL COLOR THEME - NO GRADIENTS)
+   ========================================================= */
+:root {
+  --btn-primary-bg: #2563EB;
+  --btn-primary-hover: #1D4ED8;
+  --btn-secondary-bg: #475569;
+  --btn-secondary-hover: #334155;
+  --btn-success-bg: #10B981;
+  --btn-success-hover: #059669;
+  --btn-danger-bg: #EF4444;
+  --btn-danger-hover: #DC2626;
+  --btn-warning-bg: #F59E0B;
+  --btn-warning-hover: #D97706;
+  --btn-help-bg: #9333EA;
+  --btn-help-hover: #7E22CE;
+  --btn-disabled-bg: #93C5FD;
+  --btn-radius: 8px;
 }
 
+/* Global button base: flat, clean solid colors, no gradient */
+.btn {
+  border-radius: var(--btn-radius) !important;
+  font-weight: 600 !important;
+  font-size: 0.85rem !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  transition: all 0.15s ease-in-out !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  line-height: 1.4 !important;
+  padding: 8px 18px !important;
+}
+
+/* Primary Button (Solid Blue) */
 .btn-primary,
+.btn-theme,
+.btn-gradient-primary,
 .btn-inverse-primary,
 .wizard > .actions a {
-  color: #fff !important;
-  background-color: var(--zolo-accent) !important;
-  border-color: var(--zolo-accent) !important;
+  background: var(--btn-primary-bg) !important;
+  background-color: var(--btn-primary-bg) !important;
+  background-image: none !important;
+  color: #FFFFFF !important;
+  border: 1px solid var(--btn-primary-bg) !important;
 }
-
 .btn-primary:hover, .btn-primary:focus,
+.btn-theme:hover, .btn-theme:focus,
+.btn-gradient-primary:hover, .btn-gradient-primary:focus,
 .btn-inverse-primary:hover, .btn-inverse-primary:focus,
 .wizard > .actions a:hover {
-  background-color: var(--zolo-accent-hover) !important;
-  border-color: var(--zolo-accent-hover) !important;
-  box-shadow: 0 0 0 0.2rem rgba(47, 107, 255, 0.25) !important;
+  background: var(--btn-primary-hover) !important;
+  background-color: var(--btn-primary-hover) !important;
+  background-image: none !important;
+  color: #FFFFFF !important;
+  border-color: var(--btn-primary-hover) !important;
+  transform: translateY(-1px);
 }
 
+/* Secondary Button (Solid Slate) */
+.btn-secondary,
+.btn-gradient-secondary,
+.btn-inverse-secondary,
+.btn-dark,
+.btn-gradient-dark {
+  background: var(--btn-secondary-bg) !important;
+  background-color: var(--btn-secondary-bg) !important;
+  background-image: none !important;
+  color: #FFFFFF !important;
+  border: 1px solid var(--btn-secondary-bg) !important;
+}
+.btn-secondary:hover, .btn-secondary:focus,
+.btn-gradient-secondary:hover, .btn-gradient-secondary:focus,
+.btn-inverse-secondary:hover, .btn-inverse-secondary:focus,
+.btn-dark:hover, .btn-gradient-dark:hover {
+  background: var(--btn-secondary-hover) !important;
+  background-color: var(--btn-secondary-hover) !important;
+  background-image: none !important;
+  color: #FFFFFF !important;
+  border-color: var(--btn-secondary-hover) !important;
+  transform: translateY(-1px);
+}
+
+/* Success Button (Solid Green) */
+.btn-success,
+.btn-gradient-success,
+.btn-inverse-success {
+  background: var(--btn-success-bg) !important;
+  background-color: var(--btn-success-bg) !important;
+  background-image: none !important;
+  color: #FFFFFF !important;
+  border: 1px solid var(--btn-success-bg) !important;
+}
+.btn-success:hover, .btn-success:focus,
+.btn-gradient-success:hover, .btn-gradient-success:focus,
+.btn-inverse-success:hover, .btn-inverse-success:focus {
+  background: var(--btn-success-hover) !important;
+  background-color: var(--btn-success-hover) !important;
+  background-image: none !important;
+  color: #FFFFFF !important;
+  border-color: var(--btn-success-hover) !important;
+  transform: translateY(-1px);
+}
+
+/* Danger Button (Solid Red) */
+.btn-danger,
+.btn-gradient-danger,
+.btn-inverse-danger {
+  background: var(--btn-danger-bg) !important;
+  background-color: var(--btn-danger-bg) !important;
+  background-image: none !important;
+  color: #FFFFFF !important;
+  border: 1px solid var(--btn-danger-bg) !important;
+}
+.btn-danger:hover, .btn-danger:focus,
+.btn-gradient-danger:hover, .btn-gradient-danger:focus,
+.btn-inverse-danger:hover, .btn-inverse-danger:focus {
+  background: var(--btn-danger-hover) !important;
+  background-color: var(--btn-danger-hover) !important;
+  background-image: none !important;
+  color: #FFFFFF !important;
+  border-color: var(--btn-danger-hover) !important;
+  transform: translateY(-1px);
+}
+
+/* Warning Button (Solid Amber) */
+.btn-warning,
+.btn-gradient-warning,
+.btn-inverse-warning {
+  background: var(--btn-warning-bg) !important;
+  background-color: var(--btn-warning-bg) !important;
+  background-image: none !important;
+  color: #FFFFFF !important;
+  border: 1px solid var(--btn-warning-bg) !important;
+}
+.btn-warning:hover, .btn-warning:focus,
+.btn-gradient-warning:hover, .btn-gradient-warning:focus,
+.btn-inverse-warning:hover, .btn-inverse-warning:focus {
+  background: var(--btn-warning-hover) !important;
+  background-color: var(--btn-warning-hover) !important;
+  background-image: none !important;
+  color: #FFFFFF !important;
+  border-color: var(--btn-warning-hover) !important;
+  transform: translateY(-1px);
+}
+
+/* Help / Purple Button (Solid Purple) */
+.btn-help,
+.btn-purple,
+.btn-gradient-info,
+.btn-info {
+  background: var(--btn-help-bg) !important;
+  background-color: var(--btn-help-bg) !important;
+  background-image: none !important;
+  color: #FFFFFF !important;
+  border: 1px solid var(--btn-help-bg) !important;
+}
+.btn-help:hover, .btn-help:focus,
+.btn-purple:hover, .btn-purple:focus,
+.btn-gradient-info:hover, .btn-gradient-info:focus,
+.btn-info:hover, .btn-info:focus {
+  background: var(--btn-help-hover) !important;
+  background-color: var(--btn-help-hover) !important;
+  background-image: none !important;
+  color: #FFFFFF !important;
+  border-color: var(--btn-help-hover) !important;
+  transform: translateY(-1px);
+}
+
+/* Text Button (Flat Soft Background) */
+.btn-text,
+.btn-ghost {
+  background: #F8FAFC !important;
+  background-color: #F8FAFC !important;
+  background-image: none !important;
+  color: var(--btn-primary-bg) !important;
+  border: 1px solid transparent !important;
+}
+.btn-text:hover, .btn-text:focus,
+.btn-ghost:hover, .btn-ghost:focus {
+  background: #EFF6FF !important;
+  background-color: #EFF6FF !important;
+  color: var(--btn-primary-hover) !important;
+  border-color: transparent !important;
+}
+
+/* Link Button (Flat Link Style) */
+.btn-link {
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  color: var(--btn-primary-bg) !important;
+  border: none !important;
+  text-decoration: none !important;
+  padding: 8px 12px !important;
+}
+.btn-link:hover, .btn-link:focus {
+  color: var(--btn-primary-hover) !important;
+  text-decoration: underline !important;
+  background: transparent !important;
+}
+
+/* Outline Buttons */
 .btn-outline-primary {
-  color: var(--zolo-accent) !important;
-  border-color: var(--zolo-accent) !important;
+  background: transparent !important;
+  color: var(--btn-primary-bg) !important;
+  border: 1.5px solid var(--btn-primary-bg) !important;
 }
 .btn-outline-primary:hover {
-  color: #fff !important;
-  background-color: var(--zolo-accent) !important;
+  background: var(--btn-primary-bg) !important;
+  color: #FFFFFF !important;
+  border-color: var(--btn-primary-bg) !important;
 }
 
-.btn-light, .btn-secondary, .btn-inverse-secondary {
-  color: var(--zolo-ink-2) !important;
-  background-color: #fff !important;
-  border-color: var(--zolo-border) !important;
+.btn-outline-secondary,
+.btn-light {
+  background: #FFFFFF !important;
+  color: var(--btn-secondary-bg) !important;
+  border: 1.5px solid #CBD5E1 !important;
 }
-.btn-light:hover, .btn-secondary:hover, .btn-inverse-secondary:hover {
-  background-color: var(--zolo-bg) !important;
+.btn-outline-secondary:hover,
+.btn-light:hover {
+  background: #F1F5F9 !important;
+  color: #0F172A !important;
+  border-color: #94A3B8 !important;
 }
 
-.btn-success, .btn-inverse-success { background-color: var(--zolo-ok-ink) !important; border-color: var(--zolo-ok-ink) !important; }
-.btn-danger, .btn-inverse-danger  { background-color: var(--zolo-bad-ink) !important; border-color: var(--zolo-bad-ink) !important; }
-.btn-warning, .btn-inverse-warning{ background-color: var(--zolo-warn-ink) !important; border-color: var(--zolo-warn-ink) !important; color: #fff !important; }
+/* Disabled State */
+.btn:disabled,
+.btn.disabled,
+fieldset:disabled .btn {
+  background: var(--btn-disabled-bg) !important;
+  background-color: var(--btn-disabled-bg) !important;
+  background-image: none !important;
+  color: #FFFFFF !important;
+  border-color: var(--btn-disabled-bg) !important;
+  opacity: 0.8 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+  pointer-events: none !important;
+}
+
+/* Sizes */
+.btn-sm, .btn-group-sm > .btn {
+  padding: 4px 12px !important;
+  font-size: 0.78rem !important;
+  border-radius: 6px !important;
+}
+.btn-md {
+  padding: 8px 18px !important;
+  font-size: 0.85rem !important;
+}
+.btn-lg, .btn-group-lg > .btn {
+  padding: 12px 26px !important;
+  font-size: 1rem !important;
+  border-radius: 10px !important;
+}
+
+/* Button Badge Counter */
+.btn-badge {
+  background: #FFFFFF;
+  color: var(--btn-primary-bg);
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 800;
+  min-width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  line-height: 1;
+}
+
+/* Square & Circle Icon Buttons */
+.btn-icon-square {
+  width: 36px !important;
+  height: 36px !important;
+  padding: 0 !important;
+  border-radius: 8px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: 1.5px solid #CBD5E1 !important;
+  background: #FFFFFF !important;
+  color: #334155 !important;
+}
+.btn-icon-square:hover {
+  background: #F1F5F9 !important;
+  border-color: #94A3B8 !important;
+}
+
+.btn-icon-circle {
+  width: 36px !important;
+  height: 36px !important;
+  padding: 0 !important;
+  border-radius: 50% !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: var(--btn-primary-bg) !important;
+  color: #FFFFFF !important;
+  border: none !important;
+}
+.btn-icon-circle:hover {
+  background: var(--btn-primary-hover) !important;
+}
+
+/* Segmented Unified Button Group */
+.btn-group-unified {
+  display: inline-flex;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+.btn-group-unified .btn {
+  border-radius: 0 !important;
+  border-right: 1px solid rgba(255,255,255,0.2) !important;
+}
+.btn-group-unified .btn:last-child {
+  border-right: none !important;
+}
 
 /* ---------- Page chrome ---------- */
+.container-scroller,
+.page-body-wrapper,
+.main-panel,
 .content-wrapper {
   background: var(--zolo-bg) !important;
+}
+.content-wrapper {
   padding: 20px 26px 44px !important;
 }
-.main-panel { background: var(--zolo-bg) !important; }
 
-/* ---------- Cards ---------- */
-.card {
-  border: 1px solid var(--zolo-border);
+/* ---------- Cards & Content Boxes ---------- */
+.card,
+.zolo-card {
+  background: #FFFFFF !important;
+  border: 1px solid var(--zolo-border) !important;
   border-radius: var(--zolo-radius-lg) !important;
-  box-shadow: none !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04) !important;
 }
 .card .card-body { padding: 18px 20px; }
-.card-title {
-  font-family: var(--zolo-font-heading);
-  font-weight: 700;
-  font-size: 16px;
+.card-header {
+  background: #F8FAFC !important;
+  border-bottom: 1px solid var(--zolo-border) !important;
+  border-left: 4px solid var(--theme-color, #22577A) !important;
+  padding: 12px 18px !important;
+}
+.card-title,
+.card .card-title {
+  font-family: var(--zolo-font-heading) !important;
+  font-weight: 600 !important;
+  font-size: 15px !important;
+  color: var(--theme-color, #22577A) !important;
+  letter-spacing: -0.01em;
 }
 .zolo-card-header {
   display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;
@@ -144,19 +482,41 @@ a:hover { color: var(--zolo-accent-hover); }
 .zolo-card-header .card-title { margin: 0; flex: 1 1 160px; min-width: 0; }
 .zolo-card-header select { width: auto; }
 
-/* ---------- Tables ---------- */
-.table thead th {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--zolo-label);
-  background: #FAFBFD;
-  border-bottom: 1px solid var(--zolo-border);
-  border-top: 0;
+/* ---------- Tables with Theme Color Headers ---------- */
+.table thead th,
+.bootstrap-table thead th,
+.fixed-table-container thead th,
+.table-bordered thead th {
+  font-family: var(--zolo-font-heading) !important;
+  font-size: 12.5px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.04em !important;
+  text-transform: uppercase !important;
+  color: #FFFFFF !important;
+  background: var(--theme-color, #22577A) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.15) !important;
+  padding: 10px 12px !important;
+  vertical-align: middle !important;
 }
-.table td, .table th { border-color: var(--zolo-border-soft-2); vertical-align: middle; }
-.table-hover tbody tr:hover { background: #FAFBFD; }
+.table thead th a,
+.bootstrap-table thead th a,
+.bootstrap-table thead th .th-inner {
+  color: #FFFFFF !important;
+  font-weight: 600 !important;
+}
+.bootstrap-table thead th .sortable:after,
+.bootstrap-table thead th .both:after {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+.table td, .table th, .bootstrap-table .table td, .fixed-table-container td {
+  font-family: var(--zolo-font-body) !important;
+  font-size: 13.5px !important;
+  font-weight: 400 !important;
+  border-color: var(--zolo-border-soft-2) !important;
+  vertical-align: middle !important;
+}
+.table-hover tbody tr:hover { background: #F8FAFC !important; }
 
 /* ---------- Badges / status pills ---------- */
 .badge {
@@ -176,16 +536,19 @@ a:hover { color: var(--zolo-accent-hover); }
 .form-control, .form-select, .select2-container--default .select2-selection {
   border-radius: var(--zolo-radius) !important;
   border-color: var(--zolo-border) !important;
-  font-size: 13.5px;
+  font-family: var(--zolo-font-body) !important;
+  font-size: 13.5px !important;
 }
 .form-control:focus, .form-select:focus {
   border-color: var(--zolo-accent) !important;
-  box-shadow: 0 0 0 3px rgba(47, 107, 255, 0.12) !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12) !important;
 }
-label, .form-group > label {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--zolo-ink-2);
+label, .form-group > label, .col-form-label, .custom-control-label {
+  font-family: var(--zolo-font-body) !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  color: #334155 !important;
+  margin-bottom: 4px;
 }
 
 /* ---------- Dropdowns / modals ---------- */
@@ -297,13 +660,15 @@ a.text-primary:hover, a.text-primary:focus { color: var(--zolo-accent-hover) !im
 .zolo-stat:first-child { border-left: 0; }
 .zolo-stat .zolo-stat-label {
   display: flex; align-items: center; gap: 8px;
-  font-size: 11.5px; font-weight: 600; color: var(--zolo-label);
-  text-transform: uppercase; letter-spacing: 0.02em;
+  font-family: var(--zolo-font-body) !important;
+  font-size: 14px !important; font-weight: 500 !important; color: var(--zolo-label);
+  letter-spacing: normal;
 }
 .zolo-stat .zolo-stat-value {
-  font-family: var(--zolo-font-heading);
-  font-size: 25px; font-weight: 700; letter-spacing: -0.8px;
-  margin-top: 9px; line-height: 1;
+  font-family: var(--zolo-font-heading) !important;
+  font-size: 32px !important; font-weight: 700 !important; letter-spacing: -0.03em !important;
+  margin-top: 6px; line-height: 1.1;
+  color: var(--zolo-ink);
 }
 
 .zolo-filterbar {
@@ -366,128 +731,286 @@ a.text-primary:hover, a.text-primary:focus { color: var(--zolo-accent-hover) !im
    Shell — sidebar + topbar (Phase 2)
    ===================================================================== */
 
-/* --- Sidebar --- */
+/* --- Sidebar in Theme Color --- */
 .sidebar-fixed .sidebar,
 .sidebar {
-  background: var(--zolo-surface) !important;
-  border-right: 1px solid var(--zolo-border);
-  box-shadow: none !important;
+  background: var(--theme-color, #22577A) !important;
+  border-right: 1px solid rgba(0, 0, 0, 0.15) !important;
+  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.08) !important;
 }
 
 .sidebar .sidebar-search {
   padding-top: 14px !important;
-  padding-bottom: 10px !important;
+  padding-bottom: 8px !important;
 }
 .sidebar .sidebar-search .menu-search {
-  border: 1px solid var(--zolo-border) !important;
+  border: 1px solid rgba(255, 255, 255, 0.22) !important;
   border-radius: 8px !important;
-  background: var(--zolo-bg) !important;
-  font-size: 13px;
+  background: rgba(255, 255, 255, 0.12) !important;
+  color: #FFFFFF !important;
+  font-family: var(--zolo-font-body) !important;
+  font-size: 13px !important;
   box-shadow: none !important;
 }
+.sidebar .sidebar-search .menu-search::placeholder {
+  color: rgba(255, 255, 255, 0.65) !important;
+}
 .sidebar .sidebar-search .menu-search:focus {
-  border-color: var(--zolo-accent) !important;
-  box-shadow: 0 0 0 3px rgba(47, 107, 255, 0.12) !important;
+  background: rgba(255, 255, 255, 0.2) !important;
+  border-color: rgba(255, 255, 255, 0.6) !important;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.15) !important;
+  color: #FFFFFF !important;
 }
 
-.sidebar .nav .zolo-nav-group {
+.sidebar .nav .zolo-nav-group,
+.sidebar .sub-category {
   list-style: none;
-  padding: 16px 22px 6px !important;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--zolo-muted-3);
+  padding: 16px 20px 6px !important;
+  font-family: var(--zolo-font-heading) !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  color: rgba(255, 255, 255, 0.6) !important;
   background: transparent !important;
+  border-left: none !important;
 }
-.sidebar .nav .zolo-nav-group:first-child { padding-top: 6px !important; }
+.sidebar .nav .zolo-nav-group:first-child { padding-top: 8px !important; }
 
-.sidebar .nav .nav-item {
-  padding: 0 12px !important;
+/* Sidebar Nav Items: Ensure background is strictly transparent on li so vendor white backgrounds never bleed through */
+.sidebar .nav .nav-item,
+.sidebar .nav .nav-item:hover,
+.sidebar .nav .nav-item.active,
+.sidebar .nav .nav-item:focus,
+.sidebar .nav:not(.sub-menu) > .nav-item:hover,
+.sidebar .nav:not(.sub-menu) > .nav-item.active {
+  background: transparent !important;
+  background-color: transparent !important;
+  padding: 1px 10px !important;
 }
-.sidebar .nav .nav-item .nav-link {
-  border-radius: 8px;
-  padding: 9px 10px !important;
-  font-size: 13.5px;
-  font-weight: 500;
-  color: var(--zolo-ink-2);
-  transition: background 0.12s ease, color 0.12s ease;
+
+.sidebar .nav .nav-item > .nav-link {
+  border-radius: 8px !important;
+  padding: 8px 12px !important;
+  font-family: var(--zolo-font-body) !important;
+  font-size: 13.5px !important;
+  font-weight: 500 !important;
+  color: rgba(255, 255, 255, 0.88) !important;
+  background: transparent !important;
+  transition: all 0.15s ease-in-out !important;
 }
-.sidebar .nav .nav-item .nav-link:hover {
-  background: var(--zolo-bg);
-  color: var(--zolo-ink);
+.sidebar .nav .nav-item > .nav-link:hover {
+  background: rgba(255, 255, 255, 0.12) !important;
+  color: #FFFFFF !important;
 }
-/* Highlight the active row itself, not the whole expanded group — the vendor
-   sheet paints .nav-item.active white, so that has to be cleared explicitly. */
-.sidebar .nav .nav-item.active { background: transparent !important; }
+.sidebar .nav .nav-item > .nav-link:hover i.menu-icon,
+.sidebar .nav .nav-item > .nav-link:hover .menu-title,
+.sidebar .nav .nav-item > .nav-link:hover i.menu-arrow {
+  color: #FFFFFF !important;
+}
+
+/* Highlight the active row / expanded group with high-contrast theme pill */
 .sidebar .nav .nav-item.active > .nav-link,
-.sidebar .nav .nav-item .nav-link.active,
-.sidebar .nav .nav-item .nav-link[aria-expanded="true"] {
-  background: var(--zolo-accent-soft) !important;
-  color: var(--zolo-accent-hover);
-  font-weight: 700;
+.sidebar .nav .nav-item > .nav-link.active,
+.sidebar .nav .nav-item > .nav-link[aria-expanded="true"] {
+  background: rgba(255, 255, 255, 0.18) !important;
+  color: #FFFFFF !important;
+  font-weight: 600 !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12) !important;
 }
-/* The vendor sheet colours the inner .menu-title / icon from --theme-color,
-   so the active state has to be set on those, not just on .nav-link. */
 .sidebar .nav .nav-item.active > .nav-link .menu-title,
 .sidebar .nav .nav-item.active > .nav-link i,
-.sidebar .nav .nav-item .nav-link[aria-expanded="true"] .menu-title,
-.sidebar .nav .nav-item .nav-link[aria-expanded="true"] i.menu-icon {
-  color: var(--zolo-accent-hover) !important;
-}
-.sidebar .nav .nav-item .nav-link i.menu-icon {
-  color: var(--zolo-muted-2);
-  font-size: 17px;
-  width: 22px;
-  text-align: center;
-}
 .sidebar .nav .nav-item.active > .nav-link i.menu-icon,
-.sidebar .nav .nav-item .nav-link[aria-expanded="true"] i.menu-icon {
-  color: var(--zolo-accent);
+.sidebar .nav .nav-item.active > .nav-link i.menu-arrow,
+.sidebar .nav .nav-item > .nav-link.active .menu-title,
+.sidebar .nav .nav-item > .nav-link.active i.menu-icon,
+.sidebar .nav .nav-item > .nav-link.active i.menu-arrow,
+.sidebar .nav .nav-item > .nav-link[aria-expanded="true"] .menu-title,
+.sidebar .nav .nav-item > .nav-link[aria-expanded="true"] i.menu-icon,
+.sidebar .nav .nav-item > .nav-link[aria-expanded="true"] i.menu-arrow {
+  color: #FFFFFF !important;
+}
+
+.sidebar .nav .nav-item .nav-link i.menu-icon {
+  color: rgba(255, 255, 255, 0.75) !important;
+  font-size: 16px !important;
+  width: 22px !important;
+  text-align: center !important;
 }
 .sidebar .nav .nav-item .nav-link .menu-title {
-  font-family: var(--zolo-font-body);
+  font-family: var(--zolo-font-body) !important;
+  color: inherit !important;
 }
 .sidebar .nav .nav-item .nav-link i.menu-arrow {
-  color: #C2CBD9;
+  color: rgba(255, 255, 255, 0.5) !important;
 }
-.sidebar .nav .sub-menu .nav-item .nav-link {
-  font-size: 13px;
-  color: var(--zolo-muted);
-  padding: 7px 10px 7px 40px !important;
+
+/* Sub-Menu Styling: Inset dark trough seamlessly matching the theme sidebar */
+.sidebar .nav .collapse,
+.sidebar .nav .collapsing {
+  background: transparent !important;
 }
-.sidebar .nav .sub-menu .nav-item .nav-link:hover {
-  color: var(--zolo-accent-hover);
-  background: var(--zolo-bg);
+.sidebar .nav.sub-menu,
+.sidebar .nav .collapse .sub-menu,
+.sidebar .nav .sub-menu {
+  background: rgba(0, 0, 0, 0.22) !important;
+  border-radius: 8px !important;
+  padding: 6px 4px !important;
+  margin: 4px 6px 8px !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+}
+.sidebar .nav.sub-menu .nav-item,
+.sidebar .nav .collapse .sub-menu .nav-item {
+  padding: 1px 4px !important;
+  background: transparent !important;
+}
+.sidebar .nav.sub-menu .nav-item .nav-link,
+.sidebar .nav .collapse .sub-menu .nav-item .nav-link {
+  font-family: var(--zolo-font-body) !important;
+  font-size: 13px !important;
+  color: rgba(255, 255, 255, 0.8) !important;
+  padding: 7px 12px 7px 24px !important;
+  border-radius: 6px !important;
+  background: transparent !important;
+  transition: all 0.15s ease !important;
+}
+.sidebar .nav.sub-menu .nav-item .nav-link:hover,
+.sidebar .nav .collapse .sub-menu .nav-item .nav-link:hover {
+  color: #FFFFFF !important;
+  background: rgba(255, 255, 255, 0.12) !important;
+}
+.sidebar .nav.sub-menu .nav-item .nav-link.active,
+.sidebar .nav.sub-menu .nav-item.active > .nav-link,
+.sidebar .nav .collapse .sub-menu .nav-item .nav-link.active,
+.sidebar .nav .collapse .sub-menu .nav-item.active > .nav-link {
+  background: rgba(255, 255, 255, 0.22) !important;
+  color: #FFFFFF !important;
+  font-weight: 600 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15) !important;
+}
+.sidebar .nav.sub-menu .nav-item .nav-link:before,
+.sidebar .nav .collapse .sub-menu .nav-item .nav-link:before {
+  display: none !important;
 }
 
 .zolo-sidebar-role {
-  margin: 14px 16px 6px;
-  padding: 12px 13px;
-  background: var(--zolo-bg);
-  border: 1px solid var(--zolo-border);
-  border-radius: var(--zolo-radius-lg);
+  margin: 12px 14px 6px !important;
+  padding: 10px 12px !important;
+  background: rgba(255, 255, 255, 0.12) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  border-radius: 10px !important;
 }
 .zolo-sidebar-role .zolo-sidebar-role-name {
   display: flex; align-items: center; gap: 7px;
-  font-size: 11.5px; font-weight: 700; color: var(--zolo-ink-2);
+  font-family: var(--zolo-font-heading) !important;
+  font-size: 11.5px; font-weight: 700; color: #FFFFFF !important;
 }
-.zolo-sidebar-role .zolo-sidebar-role-name .mdi { font-size: 16px; color: var(--zolo-accent); }
+.zolo-sidebar-role .zolo-sidebar-role-name .mdi { font-size: 16px; color: #93C5FD !important; }
 .zolo-sidebar-role .zolo-sidebar-role-summary {
-  font-size: 11.5px; color: var(--zolo-muted-2); line-height: 1.5; margin-top: 4px;
+  font-family: var(--zolo-font-body) !important;
+  font-size: 11.5px; color: rgba(255, 255, 255, 0.72) !important; line-height: 1.5; margin-top: 4px;
 }
 
-/* --- Topbar --- */
+/* --- Topbar & Brand Wrapper Seamless Design --- */
 .navbar.default-layout-navbar {
-  background: rgba(255, 255, 255, 0.92) !important;
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--zolo-border);
-  box-shadow: none !important;
+  background: #FFFFFF !important;
+  border-bottom: 1px solid var(--zolo-border, #D8E2EC) !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04) !important;
+  height: 70px !important;
 }
+
 .navbar.default-layout-navbar .navbar-brand-wrapper {
-  border-right: 1px solid var(--zolo-border-soft) !important;
-  background: transparent !important;
+  background: var(--theme-color, #22577A) !important;
+  border-right: 1px solid rgba(0, 0, 0, 0.12) !important;
+  height: 70px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 16px !important;
+}
+
+/* Clean School Logo presentation without floating duplicate pills */
+.navbar.default-layout-navbar .navbar-brand-wrapper .navbar-brand.brand-logo {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: #FFFFFF !important;
+  padding: 5px 14px !important;
+  border-radius: 8px !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12) !important;
+  max-height: 42px !important;
+  width: auto !important;
+}
+.navbar.default-layout-navbar .navbar-brand-wrapper .navbar-brand.brand-logo img {
+  max-height: 30px !important;
+  width: auto !important;
+  max-width: 190px !important;
+  object-fit: contain !important;
+}
+
+/* Brand logo mini strictly hidden on expanded sidebar */
+.navbar.default-layout-navbar .navbar-brand-wrapper .navbar-brand.brand-logo-mini {
+  display: none !important;
+  background: #FFFFFF !important;
+  padding: 4px !important;
+  border-radius: 8px !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12) !important;
+  width: 42px !important;
+  height: 42px !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+.navbar.default-layout-navbar .navbar-brand-wrapper .navbar-brand.brand-logo-mini img {
+  max-height: 28px !important;
+  max-width: 28px !important;
+}
+
+/* Seamless column alignment between brand wrapper, sidebar, and navbar-menu */
+@media (min-width: 992px) {
+  .navbar.default-layout-navbar .navbar-brand-wrapper,
+  .navbar .navbar-brand-wrapper {
+    width: 260px !important;
+  }
+  .sidebar-fixed .sidebar,
+  .sidebar {
+    width: 260px !important;
+  }
+  .navbar.default-layout-navbar .navbar-menu-wrapper,
+  .navbar .navbar-menu-wrapper {
+    width: calc(100% - 260px) !important;
+    background: #FFFFFF !important;
+  }
+  .main-panel {
+    width: calc(100% - 260px) !important;
+  }
+
+  /* Icon-only collapsed state synchronization */
+  body.sidebar-icon-only .navbar.default-layout-navbar .navbar-brand-wrapper,
+  body.sidebar-icon-only .navbar .navbar-brand-wrapper,
+  body.sidebar-icon-only .sidebar {
+    width: 70px !important;
+  }
+  body.sidebar-icon-only .navbar.default-layout-navbar .navbar-menu-wrapper,
+  body.sidebar-icon-only .navbar .navbar-menu-wrapper,
+  body.sidebar-icon-only .main-panel {
+    width: calc(100% - 70px) !important;
+  }
+  body.sidebar-icon-only .navbar.default-layout-navbar .navbar-brand-wrapper .navbar-brand.brand-logo {
+    display: none !important;
+  }
+  body.sidebar-icon-only .navbar.default-layout-navbar .navbar-brand-wrapper .navbar-brand.brand-logo-mini {
+    display: inline-flex !important;
+  }
+}
+.zolo-school-badge {
+  background: rgba(34, 87, 122, 0.08);
+  color: var(--theme-color, #22577A);
+  border: 1px solid rgba(34, 87, 122, 0.2);
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 13px;
 }
 .navbar .cache-clear .btn-inverse-info {
   color: var(--zolo-accent) !important;
@@ -722,12 +1245,35 @@ hr { border-color: var(--zolo-border-soft); }
 /* --- Stat Strip & Sparklines --- */
 .zolo-stat-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  background: #fff;
-  border: 1px solid #E3E8F0;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  background: #ffffff;
+  border: 1px solid #D8E2EC;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
   border-radius: 12px;
   overflow: hidden;
-  margin-bottom: 16px;
+  margin-bottom: 24px;
+}
+@media (max-width: 1200px) {
+  .zolo-stat-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .zolo-stat-grid .zolo-stat-card:nth-child(n+4) {
+    border-top: 1px solid #EEF1F6;
+  }
+  .zolo-stat-grid .zolo-stat-card:nth-child(3n+1) {
+    border-left: 0;
+  }
+}
+@media (max-width: 768px) {
+  .zolo-stat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .zolo-stat-grid .zolo-stat-card:nth-child(n+3) {
+    border-top: 1px solid #EEF1F6;
+  }
+  .zolo-stat-grid .zolo-stat-card:nth-child(2n+1) {
+    border-left: 0;
+  }
 }
 .zolo-stat-card {
   padding: 16px 18px;
@@ -744,16 +1290,24 @@ hr { border-color: var(--zolo-border-soft); }
 }
 .zolo-stat-head .ms { font-size: 17px; color: var(--zolo-accent); }
 .zolo-stat-title {
-  font-size: 11.5px; font-weight: 600; color: #64748B;
-  letter-spacing: 0.02em; text-transform: uppercase;
+  font-family: var(--zolo-font-body) !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  color: #64748B !important;
+  letter-spacing: normal !important;
+  text-transform: none !important;
 }
 .zolo-stat-body {
   display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 10px;
 }
 .zolo-stat-num {
-  font-family: var(--zolo-font-heading);
-  font-size: 29px; font-weight: 700; letter-spacing: -1px; line-height: 1;
-  font-variant-numeric: tabular-nums; color: var(--zolo-ink);
+  font-family: var(--zolo-font-heading) !important;
+  font-size: 32px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.03em !important;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  color: var(--zolo-ink);
 }
 .zolo-stat-delta {
   display: flex; align-items: center; gap: 4px; margin-top: 7px;
@@ -857,15 +1411,52 @@ hr { border-color: var(--zolo-border-soft); }
 
 /* --- Dark Navy Attendance Card --- */
 .zolo-att-card {
-  background: #0F172A; border-radius: 12px; padding: 18px 20px; color: #fff;
+  background: #0F172A;
+  border-radius: 12px;
+  padding: 18px 20px;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
 }
-.zolo-att-select {
-  font-family: inherit; font-size: 12px; font-weight: 600;
-  color: #fff !important; background: rgba(255,255,255,0.10) !important;
-  border: 1px solid rgba(255,255,255,0.16) !important;
-  border-radius: 7px !important; padding: 5px 9px; outline: none;
+.zolo-att-card .zolo-att-select,
+select#attendance-class-select.zolo-att-select,
+select.zolo-att-select {
+  font-family: inherit !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  color: #FFFFFF !important;
+  background-color: rgba(255, 255, 255, 0.12) !important;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 8px center !important;
+  background-size: 11px 9px !important;
+  border: 1px solid rgba(255, 255, 255, 0.22) !important;
+  border-radius: 7px !important;
+  padding: 4px 26px 4px 10px !important;
+  min-height: 32px !important;
+  height: 32px !important;
+  max-width: 145px !important;
+  width: auto !important;
+  flex-shrink: 1 !important;
+  outline: none !important;
+  box-shadow: none !important;
+  margin: 0 !important;
+  line-height: 1.4 !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
 }
-.zolo-att-select option { color: #0F172A; background: #fff; }
+.zolo-att-card .zolo-att-select:focus,
+select#attendance-class-select.zolo-att-select:focus {
+  border-color: rgba(255, 255, 255, 0.45) !important;
+  background-color: rgba(255, 255, 255, 0.18) !important;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.15) !important;
+}
+.zolo-att-card .zolo-att-select option,
+select#attendance-class-select.zolo-att-select option {
+  color: #0F172A !important;
+  background: #FFFFFF !important;
+}
 .zolo-att-donut {
   position: relative; width: 112px; height: 112px; flex: none;
 }
@@ -1031,9 +1622,9 @@ a.btn-icon i,
   display: inline-block !important;
 }
 
-/* Edit / Primary action */
-.btn-gradient-primary,
-.btn-primary.btn-icon,
+/* Table Row Action Icons */
+.table .btn-icon.btn-primary,
+.table .btn-action.btn-primary,
 .edit-data,
 a.edit-data,
 .btn-action.edit-data {
@@ -1041,8 +1632,7 @@ a.edit-data,
   color: #2F6BFF !important;
   border: 1px solid #C9D9FF !important;
 }
-.btn-gradient-primary:hover,
-.btn-primary.btn-icon:hover,
+.table .btn-icon.btn-primary:hover,
 .edit-data:hover,
 a.edit-data:hover {
   background: #2F6BFF !important;
@@ -1050,15 +1640,13 @@ a.edit-data:hover {
   border-color: #2F6BFF !important;
   transform: translateY(-1px);
 }
-.btn-gradient-primary:hover i,
 .edit-data:hover i {
   color: #ffffff !important;
 }
 
-/* Delete / Trash / Danger */
-.btn-gradient-danger,
-.btn-gradient-dark,
-.btn-danger.btn-icon,
+/* Delete / Trash / Danger Row Actions */
+.table .btn-icon.btn-danger,
+.table .btn-action.btn-danger,
 .delete-form,
 a.delete-form,
 .trash-data,
@@ -1067,8 +1655,7 @@ a.trash-data {
   color: #DC2626 !important;
   border: 1px solid #F6C9C9 !important;
 }
-.btn-gradient-danger:hover,
-.btn-gradient-dark:hover,
+.table .btn-icon.btn-danger:hover,
 .delete-form:hover,
 a.delete-form:hover,
 .trash-data:hover,
@@ -1078,15 +1665,14 @@ a.trash-data:hover {
   border-color: #DC2626 !important;
   transform: translateY(-1px);
 }
-.btn-gradient-danger:hover i,
 .delete-form:hover i,
 .trash-data:hover i {
   color: #ffffff !important;
 }
 
-/* Success / Active / Restore */
-.btn-gradient-success,
-.btn-success.btn-icon,
+/* Success / Active / Restore Row Actions */
+.table .btn-icon.btn-success,
+.table .btn-action.btn-success,
 .restore-data,
 a.restore-data,
 .activate-staff,
@@ -1095,8 +1681,7 @@ a.restore-data,
   color: #047857 !important;
   border: 1px solid #BCE5D6 !important;
 }
-.btn-gradient-success:hover,
-.btn-success.btn-icon:hover,
+.table .btn-icon.btn-success:hover,
 .restore-data:hover,
 a.restore-data:hover,
 .activate-staff:hover,
@@ -1106,35 +1691,32 @@ a.restore-data:hover,
   border-color: #047857 !important;
   transform: translateY(-1px);
 }
-.btn-gradient-success:hover i,
 .restore-data:hover i {
   color: #ffffff !important;
 }
 
 /* Info / PDF / View / Receipt */
-.btn-gradient-info,
-.btn-info.btn-icon,
+.table .btn-icon.btn-info,
+.table .btn-action.btn-info,
 .generate-paid-fees-pdf {
   background: #F1F5F9 !important;
   color: #334155 !important;
   border: 1px solid #CBD5E1 !important;
 }
-.btn-gradient-info:hover,
-.btn-info.btn-icon:hover,
+.table .btn-icon.btn-info:hover,
 .generate-paid-fees-pdf:hover {
   background: #334155 !important;
   color: #ffffff !important;
   border-color: #334155 !important;
   transform: translateY(-1px);
 }
-.btn-gradient-info:hover i,
 .generate-paid-fees-pdf:hover i {
   color: #ffffff !important;
 }
 
 /* Warning / Inactive / Deactivate */
-.btn-gradient-warning,
-.btn-warning.btn-icon,
+.table .btn-icon.btn-warning,
+.table .btn-action.btn-warning,
 .deactivate-staff,
 .deactivate-student {
   background: #FEF3E2 !important;
@@ -1509,6 +2091,7 @@ td.bs-checkbox input[type="checkbox"] {
 }
 
 /* ---------- Page Header & Breadcrumbs Overhaul ---------- */
+.zolo-page-header,
 .page-header {
   display: flex !important;
   align-items: center !important;
@@ -1607,8 +2190,12 @@ td.bs-checkbox input[type="checkbox"] {
 .card .card-description {
   font-size: 12.5px !important;
   color: #64748B !important;
-  margin-top: -10px !important;
+  margin-top: 0 !important;
   margin-bottom: 16px !important;
+}
+
+.card .card-title + .card-description {
+  margin-top: -8px !important;
 }
 
 .card-header {
@@ -1620,6 +2207,11 @@ td.bs-checkbox input[type="checkbox"] {
   font-weight: 700 !important;
   font-size: 15px !important;
   color: #0F172A !important;
+}
+
+/* Ensure clean margin between stacked cards */
+.card + .card {
+  margin-top: 20px;
 }
 
 /* ---------- Forms & Inputs Across All Views ---------- */
@@ -1666,23 +2258,210 @@ select.form-control:focus {
   box-shadow: 0 0 0 3px rgba(47, 107, 255, 0.12) !important;
 }
 
+/* Compact form controls overhaul across the entire website */
+.form-control-sm,
+select.form-control-sm,
+.form-select-sm,
+.input-group-sm > .form-control,
+.input-group-sm > select.form-control,
+.input-group-sm > .input-group-append > .btn,
+.input-group-sm > .input-group-prepend > .btn {
+  min-height: 32px !important;
+  height: 32px !important;
+  padding: 4px 10px !important;
+  font-size: 12px !important;
+  line-height: 1.4 !important;
+  border-radius: 7px !important;
+}
+
+/* Header and card filter dropdowns - never blow out flex containers */
+.card-header select.form-control,
+.card-body select.form-control-sm,
+.zolo-card-header select,
+.filter_leaves,
+.fees-over-due-class,
+#filter_expense_session_year_id,
+#exam_reuslt_exam_name,
+#filter_session_year_id,
+#filter_medium_id {
+  min-height: 32px !important;
+  height: 32px !important;
+  padding: 4px 10px !important;
+  font-size: 12px !important;
+  width: auto !important;
+  max-width: 170px !important;
+  display: inline-block !important;
+}
+
+/* Bootstrap-table pagination size select */
+.fixed-table-pagination .page-list .btn-group .dropdown-toggle,
+.fixed-table-pagination .page-list select,
+.fixed-table-pagination select.form-control {
+  min-height: 30px !important;
+  height: 30px !important;
+  padding: 2px 8px !important;
+  font-size: 12px !important;
+  line-height: 1.3 !important;
+  border-radius: 6px !important;
+  width: auto !important;
+  display: inline-block !important;
+}
+
 textarea.form-control {
   min-height: 80px !important;
 }
 
-/* Checkboxes and Radios */
-.form-check {
+/* =========================================================
+   ZOLO SEGMENTED BUTTON CONTROL SYSTEM
+   Converts radio buttons (Gender, Status, etc.) into real tactile buttons
+   ========================================================= */
+.zolo-segmented-control {
+  display: inline-flex !important;
+  width: 100% !important;
+  background: #F1F5F9 !important;
+  padding: 3px !important;
+  border-radius: 8px !important;
+  border: 1px solid #CBD5E1 !important;
+  gap: 4px !important;
+  align-items: stretch !important;
+  height: 32px !important;
+  box-sizing: border-box !important;
+}
+
+.zolo-segment-btn {
+  flex: 1 1 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  position: relative !important;
+  cursor: pointer !important;
+  user-select: none !important;
+  display: flex !important;
+  border-radius: 6px !important;
+  transition: all 0.15s ease-in-out !important;
+}
+
+.zolo-segment-input {
+  position: absolute !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+}
+
+.zolo-segment-content {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  height: 100% !important;
+  padding: 2px 8px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  color: #475569 !important;
+  border-radius: 6px !important;
+  transition: all 0.15s ease-in-out !important;
+  background: transparent !important;
+  text-transform: capitalize !important;
+  letter-spacing: 0.2px !important;
+  white-space: nowrap !important;
+}
+
+.zolo-segment-content .segment-icon {
+  font-size: 13px !important;
+  margin-right: 5px !important;
+  transition: transform 0.15s ease !important;
+}
+
+.zolo-segment-btn:hover .zolo-segment-content {
+  background: rgba(255, 255, 255, 0.7) !important;
+  color: #0F172A !important;
+}
+
+/* Active State via CSS :has() or .active class */
+.zolo-segment-btn:has(.zolo-segment-input:checked),
+.zolo-segment-btn.active {
+  background: #2563EB !important;
+}
+
+.zolo-segment-btn:has(.zolo-segment-input:checked) .zolo-segment-content,
+.zolo-segment-btn.active .zolo-segment-content {
+  background: #2563EB !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 1px 3px rgba(37, 99, 235, 0.3) !important;
+}
+
+.zolo-segment-btn:has(.zolo-segment-input:checked) .segment-icon,
+.zolo-segment-btn.active .segment-icon {
+  color: #FFFFFF !important;
+  transform: scale(1.1) !important;
+}
+
+/* Icon specific colors when inactive */
+.zolo-segment-btn:not(.active):not(:has(.zolo-segment-input:checked)) .icon-male {
+  color: #2563EB !important;
+}
+.zolo-segment-btn:not(.active):not(:has(.zolo-segment-input:checked)) .icon-female {
+  color: #EC4899 !important;
+}
+
+/* =========================================================
+   GLOBAL FORM-CHECK BUTTON-PILL SYSTEM (APPLICATION-WIDE)
+   Transforms ANY existing radio/checkbox button group into clean button pills
+   ========================================================= */
+.form-check-inline {
+  display: inline-flex !important;
+  align-items: center !important;
+  background: #F8FAFC !important;
+  border: 1px solid #CBD5E1 !important;
+  border-radius: 6px !important;
+  padding: 4px 12px !important;
+  margin-right: 8px !important;
+  margin-bottom: 4px !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease-in-out !important;
+  user-select: none !important;
+  min-height: 32px !important;
+}
+
+.form-check-inline:hover {
+  background: #F1F5F9 !important;
+  border-color: #94A3B8 !important;
+}
+
+.form-check-inline:has(input[type="radio"]:checked),
+.form-check-inline:has(input[type="checkbox"]:checked),
+.form-check-inline.active {
+  background: #2563EB !important;
+  border-color: #2563EB !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 1px 3px rgba(37, 99, 235, 0.25) !important;
+}
+
+.form-check-inline:has(input[type="radio"]:checked) .form-check-label,
+.form-check-inline:has(input[type="checkbox"]:checked) .form-check-label,
+.form-check-inline.active .form-check-label {
+  color: #FFFFFF !important;
+  font-weight: 600 !important;
+}
+
+.form-check-inline input[type="radio"],
+.form-check-inline input[type="checkbox"] {
+  opacity: 0 !important;
+  position: absolute !important;
+  width: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Standard isolated checkboxes/radios outside inline pills */
+.form-check:not(.form-check-inline) {
   margin-bottom: 8px !important;
   padding-left: 0 !important;
 }
 
-.form-check-inline {
-  display: inline-flex !important;
-  align-items: center !important;
-  margin-right: 18px !important;
-}
-
-.form-check .form-check-label {
+.form-check:not(.form-check-inline) .form-check-label {
   display: inline-flex !important;
   align-items: center !important;
   gap: 8px !important;
@@ -1694,14 +2473,17 @@ textarea.form-control {
   line-height: 1.3 !important;
 }
 
-.form-check input[type="checkbox"],
-.form-check input[type="radio"] {
-  accent-color: #2F6BFF !important;
+.form-check:not(.form-check-inline) input[type="checkbox"],
+.form-check:not(.form-check-inline) input[type="radio"] {
+  accent-color: #2563EB !important;
   width: 16px !important;
   height: 16px !important;
   margin: 0 !important;
   cursor: pointer !important;
   position: static !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: inline-block !important;
 }
 
 /* Hide legacy faux-helper from PurpleAdmin */
@@ -2335,3 +3117,542 @@ textarea.form-control {
   margin-top: 24px;
   z-index: 100;
 }
+
+/* =========================================================
+   Flex Gap Utilities (Bootstrap 4 Fallback)
+   ========================================================= */
+.gap-1 { gap: 0.25rem !important; }
+.gap-2 { gap: 0.5rem !important; }
+.gap-3 { gap: 1rem !important; }
+.gap-4 { gap: 1.5rem !important; }
+.gap-5 { gap: 3rem !important; }
+
+/* =========================================================
+   Bootstrap Table Global Sleek Polish
+   ========================================================= */
+.bootstrap-table .table {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100% !important;
+}
+
+.bootstrap-table .table thead th {
+  background: #F8FAFC !important;
+  color: #475569 !important;
+  font-weight: 700 !important;
+  font-size: 11.5px !important;
+  letter-spacing: 0.5px !important;
+  text-transform: uppercase !important;
+  padding: 12px 14px !important;
+  border-top: none !important;
+  border-bottom: 2px solid #E2E8F0 !important;
+  vertical-align: middle !important;
+  white-space: nowrap;
+}
+
+.bootstrap-table .table tbody td {
+  padding: 12px 14px !important;
+  vertical-align: middle !important;
+  border-top: 1px solid #F1F5F9 !important;
+  color: #1E293B;
+  font-size: 13.5px;
+}
+
+.bootstrap-table .table tbody tr:hover {
+  background-color: #F8FAFC !important;
+}
+
+/* Toolbar search and buttons breathing room */
+.bootstrap-table .fixed-table-toolbar {
+  margin-bottom: 12px;
+}
+
+.bootstrap-table .fixed-table-toolbar .search {
+  margin-left: 8px;
+  margin-bottom: 8px;
+}
+
+.bootstrap-table .fixed-table-toolbar .search input.search-input {
+  border-radius: 8px !important;
+  border: 1px solid #CBD5E1 !important;
+  height: 38px !important;
+  padding: 6px 14px !important;
+  font-size: 13px !important;
+  background-color: #FFFFFF !important;
+  box-shadow: none !important;
+}
+
+.bootstrap-table .fixed-table-toolbar .search input.search-input:focus {
+  border-color: #2563EB !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12) !important;
+}
+
+.bootstrap-table .fixed-table-toolbar .columns {
+  margin-bottom: 8px;
+}
+
+.bootstrap-table .fixed-table-toolbar .columns > .btn-group > .btn,
+.bootstrap-table .fixed-table-toolbar .columns > .btn {
+  border-radius: 8px !important;
+  border: 1px solid #CBD5E1 !important;
+  height: 38px !important;
+  margin-left: 4px !important;
+  background: #FFFFFF !important;
+  color: #475569 !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 12px !important;
+}
+
+.bootstrap-table .fixed-table-toolbar .columns > .btn-group > .btn:hover,
+.bootstrap-table .fixed-table-toolbar .columns > .btn:hover {
+  background: #F8FAFC !important;
+  border-color: #94A3B8 !important;
+  color: #0F172A !important;
+}
+
+.bootstrap-table .fixed-table-pagination {
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid #F1F5F9;
+}
+
+/* =========================================================
+   Zolo Component System: Selection Pills & Chips
+   ========================================================= */
+.zolo-selection-pill {
+  display: inline-block;
+  margin: 4px 6px 4px 0;
+  position: relative;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.zolo-selection-pill .pill-content {
+  background: #FFFFFF;
+  border: 1.5px solid #E2E8F0;
+  border-radius: 9px;
+  color: #334155;
+  transition: all 0.18s ease;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+.zolo-selection-pill:hover .pill-content {
+  border-color: #94A3B8;
+  background: #F8FAFC;
+  transform: translateY(-1px);
+}
+.zolo-selection-pill .pill-indicator {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1.5px solid #CBD5E1;
+  background: #FFFFFF;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.18s ease;
+}
+.zolo-selection-pill input[type="checkbox"] ~ .pill-content .pill-indicator {
+  border-radius: 4px;
+}
+.zolo-selection-pill .radio-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: transparent;
+  transition: all 0.18s ease;
+}
+.zolo-selection-pill .check-icon {
+  font-size: 9px;
+  color: transparent;
+  transition: all 0.18s ease;
+}
+
+/* Active / Checked State */
+.zolo-selection-pill.active .pill-content,
+.zolo-selection-pill input:checked ~ .pill-content {
+  border-color: #2563EB !important;
+  background: #EFF6FF !important;
+  color: #1D4ED8 !important;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15) !important;
+}
+.zolo-selection-pill.active .pill-indicator,
+.zolo-selection-pill input:checked ~ .pill-content .pill-indicator {
+  border-color: #2563EB !important;
+  background: #2563EB !important;
+}
+.zolo-selection-pill.active .radio-dot,
+.zolo-selection-pill input:checked ~ .pill-content .radio-dot {
+  background: #FFFFFF !important;
+}
+.zolo-selection-pill.active .check-icon,
+.zolo-selection-pill input:checked ~ .pill-content .check-icon {
+  color: #FFFFFF !important;
+}
+.zolo-selection-pill.active .pill-icon,
+.zolo-selection-pill input:checked ~ .pill-content .pill-icon {
+  color: #2563EB !important;
+}
+
+/* Section Chip with optional Block Assignment */
+.zolo-section-card {
+  background: #FFFFFF;
+  border: 1.5px solid #E2E8F0;
+  border-radius: 10px;
+  padding: 8px 12px;
+  margin: 4px 6px 8px 0;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  flex-direction: column;
+  min-width: 130px;
+}
+.zolo-section-card:hover {
+  border-color: #94A3B8;
+  background: #F8FAFC;
+}
+.zolo-section-card.active {
+  border-color: #2563EB !important;
+  background: #F8FAFC !important;
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.12) !important;
+}
+
+/* Zolo Modern Tabs */
+.zolo-tabs {
+  background: #F1F5F9;
+  padding: 4px;
+  border-radius: 10px;
+}
+.zolo-tabs .zolo-tab-btn {
+  border-radius: 8px !important;
+  font-weight: 600;
+  font-size: 13px;
+  color: #475569;
+  border: none;
+  background: transparent;
+  padding: 7px 14px;
+  transition: all 0.18s ease;
+}
+.zolo-tabs .zolo-tab-btn:hover {
+  color: #0F172A;
+  background: rgba(255, 255, 255, 0.6);
+}
+.zolo-tabs .zolo-tab-btn.active {
+  background: #FFFFFF !important;
+  color: #2563EB !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* =========================================================
+   Zolo Data Tables: Alternate Row Colors & Modern Templated Look
+   (Strictly excluding Timetable Grid/Matrix)
+   ========================================================= */
+.bootstrap-table .table:not(.timetable-v2-grid):not(.timetable-table):not(.timetable-matrix-table):not([class*="timetable"]),
+.card .table:not([class*="timetable"]):not(.timetable-v2-grid),
+.table.zolo-regular-table {
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  width: 100% !important;
+  background-color: #FFFFFF !important;
+}
+
+/* Header styling for regular tables */
+.bootstrap-table .table:not([class*="timetable"]) thead th,
+.card .table:not([class*="timetable"]) thead th {
+  background-color: #F1F5F9 !important;
+  color: #334155 !important;
+  font-weight: 700 !important;
+  font-size: 12px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  border-top: none !important;
+  border-bottom: 2px solid #E2E8F0 !important;
+  padding: 13px 16px !important;
+  vertical-align: middle !important;
+}
+
+/* Zebra striping for regular tables (Alternate Rows) */
+.bootstrap-table .table:not([class*="timetable"]) tbody tr:nth-of-type(odd),
+.card .table:not([class*="timetable"]):not(.table-borderless) tbody tr:nth-of-type(odd) {
+  background-color: #FFFFFF !important;
+}
+
+.bootstrap-table .table:not([class*="timetable"]) tbody tr:nth-of-type(even),
+.card .table:not([class*="timetable"]):not(.table-borderless) tbody tr:nth-of-type(even) {
+  background-color: #F8FAFC !important; /* Soft distinct contrasting tint */
+}
+
+/* Hover state for regular tables */
+.bootstrap-table .table:not([class*="timetable"]) tbody tr:hover,
+.card .table:not([class*="timetable"]):not(.table-borderless) tbody tr:hover {
+  background-color: #EFF6FF !important; /* Sleek interactive blue tint */
+  transition: background-color 0.15s ease-in-out !important;
+}
+
+/* Cell padding & typography */
+.bootstrap-table .table:not([class*="timetable"]) tbody td,
+.card .table:not([class*="timetable"]) tbody td {
+  padding: 13px 16px !important;
+  vertical-align: middle !important;
+  border-top: 1px solid #F1F5F9 !important;
+  border-bottom: none !important;
+  color: #1E293B !important;
+  font-size: 13px !important;
+}
+
+/* =========================================================
+   Zolo Structured Form Box & Panel System (Fee Box & Table Box)
+   ========================================================= */
+.zolo-form-box {
+  background-color: #F8FAFC !important;
+  border: 1.5px solid #E2E8F0 !important;
+  border-radius: 12px !important;
+  margin-bottom: 24px !important;
+  overflow: hidden !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03) !important;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.zolo-form-box:hover {
+  border-color: #CBD5E1 !important;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.05) !important;
+}
+
+.zolo-box-header {
+  background-color: #FFFFFF !important;
+  border-bottom: 1.5px solid #E2E8F0 !important;
+  padding: 14px 20px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+}
+
+.zolo-box-title {
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  color: #0F172A !important;
+  margin: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.zolo-box-body {
+  padding: 20px !important;
+}
+
+/* Table-like repeater styling inside Form Boxes */
+.zolo-repeater-table {
+  background: #FFFFFF;
+  border: 1.5px solid #E2E8F0;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.zolo-repeater-header {
+  background: #F1F5F9;
+  border-bottom: 1.5px solid #E2E8F0;
+  padding: 10px 16px;
+  font-weight: 700;
+  font-size: 11px;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  display: flex;
+  align-items: center;
+}
+
+.zolo-repeater-row {
+  background: #FFFFFF;
+  border-bottom: 1px solid #F1F5F9;
+  padding: 12px 16px;
+  transition: background-color 0.15s ease;
+  display: flex;
+  align-items: center;
+}
+
+.zolo-repeater-row:nth-child(even) {
+  background: #FAFCFF;
+}
+
+.zolo-repeater-row:hover {
+  background: #EFF6FF;
+}
+
+.zolo-repeater-row:last-child {
+  border-bottom: none;
+}
+
+/* Term Fee Preset Buttons */
+.term-preset-card {
+  background: #FFFFFF;
+  border: 1.5px solid #E2E8F0;
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin: 4px 6px 8px 0;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  display: inline-flex;
+  align-items: center;
+  user-select: none;
+}
+
+.term-preset-card:hover {
+  border-color: #2563EB;
+  background: #F8FAFC;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 5px rgba(37, 99, 235, 0.08);
+}
+
+.term-preset-card.active {
+  border-color: #2563EB !important;
+  background: #EFF6FF !important;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15) !important;
+}
+
+.term-preset-card .preset-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: #F1F5F9;
+  color: #2563EB;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  margin-right: 10px;
+}
+
+.term-preset-card.active .preset-icon {
+  background: #2563EB;
+  color: #FFFFFF;
+}
+
+.term-preset-card .preset-title {
+  font-weight: 700;
+  font-size: 13px;
+  color: #1E293B;
+  line-height: 1.2;
+}
+
+.term-preset-card .preset-desc {
+  font-size: 11px;
+  color: #64748B;
+  margin-top: 2px;
+}
+
+/* Balance Calculator Bar */
+.fee-balance-bar {
+  background: #FFFFFF;
+  border: 1.5px solid #E2E8F0;
+  border-radius: 10px;
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+}
+
+/* =========================================================
+   ZOLO ULTRA-COMPACT SINGLE-SCREEN MODAL ARCHITECTURE
+   Fits complex CRUD forms into a single viewport screen
+   ========================================================= */
+.zolo-compact-modal .modal-dialog {
+  max-width: 1100px !important;
+  margin: 1.5rem auto !important;
+}
+
+.zolo-compact-modal .modal-content {
+  border-radius: 12px !important;
+  border: 1px solid #E2E8F0 !important;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.15) !important;
+  overflow: hidden !important;
+}
+
+.zolo-compact-modal .modal-header {
+  padding: 10px 18px !important;
+  background: #FFFFFF !important;
+  border-bottom: 1px solid #E2E8F0 !important;
+}
+
+.zolo-compact-modal .modal-title {
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  color: #0F172A !important;
+}
+
+.zolo-compact-modal .modal-body {
+  padding: 12px 18px !important;
+  max-height: calc(100vh - 125px) !important;
+  overflow-y: auto !important;
+  background: #FFFFFF !important;
+}
+
+.zolo-compact-modal .modal-footer {
+  padding: 8px 18px !important;
+  background: #F8FAFC !important;
+  border-top: 1px solid #E2E8F0 !important;
+}
+
+.zolo-compact-modal .form-group {
+  margin-bottom: 8px !important;
+}
+
+.zolo-compact-modal label {
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.35px !important;
+  color: #475569 !important;
+  margin-bottom: 2px !important;
+  display: block !important;
+}
+
+.zolo-compact-modal .form-control {
+  height: 32px !important;
+  min-height: 32px !important;
+  padding: 4px 8px !important;
+  font-size: 12.5px !important;
+  border-radius: 6px !important;
+  border: 1px solid #CBD5E1 !important;
+  background: #FFFFFF !important;
+  color: #0F172A !important;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+}
+
+.zolo-compact-modal .form-control:focus {
+  border-color: #2563EB !important;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15) !important;
+}
+
+.zolo-compact-modal textarea.form-control {
+  height: 32px !important;
+  min-height: 32px !important;
+  line-height: 1.2 !important;
+  resize: vertical !important;
+}
+
+.zolo-compact-modal textarea.form-control:focus {
+  min-height: 52px !important;
+  height: 52px !important;
+}
+
+.zolo-section-divider {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding-bottom: 4px !important;
+  margin-bottom: 8px !important;
+  margin-top: 6px !important;
+  border-bottom: 1px solid #E2E8F0 !important;
+  color: #1E293B !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+}
+.zolo-section-divider i {
+  color: #2563EB !important;
+  font-size: 13px !important;
+}
+
+
+

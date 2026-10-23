@@ -9,11 +9,11 @@
     .tm-wrap { overflow: auto; max-height: 72vh; border: 1px solid #e5e7eb; border-radius: 10px; }
     .tm-table { border-collapse: separate; border-spacing: 0; font-size: 12px; min-width: 100%; }
     .tm-table th, .tm-table td { border-right: 1px solid #eef0f3; border-bottom: 1px solid #eef0f3; padding: 3px; vertical-align: top; }
-    .tm-table thead th { position: sticky; background: #f8fafc; z-index: 2; text-align: center; white-space: nowrap; }
-    .tm-table thead tr:first-child th { top: 0; }
-    .tm-table thead tr:nth-child(2) th { top: 26px; font-weight: 500; color: #64748b; }
+    .tm-table thead th { position: sticky; background: var(--theme-color, #22577A); color: #ffffff; z-index: 2; text-align: center; white-space: nowrap; }
+    .tm-table thead tr:first-child th { top: 0; font-weight: 700; font-size: 13px; }
+    .tm-table thead tr:nth-child(2) th { top: 26px; font-weight: 600; color: rgba(255, 255, 255, 0.88); background: #1B4461; }
     .tm-table .tm-teacher { position: sticky; left: 0; background: #fff; z-index: 1; min-width: 170px; font-weight: 600; white-space: nowrap; }
-    .tm-table thead .tm-teacher { z-index: 3; background: #f8fafc; }
+    .tm-table thead .tm-teacher { z-index: 3; background: #1B4461; color: #ffffff; }
     .tm-day-start { border-left: 2px solid #cbd5e1 !important; }
     .tm-cell { min-width: 92px; height: 46px; }
     .tm-cell.tm-break { background: repeating-linear-gradient(45deg, #f8fafc, #f8fafc 6px, #f1f5f9 6px, #f1f5f9 12px); }

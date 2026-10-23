@@ -101,19 +101,15 @@
 
                             <div class="form-group col-sm-12 col-md-12">
                                 <label>{{ __('gender') }} <span class="text-danger">*</span></label>
-                                <div class="d-flex">
-                                    <div class="form-check form-check-inline">
-                                        <label class="form-check-label">
-                                            {!! Form::radio('gender', 'male', null, ['class' => 'form-check-input edit', 'id' => 'male']) !!}
-                                            {{ __('male') }}
-                                        </label>
-                                    </div>
-                                    <div class="form-check form-check-inline">
-                                        <label class="form-check-label">
-                                            {!! Form::radio('gender', 'female', null, ['class' => 'form-check-input edit', 'id' => 'female']) !!}
-                                            {{ __('female') }}
-                                        </label>
-                                    </div>
+                                <div class="zolo-segmented-control" style="max-width: 320px;" role="group" aria-label="Gender">
+                                    <label class="zolo-segment-btn" for="male">
+                                        <input type="radio" name="gender" value="male" id="male" class="zolo-segment-input edit" required>
+                                        <span class="zolo-segment-content"><i class="fa fa-mars segment-icon icon-male"></i> {{ __('male') }}</span>
+                                    </label>
+                                    <label class="zolo-segment-btn" for="female">
+                                        <input type="radio" name="gender" value="female" id="female" class="zolo-segment-input edit" required>
+                                        <span class="zolo-segment-content"><i class="fa fa-venus segment-icon icon-female"></i> {{ __('female') }}</span>
+                                    </label>
                                 </div>
                             </div>
                             <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
@@ -122,7 +118,7 @@
                                 <div class="input-group col-xs-12">
                                     <input type="text" id="image" class="form-control file-upload-info" disabled="" placeholder="{{ __('image') }}"/>
                                     <span class="input-group-append">
-                                            <button class="file-upload-browse btn btn-theme" type="button">{{ __('upload') }}</button>
+                                            <button class="file-upload-browse btn btn-sm btn-outline-secondary" type="button">{{ __('upload') }}</button>
                                         </span>
                                 </div>
                             </div>
@@ -141,9 +137,11 @@
                         </div>
 
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __('Cancel') }}</button>
-                        <input class="btn btn-theme" type="submit" value={{ __('submit') }}>
+                    <div class="modal-footer py-2 px-3 d-flex justify-content-end bg-light" style="gap: 8px;">
+                        <button type="button" class="btn btn-sm btn-secondary px-3" data-dismiss="modal">
+                            <i class="fa fa-times mr-1"></i> {{ __('Cancel') }}
+                        </button>
+                        <input class="btn btn-sm btn-primary px-4 font-weight-bold" type="submit" value="{{ __('submit') }}">
                     </div>
                 </form>
             </div>

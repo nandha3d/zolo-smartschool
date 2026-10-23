@@ -27,15 +27,21 @@
 
                                 <hr>
                                 <div class="row">
-                                    <div class="col-md-4 col-sm-12 col-12">
+                                    <div class="col-md-6 col-sm-12 col-12">
                                         <h4 class="mb-3">{{ __('Class Teacher') }}</h4>
                                         <div class="form-group">
-                                            {{--                                            <select name="class_teacher_id" id="class_teacher_id" class="form-control select2" required="required" multiple>--}}
                                             <select multiple name="class_teacher_id[]" id="class_teacher_id" data-class-section="{{$classSection->id}}" class="form-control select2-dropdown select2-hidden-accessible" style="width:100%;" tabindex="-1" aria-hidden="true" data-placeholder="{{__("Search Teacher Name")}}">
                                                 @foreach ($teachers as $teacher)
                                                     <option value="{{ $teacher->id }}" {{ $classSection->class_teachers->contains('teacher_id',$teacher->id) ? "selected data-exists=true" : "data-exists=false" }} >{{$teacher->full_name}}</option>
                                                 @endforeach
                                             </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 col-sm-12 col-12">
+                                        <h4 class="mb-3">{{ __('Building / Block') }}</h4>
+                                        <div class="form-group">
+                                            <input type="text" name="block" id="block" class="form-control" value="{{ $classSection->block }}" placeholder="{{ __('e.g. Block A, Block B, Block C, Commerce Block') }}">
+                                            <small class="text-muted">{{ __('Assigning a building/block helps prioritize nearby labs and rooms in the timetable.') }}</small>
                                         </div>
                                     </div>
                                 </div>

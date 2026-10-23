@@ -60,22 +60,18 @@
 
                                 @if(!empty($features) )
                                     <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
-                                        <label>{{ __('Status') }} <span class="text-danger">*</span></label><br>
-                                        <div class="d-flex">
-                                            <div class="form-check form-check-inline">
-                                                <label class="form-check-label">
-                                                    {!! Form::radio('status', 1) !!}
-                                                    {{ __('Active') }}
-                                                </label>
-                                            </div>
-                                            <div class="form-check form-check-inline">
-                                                <label class="form-check-label">
-                                                    {!! Form::radio('status', 0,true) !!}
-                                                    {{ __('Inactive') }}
-                                                </label>
-                                            </div>
+                                        <label>{{ __('Status') }} <span class="text-danger">*</span></label>
+                                        <div class="zolo-segmented-control" role="group" aria-label="Status">
+                                            <label class="zolo-segment-btn" for="status_active">
+                                                <input type="radio" name="status" value="1" id="status_active" class="zolo-segment-input">
+                                                <span class="zolo-segment-content"><i class="fa fa-check-circle segment-icon text-success mr-1"></i> {{ __('Active') }}</span>
+                                            </label>
+                                            <label class="zolo-segment-btn active" for="status_inactive">
+                                                <input type="radio" name="status" value="0" id="status_inactive" class="zolo-segment-input" checked>
+                                                <span class="zolo-segment-content"><i class="fa fa-times-circle segment-icon text-muted mr-1"></i> {{ __('Inactive') }}</span>
+                                            </label>
                                         </div>
-                                        <span class="text-danger small">{{ __('Note').':-'.__('Activating this will consider in your current subscription cycle') }}</span>
+                                        <span class="text-danger small mt-1 d-block">{{ __('Note').':-'.__('Activating this will consider in your current subscription cycle') }}</span>
                                     </div>
                                 @endif
                             </div>
@@ -100,20 +96,16 @@
                                 </div>
 
                                 <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
-                                    <label>{{ __('gender') }} <span class="text-danger">*</span></label><br>
-                                    <div class="d-flex">
-                                        <div class="form-check form-check-inline">
-                                            <label class="form-check-label">
-                                                {!! Form::radio('gender', 'male',true) !!}
-                                                {{ __('male') }}
-                                            </label>
-                                        </div>
-                                        <div class="form-check form-check-inline">
-                                            <label class="form-check-label">
-                                                {!! Form::radio('gender', 'female') !!}
-                                                {{ __('female') }}
-                                            </label>
-                                        </div>
+                                    <label>{{ __('gender') }} <span class="text-danger">*</span></label>
+                                    <div class="zolo-segmented-control" role="group" aria-label="Gender">
+                                        <label class="zolo-segment-btn active" for="male">
+                                            <input type="radio" name="gender" value="male" id="male" class="zolo-segment-input" checked required>
+                                            <span class="zolo-segment-content"><i class="fa fa-mars segment-icon icon-male"></i> {{ __('male') }}</span>
+                                        </label>
+                                        <label class="zolo-segment-btn" for="female">
+                                            <input type="radio" name="gender" value="female" id="female" class="zolo-segment-input" required>
+                                            <span class="zolo-segment-content"><i class="fa fa-venus segment-icon icon-female"></i> {{ __('female') }}</span>
+                                        </label>
                                     </div>
                                 </div>
                                 <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
@@ -260,37 +252,35 @@
                                     <label>{{ __('guardian') . ' ' . __('mobile') }} <span class="text-danger">*</span></label>
                                     {!! Form::number('guardian_mobile', null, ['placeholder' => __('guardian') . ' ' . __('mobile'), "pattern"=>"[0-9]{6,15}", "title"=>"Please enter a valid mobile number (6-15 digits)", 'class' => 'form-control remove-number-increment', 'id' => 'guardian_mobile','min' => 1 ]) !!}
                                 </div>
-                                <div class="form-group col-sm-12 col-md-12 col-lg-12">
-                                    <label>{{ __('gender') }} <span class="text-danger">*</span></label><br>
-                                    <div class="d-flex">
-                                        <div class="form-check form-check-inline">
-                                            <label class="form-check-label">
-                                                <input type="radio" checked name="guardian_gender" value="male" id="guardian_male">
-                                                {{ __('male') }}
-                                            </label>
-                                        </div>
-                                        <div class="form-check form-check-inline">
-                                            <label class="form-check-label">
-                                                <input type="radio" name="guardian_gender" value="female" id="guardian_female">
-                                                {{ __('female') }}
-                                            </label>
-                                        </div>
+                                <div class="form-group col-sm-12 col-md-6 col-lg-4">
+                                    <label>{{ __('gender') }} <span class="text-danger">*</span></label>
+                                    <div class="zolo-segmented-control" role="group" aria-label="Guardian Gender">
+                                        <label class="zolo-segment-btn active" for="guardian_male">
+                                            <input type="radio" checked name="guardian_gender" value="male" id="guardian_male" class="zolo-segment-input">
+                                            <span class="zolo-segment-content"><i class="fa fa-mars segment-icon icon-male"></i> {{ __('male') }}</span>
+                                        </label>
+                                        <label class="zolo-segment-btn" for="guardian_female">
+                                            <input type="radio" name="guardian_gender" value="female" id="guardian_female" class="zolo-segment-input">
+                                            <span class="zolo-segment-content"><i class="fa fa-venus segment-icon icon-female"></i> {{ __('female') }}</span>
+                                        </label>
                                     </div>
                                 </div>
-                                <div class="form-group col-sm-12 col-md-4 col-lg-6 col-xl-4">
+                                <div class="form-group col-sm-12 col-md-6 col-lg-4">
                                     <label for="guardian_image">{{ __('image') }} </label>
                                     <input type="file" name="guardian_image" accept="image/*" class="file-upload-default"/>
                                     <div class="input-group col-xs-12">
                                         <input type="text" id="guardian_image" class="form-control file-upload-info" disabled="" placeholder="{{ __('image') }}"/>
                                         <span class="input-group-append">
-                                            <button class="file-upload-browse btn btn-theme" type="button">{{ __('upload') }}</button>
+                                            <button class="file-upload-browse btn btn-sm btn-outline-secondary" type="button">{{ __('upload') }}</button>
                                         </span>
                                     </div>
-                                    <img id="guardian-image-preview" src="" alt="Guardian Image" class="img-fluid w-25"/>
+                                    <img id="guardian-image-preview" src="" alt="Guardian Image" class="img-fluid w-25 mt-1"/>
                                 </div>
                             </div>
-                            <input class="btn btn-theme float-right ml-3" id="create-btn" type="submit" value={{ __('submit') }}>
-                            <input class="btn btn-secondary float-right" type="reset" value={{ __('reset') }}>
+                            <div class="d-flex justify-content-end align-items-center mt-3 pt-2 border-top" style="gap: 8px;">
+                                <input class="btn btn-secondary px-3" type="reset" value="{{ __('reset') }}">
+                                <input class="btn btn-primary px-4 font-weight-bold" id="create-btn" type="submit" value="{{ __('submit') }}">
+                            </div>
                         </form>
                     </div>
                 </div>

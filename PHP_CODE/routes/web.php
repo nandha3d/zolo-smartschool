@@ -519,7 +519,7 @@ Route::group(['middleware' => ['Role', 'checkSchoolStatus', 'status','SwitchData
 
         /*** Timetable ***/
         Route::group(['prefix' => 'timetable'], static function () {
-            Route::put('/settings', [TimetableController::class, 'updateTimetableSettings'])->name('timetable.settings');
+            Route::match(['put', 'post'], '/settings', [TimetableController::class, 'updateTimetableSettings'])->name('timetable.settings');
             Route::post('/auto-generate', [TimetableController::class, 'autoGenerate'])->name('timetable.auto-generate');
             Route::post('/generate', [TimetableController::class, 'generatePreview'])->name('timetable.generate');
             Route::post('/generation/{id}/apply', [TimetableController::class, 'applyGeneration'])->name('timetable.generation.apply');
@@ -555,6 +555,11 @@ Route::group(['middleware' => ['Role', 'checkSchoolStatus', 'status','SwitchData
             Route::get('/teacher-matrix', [TimetableController::class, 'teacherMatrix'])->name('timetable.teacher-matrix');
             Route::get('/teacher-matrix/data', [TimetableController::class, 'teacherMatrixData'])->name('timetable.teacher-matrix.data');
             Route::post('/move', [TimetableController::class, 'moveSlot'])->name('timetable.move');
+            Route::post('/place-slot', [TimetableController::class, 'placeSlot'])->name('timetable.place-slot');
+            Route::post('/clear-slot', [TimetableController::class, 'clearSlot'])->name('timetable.clear-slot');
+            Route::post('/class-block', [TimetableController::class, 'saveClassBlock'])->name('timetable.class-block');
+            Route::post('/block-settings', [TimetableController::class, 'saveBlockSettings'])->name('timetable.block-settings');
+            Route::get('/card-data', [TimetableController::class, 'getCardViewData'])->name('timetable.card-data');
             Route::get('/substitutes', [TimetableController::class, 'substitutes'])->name('timetable.substitutes');
             Route::group(['prefix' => '/teacher'], static function () {
                 Route::get('/', [TimetableController::class, 'teacherIndex'])->name('timetable.teacher.index');

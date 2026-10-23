@@ -351,11 +351,11 @@ window.studentEvents = {
 
         // Set gender radio button
         if (row.eng_student_gender == 'male') {
-            $('#male').prop('checked', true);
-            $('#female').prop('checked', false);
+            $('#male').prop('checked', true).trigger('change');
+            $('#female').prop('checked', false).trigger('change');
         } else {
-            $('#male').prop('checked', false);
-            $('#female').prop('checked', true);
+            $('#male').prop('checked', false).trigger('change');
+            $('#female').prop('checked', true).trigger('change');
         }
 
         setTimeout(() => {
@@ -433,11 +433,11 @@ window.studentEvents = {
 
             // Set guardian gender radio button
             if (row.eng_guardian_gender == 'male') {
-                $('#edit-guardian-male').prop('checked', true);
-                $('#edit-guardian-female').prop('checked', false);
+                $('#edit-guardian-male').prop('checked', true).trigger('change');
+                $('#edit-guardian-female').prop('checked', false).trigger('change');
             } else {
-                $('#edit-guardian-male').prop('checked', false);
-                $('#edit-guardian-female').prop('checked', true);
+                $('#edit-guardian-male').prop('checked', false).trigger('change');
+                $('#edit-guardian-female').prop('checked', true).trigger('change');
             }
         }, 500);
     }, 'click .deactivate-student': function (e) {

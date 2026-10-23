@@ -1,7 +1,11 @@
 @php
     $lang = Session::get('language');
 @endphp
-{{-- Instrument Sans, Figtree & Material Symbols Sharp, all self-hosted --}}
+{{-- Inter Font System (Weights 300, 400, 500, 600, 700, 800) --}}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+{{-- Self-hosted fonts & icon packs --}}
 <link rel="stylesheet" href="{{ asset('/assets/fonts/material-symbols/material-symbols-sharp.css') }}">
 <link rel="stylesheet" href="{{ asset('/assets/fonts/zolo/zolo-fonts.css') }}">
 <link rel="stylesheet" href="{{ asset('/assets/css/materialdesignicons.min.css') }}">
@@ -52,24 +56,27 @@
     :root {
         --theme-color: <?=$systemSettings['theme_color']??"#22577A" ?>;
     }
-    /* Custom styles for sidebar sub-categories */
+    /* Styles for sidebar sub-categories in theme color sidebar */
     .sub-category {
-        padding: 10px 0 5px 15px;
-        font-weight: bold;
-        color: #6c7293;
-        font-size: 0.9rem;
-        text-transform: uppercase;
-        margin-top: 10px;
-        border-left: 3px solid #3e4b5b;
+        padding: 14px 20px 4px !important;
+        font-weight: 700 !important;
+        color: rgba(255, 255, 255, 0.6) !important;
+        font-size: 11px !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.08em !important;
+        margin-top: 10px !important;
+        border-left: none !important;
     }
     .nav-item.pl-3 .nav-link {
-        padding-left: 15px !important;
-        font-size: 0.85rem;
+        padding-left: 20px !important;
+        font-size: 0.85rem !important;
+        color: rgba(255, 255, 255, 0.85) !important;
     }
     .nav-item.pl-3 .nav-link i.small-icon {
-        font-size: 8px;
-        margin-right: 5px;
-        vertical-align: middle;
+        font-size: 8px !important;
+        margin-right: 6px !important;
+        vertical-align: middle !important;
+        color: rgba(255, 255, 255, 0.6) !important;
     }
 </style>
 <script>

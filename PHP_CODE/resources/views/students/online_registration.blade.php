@@ -170,20 +170,16 @@
                                                     </div>
                     
                                                     <div class="form-group col-sm-12 col-md-4">
-                                                        <label>{{ __('gender') }} <span class="text-danger">*</span></label><br>
-                                                        <div class="d-flex">
-                                                            <div class="form-check form-check-inline">
-                                                                <label class="form-check-label">
-                                                                    {!! Form::radio('gender', 'male', false ,['id' => 'male']) !!}
-                                                                    {{ __('male') }}
-                                                                </label>
-                                                            </div>
-                                                            <div class="form-check form-check-inline">
-                                                                <label class="form-check-label">
-                                                                    {!! Form::radio('gender', 'female', false , ['id' => 'female']) !!}
-                                                                    {{ __('female') }}
-                                                                </label>
-                                                            </div>
+                                                        <label>{{ __('gender') }} <span class="text-danger">*</span></label>
+                                                        <div class="zolo-segmented-control" role="group" aria-label="Gender">
+                                                            <label class="zolo-segment-btn" for="male">
+                                                                <input type="radio" name="gender" value="male" id="male" class="zolo-segment-input" required>
+                                                                <span class="zolo-segment-content"><i class="fa fa-mars segment-icon icon-male"></i> {{ __('male') }}</span>
+                                                            </label>
+                                                            <label class="zolo-segment-btn" for="female">
+                                                                <input type="radio" name="gender" value="female" id="female" class="zolo-segment-input" required>
+                                                                <span class="zolo-segment-content"><i class="fa fa-venus segment-icon icon-female"></i> {{ __('female') }}</span>
+                                                            </label>
                                                         </div>
                                                     </div>
                                                     <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
@@ -349,22 +345,16 @@
                                                         {!! Form::number('guardian_mobile', null, ['placeholder' => __('guardian') . ' ' . __('mobile'), 'class' => 'form-control remove-number-increment', 'min' => 1  ,'id' => 'edit_guardian_mobile']) !!}
                                                     </div>
                                                     <div class="form-group col-sm-12 col-md-12">
-                                                        <label>{{ __('gender') }} <span class="text-danger">*</span></label><br>
-                                                        <div class="d-flex">
-                                                            <div class="form-check form-check-inline">
-                                                                <label class="form-check-label">
-                                                                    {!! Form::radio('guardian_gender', 'male', false , ['id' =>"edit-guardian-male"]) !!}
-                                                                    {{-- <input type="radio" name="guardian_gender" value="male" id="edit_guardian_male"  disabled> --}}
-                                                                    {{ __('male') }}
-                                                                </label>
-                                                            </div>
-                                                            <div class="form-check form-check-inline">
-                                                                <label class="form-check-label">
-                                                                    {!! Form::radio('guardian_gender', 'female', false , ['id' =>"edit-guardian-female"]) !!}
-                                                                    {{-- <input type="radio" name="guardian_gender" value="female" id="edit_guardian_female" disabled> --}}
-                                                                    {{ __('female') }}
-                                                                </label>
-                                                            </div>
+                                                        <label>{{ __('gender') }} <span class="text-danger">*</span></label>
+                                                        <div class="zolo-segmented-control" style="max-width: 320px;" role="group" aria-label="Guardian Gender">
+                                                            <label class="zolo-segment-btn" for="edit-guardian-male">
+                                                                <input type="radio" name="guardian_gender" value="male" id="edit-guardian-male" class="zolo-segment-input" required>
+                                                                <span class="zolo-segment-content"><i class="fa fa-mars segment-icon icon-male"></i> {{ __('male') }}</span>
+                                                            </label>
+                                                            <label class="zolo-segment-btn" for="edit-guardian-female">
+                                                                <input type="radio" name="guardian_gender" value="female" id="edit-guardian-female" class="zolo-segment-input" required>
+                                                                <span class="zolo-segment-content"><i class="fa fa-venus segment-icon icon-female"></i> {{ __('female') }}</span>
+                                                            </label>
                                                         </div>
                                                     </div>
                                                     <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
@@ -385,27 +375,25 @@
                                                 <hr>
                                                 <div class="row mt-5">
                                                     <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
-                                                        <label>{{ __('application_status') }} <span class="text-danger">*</span></label><br>
-                                                        <div class="d-flex">
-                                                            <div class="form-check form-check-inline">
-                                                                <label class="form-check-label">
-                                                                    {!! Form::radio('application_status', '1', true , ['class'=> 'application-status-accepted','id' =>"edit-application-status-accepted", 'checked','required']) !!}
-                                                                    {{ __('accepted') }}
-                                                                </label>
-                                                            </div>
-                                                            <div class="form-check form-check-inline">
-                                                                <label class="form-check-label">
-                                                                    {!! Form::radio('application_status', '0', false , ['class'=> 'application-status-rejected','id' =>"edit-application-status-rejected", 'required']) !!}
-                                                                    {{ __('rejected') }}
-                                                                </label>
-                                                            </div>
+                                                        <label>{{ __('application_status') }} <span class="text-danger">*</span></label>
+                                                        <div class="zolo-segmented-control" role="group" aria-label="Application Status">
+                                                            <label class="zolo-segment-btn active" for="edit-application-status-accepted">
+                                                                <input type="radio" name="application_status" value="1" id="edit-application-status-accepted" class="zolo-segment-input application-status-accepted" checked required>
+                                                                <span class="zolo-segment-content"><i class="fa fa-check-circle segment-icon text-success mr-1"></i> {{ __('accepted') }}</span>
+                                                            </label>
+                                                            <label class="zolo-segment-btn" for="edit-application-status-rejected">
+                                                                <input type="radio" name="application_status" value="0" id="edit-application-status-rejected" class="zolo-segment-input application-status-rejected" required>
+                                                                <span class="zolo-segment-content"><i class="fa fa-times-circle segment-icon text-danger mr-1"></i> {{ __('rejected') }}</span>
+                                                            </label>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __('Cancel') }}</button>
-                                                <input class="btn btn-theme" type="submit" value={{ __('submit') }}>
+                                            <div class="modal-footer py-2 px-3 d-flex justify-content-end bg-light" style="gap: 8px;">
+                                                <button type="button" class="btn btn-sm btn-secondary px-3" data-dismiss="modal">
+                                                    <i class="fa fa-times mr-1"></i> {{ __('Cancel') }}
+                                                </button>
+                                                <input class="btn btn-sm btn-primary px-4 font-weight-bold" type="submit" value="{{ __('submit') }}">
                                             </div>
                                         </form>
                                     </div>

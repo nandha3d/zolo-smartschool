@@ -48,55 +48,67 @@
         border-radius: 14px;
         padding: 16px;
         box-shadow: 0 1px 4px rgba(0,0,0,0.04);
-        overflow-x: auto;
+        overflow-x: hidden;
+    }
+    @media (max-width: 991px) {
+        .matrix-container {
+            overflow-x: auto;
+        }
     }
     .matrix-table {
-        width: 100%;
+        width: 100% !important;
+        max-width: 100% !important;
         border-collapse: separate;
-        border-spacing: 8px;
-        min-width: 900px;
+        border-spacing: 5px;
+        table-layout: fixed;
     }
     .matrix-table th {
         background: #F8FAFC;
         color: #475569;
-        font-size: 13px;
+        font-size: 12px;
         font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
-        padding: 12px 10px;
+        letter-spacing: 0.4px;
+        padding: 6px 4px;
         text-align: center;
-        border-radius: 8px;
+        border-radius: 6px;
         border: 1px solid #E2E8F0;
+        height: 30px;
+        vertical-align: middle;
     }
     .matrix-table th.period-header-col {
-        width: 140px;
+        width: 95px !important;
+        max-width: 95px !important;
         background: #F1F5F9;
         color: #1E293B;
     }
     .matrix-table td {
         vertical-align: top;
         padding: 0;
-        height: 105px;
-        min-width: 145px;
+        height: 68px;
     }
     .matrix-table td.period-label-cell {
         vertical-align: middle;
         text-align: center;
         background: #F8FAFC;
         border: 1px solid #E2E8F0;
-        border-radius: 10px;
-        padding: 8px;
+        border-radius: 8px;
+        padding: 4px 6px;
+        width: 95px !important;
+        max-width: 95px !important;
     }
     .period-title {
         font-weight: 700;
-        font-size: 13px;
+        font-size: 11.5px;
         color: #1E293B;
+        line-height: 1.1;
     }
     .period-time {
-        font-size: 11px;
+        font-size: 9.5px;
         color: #64748B;
         font-weight: 500;
-        margin-top: 2px;
+        margin-top: 1px;
+        line-height: 1.1;
     }
 
     /* Slot Cards */
@@ -219,27 +231,60 @@
         border-color: #EF4444;
     }
 
-    /* Break Row / Slot */
+    /* =========================================================
+       SLEEK BREAK ROW & CELLS (Compact ~32px Height)
+       ========================================================= */
+    .matrix-table tr.break-period-row td {
+        height: 32px !important;
+        min-height: 32px !important;
+        max-height: 32px !important;
+        padding: 0 !important;
+        vertical-align: middle;
+    }
+    .matrix-table tr.break-period-row td.period-label-cell {
+        height: 32px !important;
+        min-height: 32px !important;
+        max-height: 32px !important;
+        padding: 2px 4px !important;
+        background: #FEF3C7;
+        border-color: #FDE68A;
+    }
+    .matrix-table tr.break-period-row .period-title {
+        font-size: 10.5px;
+        color: #92400E;
+        font-weight: 700;
+        line-height: 1;
+    }
+    .matrix-table tr.break-period-row .period-time {
+        font-size: 9px;
+        color: #B45309;
+        margin-top: 1px;
+        line-height: 1;
+    }
     .break-card {
-        background: repeating-linear-gradient(
-            45deg,
-            #F8FAFC,
-            #F8FAFC 10px,
-            #F1F5F9 10px,
-            #F1F5F9 20px
-        );
-        border: 1px dashed #CBD5E1;
-        border-radius: 10px;
-        height: 100%;
+        height: 30px !important;
+        min-height: 30px !important;
+        max-height: 30px !important;
+        border-radius: 6px;
+        background: #FFFDF5;
+        border: 1px dashed #FCD34D;
         display: flex;
-        flex-direction: column;
+        flex-direction: row;
         align-items: center;
         justify-content: center;
-        color: #64748B;
+        gap: 6px;
+        color: #92400E;
+        font-size: 11px;
         font-weight: 600;
-        font-size: 12px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
+        padding: 0 8px;
+        margin: 0;
+        text-transform: none;
+        box-shadow: none;
+    }
+    .break-card i {
+        font-size: 11px;
+        color: #D97706;
+        margin: 0 !important;
     }
     .empty-slot-card {
         background: #FAFAFA;
@@ -1425,9 +1470,9 @@
         const matrix = data.matrix || {};
 
         // Update Headers
-        let headerHtml = `<th class="period-header-col">{{ __('Period / Time') }}</th>`;
+        let headerHtml = `<th class="period-header-col" style="width: 95px !important; max-width: 95px !important;">{{ __('Period / Time') }}</th>`;
         days.forEach(d => {
-            headerHtml += `<th>${d}</th>`;
+            headerHtml += `<th style="width: calc((100% - 95px) / ${days.length});">${d}</th>`;
         });
         $('#matrixHeaderRow').html(headerHtml);
 
@@ -1453,13 +1498,14 @@
         let conflictDetails = [];
 
         timeSlots.forEach((slot, pIdx) => {
-            const periodLabel = slot.type === 'Break' ? (slot.title || 'Break') : `Period ${slot.period_no || (pIdx + 1)}`;
+            const isBreakPeriod = (slot.type === 'Break' || (slot.title && slot.title.toLowerCase().indexOf('break') !== -1));
+            const periodLabel = isBreakPeriod ? (slot.title || 'Break') : `Period ${slot.period_no || (pIdx + 1)}`;
             const timeRange = `${slot.start_time.substring(0, 5)} - ${slot.end_time.substring(0, 5)}`;
 
-            bodyHtml += `<tr>`;
+            bodyHtml += `<tr class="${isBreakPeriod ? 'break-period-row' : ''}">`;
             bodyHtml += `
-                <td class="period-label-cell">
-                    <div class="period-title">${periodLabel}</div>
+                <td class="period-label-cell ${isBreakPeriod ? 'break-time-cell' : ''}">
+                    <div class="period-title">${isBreakPeriod ? '<i class="fa fa-coffee mr-1 text-warning"></i>' : ''}${periodLabel}</div>
                     <div class="period-time">${timeRange}</div>
                 </td>
             `;
@@ -1468,13 +1514,22 @@
                 const daySlots = matrix[day] || {};
                 const entry = daySlots[slot.start_time];
 
-                if (entry) {
+                if (isBreakPeriod && (!entry || entry.type === 'Break')) {
+                    bodyHtml += `
+                        <td>
+                            <div class="break-card">
+                                <i class="fa fa-coffee mr-1"></i>
+                                <span>${(entry && entry.subject_name) || slot.title || 'Break'}</span>
+                            </div>
+                        </td>
+                    `;
+                } else if (entry) {
                     if (entry.type === 'Break') {
                         bodyHtml += `
                             <td>
                                 <div class="break-card">
-                                    <span>☕ ${entry.subject_name || 'Break'}</span>
-                                    <small class="text-muted">${timeRange}</small>
+                                    <i class="fa fa-coffee mr-1"></i>
+                                    <span>${entry.subject_name || 'Break'}</span>
                                 </div>
                             </td>
                         `;

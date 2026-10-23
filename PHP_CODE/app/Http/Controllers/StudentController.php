@@ -839,11 +839,21 @@ class StudentController extends Controller
         try {
             $user_ids = explode(",", $request->user_id);
             $settings = $this->cache->getSchoolSettings();
-            if (!isset($settings['student_id_card_fields'])) {
-                return redirect()->route('id-card-settings')->with('error', trans('settings_not_found'));
+
+            // Provide fallback defaults so ID card generation never fails even if settings were not previously saved
+            if (empty($settings['student_id_card_fields'])) {
+                $settings['student_id_card_fields'] = 'student_name,class_section,roll_no,dob,gender';
+            }
+            if (empty($settings['page_width'])) {
+                $settings['page_width'] = 54;
+            }
+            if (empty($settings['page_height'])) {
+                $settings['page_height'] = 85.6;
             }
 
-            $settings['student_id_card_fields'] = explode(",", $settings['student_id_card_fields']);
+            $settings['student_id_card_fields'] = is_array($settings['student_id_card_fields'])
+                ? $settings['student_id_card_fields']
+                : explode(",", $settings['student_id_card_fields']);
 
             $data = explode("storage/", $settings['signature'] ?? '');
             $settings['signature'] = end($data);
@@ -855,9 +865,9 @@ class StudentController extends Controller
             $settings['horizontal_logo'] = end($data);
 
             $sessionYear = $this->cache->getDefaultSessionYear();
-            $valid_until = date('F j, Y', strtotime($sessionYear->end_date));
-            $height = $settings['page_height'] * 2.8346456693;
-            $width = $settings['page_width'] * 2.8346456693;
+            $valid_until = $sessionYear ? date('F j, Y', strtotime($sessionYear->end_date)) : date('F j, Y', strtotime('+1 year'));
+            $height = floatval($settings['page_height']) * 2.8346456693;
+            $width = floatval($settings['page_width']) * 2.8346456693;
             $customPaper = array(0, 0, $width, $height);
 
             $students = $this->user->builder()->select('id', 'first_name', 'last_name', 'image', 'school_id', 'gender', 'dob')
@@ -877,18 +887,19 @@ class StudentController extends Controller
                     }
                 ])->get();
 
-            $template_design = $request->input('template_design', $request->input('template_id', (isset($settings['layout_type']) && $settings['layout_type'] == 'horizontal') ? 'h_split' : 'wave'));
-            $primary_color = $request->input('primary_color', '#1E293B');
-            $accent_color = $request->input('accent_color', '#06B6D4');
+            $template_design = $request->input('template_design', $request->input('template_id', $settings['template_design'] ?? $settings['id_card_template'] ?? ((isset($settings['layout_type']) && $settings['layout_type'] == 'horizontal') ? 'h_split' : 'wave')));
+            $primary_color = $request->input('primary_color', $settings['primary_color'] ?? $settings['header_color'] ?? '#1E293B');
+            $accent_color = $request->input('accent_color', $settings['accent_color'] ?? $settings['footer_color'] ?? '#06B6D4');
             $print_format = $request->input('print_format', 'single'); // 'single', 'a4', 'a3'
             $show_cut_guides = $request->input('show_cut_guides', 1);
+            $card_side = $request->input('card_side', $settings['student_id_card_card_side'] ?? 'both'); // 'both', 'front', 'back'
 
             $settings['page_height'] = ($settings['page_height'] * 3.7795275591) . 'px';
 
             $pdf = PDF::loadView('students.students_id_card', compact(
                 'students', 'sessionYear', 'valid_until', 'settings',
                 'template_design', 'primary_color', 'accent_color',
-                'print_format', 'show_cut_guides'
+                'print_format', 'show_cut_guides', 'card_side'
             ));
 
             if ($print_format === 'a4') {

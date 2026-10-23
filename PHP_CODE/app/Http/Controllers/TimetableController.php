@@ -110,11 +110,15 @@ class TimetableController extends Controller
 
         $classes = $this->class->builder()->with('stream')->get()->pluck('full_name', 'id');
         $mediums = $this->medium->builder()->pluck('name', 'id');
-        $classSections = $this->classSection->builder()->with(['class', 'section', 'medium'])->get();
+        $classSections = $this->classSection->builder()->with(['class', 'section', 'medium', 'teachers'])->get();
 
         $schoolId = Auth::user()->school_id;
         $templates = $this->planningService->getTemplates($schoolId);
         $resources = $this->planningService->getResources($schoolId);
+
+        $availableBlocks = collect($classSections->pluck('block')->merge($resources->pluck('block')))->filter()->unique()->values()->all();
+        $blockSettings = $this->schoolSettings->getBulkData(['timetable_prioritize_same_block']);
+        $prioritizeSameBlock = isset($blockSettings['timetable_prioritize_same_block']) ? (bool)$blockSettings['timetable_prioritize_same_block'] : true;
 
         // Per-section readiness for the school-wide batch generator: how many subject
         // requirements are set, their weekly periods, and how many lack a teacher.
@@ -133,7 +137,7 @@ class TimetableController extends Controller
             'no_teacher' => $reqs->filter(fn($r) => !isset($taught[$r->class_section_id . ':' . $r->subject_id]))->count(),
         ]);
 
-        return view('timetable.index', compact('timetableData', 'classes', 'mediums', 'classSections', 'templates', 'resources', 'readiness'));
+        return view('timetable.index', compact('timetableData', 'classes', 'mediums', 'classSections', 'templates', 'resources', 'readiness', 'availableBlocks', 'prioritizeSameBlock'));
     }
 
     public function store(Request $request)
@@ -1047,6 +1051,7 @@ class TimetableController extends Controller
         $request->validate([
             'name'     => 'required|string|max:191',
             'type'     => 'nullable|string',
+            'block'    => 'nullable|string|max:64',
             'capacity' => 'nullable|numeric',
         ]);
 
@@ -1071,6 +1076,13 @@ class TimetableController extends Controller
     {
         ResponseService::noFeatureThenRedirect('Timetable Management');
         ResponseService::noPermissionThenSendJson(['timetable-edit']);
+
+        $request->validate([
+            'name'     => 'nullable|string|max:191',
+            'type'     => 'nullable|string',
+            'block'    => 'nullable|string|max:64',
+            'capacity' => 'nullable|numeric',
+        ]);
 
         try {
             $resource = $this->planningService->updateResource((int)$id, $request->all());
@@ -1301,7 +1313,7 @@ class TimetableController extends Controller
                 'teacher:users.id,first_name,last_name',
                 'subject:id,name,type,bg_color',
                 'subject_teacher.teacher:id,first_name,last_name',
-                'resource:id,name,type',
+                'resource:id,name,type,block',
                 'period'
             ])
             ->orderBy('start_time', 'ASC')
@@ -1319,18 +1331,47 @@ class TimetableController extends Controller
         $activeDays = [];
         $timeSlots = [];
 
+        // 1. Populate canonical periods from default bell schedule template first
+        $defaultTemplate = $this->planningService->getDefaultTemplate($schoolId);
+        if ($defaultTemplate && $defaultTemplate->periods->count()) {
+            $activeDays = $defaultTemplate->working_days ?? ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+            $pNum = 1;
+            foreach ($defaultTemplate->periods->sortBy('start_time') as $period) {
+                $timeKey = $period->start_time . ' - ' . $period->end_time;
+                $pTitle = $period->name;
+                if (empty($pTitle)) {
+                    $pTitle = ($period->type === 'Break' || !$period->is_instructional) ? 'Break' : ('Period ' . ($period->period_number ?: $pNum++));
+                }
+                $timeSlots[$timeKey] = [
+                    'start_time' => $period->start_time,
+                    'end_time'   => $period->end_time,
+                    'period_no'  => $period->period_number,
+                    'period_id'  => $period->id,
+                    'type'       => $period->type,
+                    'title'      => $pTitle,
+                ];
+            }
+        }
+
+        // 2. Incorporate any slots already scheduled in this class
+        $extraNum = count($timeSlots) + 1;
         foreach ($timetables as $slot) {
             if (!in_array($slot->day, $activeDays)) {
                 $activeDays[] = $slot->day;
             }
             $timeKey = $slot->start_time . ' - ' . $slot->end_time;
             if (!isset($timeSlots[$timeKey])) {
+                $pTitle = $slot->period?->name;
+                if (empty($pTitle)) {
+                    $pTitle = ($slot->type === 'Break') ? 'Break' : ('Period ' . ($slot->period_no ?: $extraNum++));
+                }
                 $timeSlots[$timeKey] = [
                     'start_time' => $slot->start_time,
                     'end_time'   => $slot->end_time,
                     'period_no'  => $slot->period_no ?? null,
+                    'period_id'  => $slot->period_id ?? null,
                     'type'       => $slot->type,
-                    'title'      => $slot->title ?? ($slot->type === 'Break' ? 'Break' : null),
+                    'title'      => $pTitle,
                 ];
             }
         }
@@ -1385,6 +1426,7 @@ class TimetableController extends Controller
                 'period_id'            => $t->period_id,
                 'resource_id'          => $t->resource_id,
                 'resource_name'        => $t->resource?->name,
+                'resource_block'       => $t->resource?->block,
                 'is_locked'            => (bool)$t->is_locked,
                 'locked_by'            => $t->locked_by,
                 'lock_reason'          => $t->lock_reason,
@@ -1393,11 +1435,83 @@ class TimetableController extends Controller
             ];
         }
 
+        $classSection = \App\Models\ClassSection::with(['class', 'section', 'teachers'])->find($classSectionID);
+
+        $palette = [];
+        $classSubjects = \App\Models\ClassSubject::where('class_id', $classSection?->class_id)
+            ->with(['subject'])
+            ->get();
+
+        $scheduleReqs = SubjectScheduleRequirement::where('school_id', $schoolId)
+            ->where('class_section_id', $classSectionID)
+            ->where('is_active', true)
+            ->with(['resource'])
+            ->get()
+            ->keyBy('subject_id');
+
+        $assignedCountBySubject = $timetables->where('type', 'Lecture')->groupBy('subject_id')->map->count();
+
+        foreach ($classSubjects as $cs) {
+            $sub = $cs->subject;
+            if (!$sub) continue;
+            $req = $scheduleReqs->get($sub->id);
+            $reqWeekly = $req ? (int)$req->weekly_periods : 5;
+            $assigned = $assignedCountBySubject->get($sub->id, 0);
+
+            $st = SubjectTeacher::where('class_section_id', $classSectionID)
+                ->where('subject_id', $sub->id)
+                ->with('teacher')
+                ->first();
+
+            $prefResource = $req?->resource;
+
+            $palette[] = [
+                'subject_id'               => $sub->id,
+                'subject_name'             => $sub->name,
+                'subject_type'             => $sub->type ?? 'Theory',
+                'bg_color'                 => $sub->bg_color ?: '#4F46E5',
+                'teacher_id'               => $st?->teacher_id,
+                'teacher_name'             => $st?->teacher ? trim($st->teacher->first_name . ' ' . $st->teacher->last_name) : null,
+                'required_weekly'          => $reqWeekly,
+                'assigned_periods'         => $assigned,
+                'remaining_periods'        => max(0, $reqWeekly - $assigned),
+                'preferred_resource_id'    => $prefResource?->id,
+                'preferred_resource_name'  => $prefResource?->name,
+                'preferred_resource_block' => $prefResource?->block,
+            ];
+        }
+
+        $activeResources = \App\Models\TimetableResource::where('school_id', $schoolId)
+            ->where('is_active', true)
+            ->select(['id', 'name', 'type', 'block', 'capacity'])
+            ->get();
+
+        $availableBlocks = collect(\App\Models\ClassSection::where('school_id', $schoolId)->pluck('block'))
+            ->merge($activeResources->pluck('block'))
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+
+        $blockSettings = $this->schoolSettings->getBulkData(['timetable_prioritize_same_block']);
+        $prioritizeSameBlock = isset($blockSettings['timetable_prioritize_same_block']) ? (bool)$blockSettings['timetable_prioritize_same_block'] : true;
+
         return response()->json([
-            'error'      => false,
-            'days'       => $activeDays,
-            'time_slots' => array_values($timeSlots),
-            'matrix'     => $matrix,
+            'error'                 => false,
+            'days'                  => $activeDays,
+            'time_slots'            => array_values($timeSlots),
+            'matrix'                => $matrix,
+            'class_section'         => $classSection ? [
+                'id'                 => $classSection->id,
+                'name'               => $classSection->name,
+                'full_name'          => $classSection->full_name,
+                'block'              => $classSection->block,
+                'class_teacher_name' => $classSection->teachers->first() ? trim($classSection->teachers->first()->first_name . ' ' . $classSection->teachers->first()->last_name) : null,
+            ] : null,
+            'subject_palette'       => $palette,
+            'resources'             => $activeResources,
+            'available_blocks'      => $availableBlocks,
+            'prioritize_same_block' => $prioritizeSameBlock,
         ]);
     }
 
@@ -1624,6 +1738,7 @@ class TimetableController extends Controller
             'start_time' => 'required|date_format:H:i:s',
             'end_time'   => 'required|date_format:H:i:s|after:start_time',
             'period_id'  => 'nullable|integer',
+            'teacher_id' => 'nullable|integer',
         ]);
 
         $schoolId = Auth::user()->school_id;
@@ -1644,7 +1759,29 @@ class TimetableController extends Controller
                 DB::rollBack();
                 return response()->json(['error' => true, 'message' => 'This lesson is locked. Unlock it first.'], 422);
             }
-            if ($slot->day === $day && $slot->start_time === $start && $slot->end_time === $end) {
+
+            $stRecord = null;
+            $activeTeacherId = $slot->subject_teacher?->teacher_id;
+            if ($request->filled('teacher_id')) {
+                $requestedTeacherId = (int) $request->teacher_id;
+                if ($requestedTeacherId !== (int) $activeTeacherId) {
+                    $classSection = ClassSection::find($slot->class_section_id);
+                    $classSubject = \App\Models\ClassSubject::where('class_id', $classSection?->class_id)
+                        ->where('subject_id', $slot->subject_id)
+                        ->first();
+                    $stRecord = SubjectTeacher::firstOrCreate([
+                        'class_section_id' => $slot->class_section_id,
+                        'subject_id'       => $slot->subject_id,
+                        'teacher_id'       => $requestedTeacherId,
+                    ], [
+                        'class_subject_id' => $classSubject?->id,
+                        'school_id'        => $schoolId,
+                    ]);
+                    $activeTeacherId = $requestedTeacherId;
+                }
+            }
+
+            if ($slot->day === $day && $slot->start_time === $start && $slot->end_time === $end && !$stRecord) {
                 DB::rollBack();
                 return response()->json(['error' => false, 'message' => 'Nothing to change.']);
             }
@@ -1686,7 +1823,7 @@ class TimetableController extends Controller
             $excludeIds = array_values(array_filter([$slot->id, $swap?->id]));
             $violations = $this->validationService->validateSingleSlot(
                 $schoolId, $slot->class_section_id, $day, $start, $end,
-                $slot->subject_teacher?->teacher_id, $slot->resource_id, $excludeIds, $periodId
+                $activeTeacherId, $slot->resource_id, $excludeIds, $periodId
             );
             if ($swap) {
                 $violations = array_merge($violations, $this->validationService->validateSingleSlot(
@@ -1697,15 +1834,41 @@ class TimetableController extends Controller
 
             if (!empty($violations)) {
                 DB::rollBack();
-                return response()->json([
-                    'error'      => true,
-                    'message'    => $violations[0]['message'],
-                    'violations' => $violations,
-                ], 422);
+                $teacherConflict = collect($violations)->firstWhere('code', 'TEACHER_CONFLICT');
+                if ($teacherConflict && !$request->boolean('force')) {
+                    $conflictPayload = $this->calculateTeacherConflictOptions(
+                        $schoolId,
+                        $activeTeacherId,
+                        $slot->subject_id,
+                        $slot->class_section_id,
+                        $day,
+                        $start,
+                        $end,
+                        $slot->id
+                    );
+                    return response()->json(array_merge([
+                        'error'                => true,
+                        'has_teacher_conflict' => true,
+                        'message'              => $violations[0]['message'],
+                        'violations'           => $violations,
+                    ], $conflictPayload), 409);
+                }
+
+                if (!$request->boolean('force')) {
+                    return response()->json([
+                        'error'      => true,
+                        'message'    => $violations[0]['message'],
+                        'violations' => $violations,
+                    ], 422);
+                }
             }
 
             $origin = ['day' => $slot->day, 'start_time' => $slot->start_time, 'end_time' => $slot->end_time, 'period_id' => $slot->period_id];
-            $slot->update(['day' => $day, 'start_time' => $start, 'end_time' => $end, 'period_id' => $periodId]);
+            $slotUpdate = ['day' => $day, 'start_time' => $start, 'end_time' => $end, 'period_id' => $periodId];
+            if ($stRecord) {
+                $slotUpdate['subject_teacher_id'] = $stRecord->id;
+            }
+            $slot->update($slotUpdate);
             $swap?->update($origin);
 
             DB::commit();
@@ -1817,6 +1980,499 @@ class TimetableController extends Controller
             'day'     => $day,
             'date'    => $date->toDateString(),
             'lessons' => $result,
+        ]);
+    }
+
+    public function placeSlot(Request $request)
+    {
+        ResponseService::noFeatureThenRedirect('Timetable Management');
+        ResponseService::noPermissionThenSendJson('timetable-edit');
+
+        $request->validate([
+            'class_section_id' => 'required|numeric',
+            'day'              => 'required|in:Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday',
+            'start_time'       => 'required',
+            'end_time'         => 'required',
+            'subject_id'       => 'required|numeric',
+            'teacher_id'       => 'nullable|numeric',
+            'resource_id'      => 'nullable|numeric',
+            'period_id'        => 'nullable|numeric',
+            'type'             => 'nullable|string',
+        ]);
+
+        $schoolId = Auth::user()->school_id;
+        $classSectionId = (int)$request->class_section_id;
+        $day = $request->day;
+        $startTime = Carbon::parse($request->start_time)->format('H:i:s');
+        $endTime = Carbon::parse($request->end_time)->format('H:i:s');
+        $subjectId = (int)$request->subject_id;
+        $teacherId = $request->filled('teacher_id') ? (int)$request->teacher_id : null;
+        $resourceId = $request->filled('resource_id') ? (int)$request->resource_id : null;
+        $periodId = $request->filled('period_id') ? (int)$request->period_id : null;
+        $slotType = $request->type ?? 'Lecture';
+
+        try {
+            DB::beginTransaction();
+
+            $existing = $this->timetable->builder()
+                ->where('class_section_id', $classSectionId)
+                ->where('day', $day)
+                ->where('start_time', $startTime)
+                ->where('end_time', $endTime)
+                ->first();
+
+            if ($existing && $existing->is_locked) {
+                DB::rollBack();
+                return response()->json([
+                    'error'   => true,
+                    'message' => 'This slot is locked (' . ($existing->lock_reason ?? 'locked by admin') . '). Unlock it first.'
+                ], 422);
+            }
+
+            $subjectTeacherId = null;
+            if ($teacherId) {
+                $classSection = ClassSection::find($classSectionId);
+                $classSubject = \App\Models\ClassSubject::where('class_id', $classSection?->class_id)
+                    ->where('subject_id', $subjectId)
+                    ->first();
+
+                $subjectTeacher = SubjectTeacher::firstOrCreate([
+                    'class_section_id' => $classSectionId,
+                    'subject_id'       => $subjectId,
+                    'teacher_id'       => $teacherId,
+                ], [
+                    'class_subject_id' => $classSubject?->id,
+                    'school_id'        => $schoolId,
+                ]);
+                $subjectTeacherId = $subjectTeacher->id;
+            }
+
+            $excludeId = $existing ? $existing->id : null;
+            $violations = $this->validationService->validateSingleSlot(
+                $schoolId,
+                $classSectionId,
+                $day,
+                $startTime,
+                $endTime,
+                $teacherId,
+                $resourceId,
+                $excludeId ? [$excludeId] : [],
+                $periodId
+            );
+
+            if (!empty($violations)) {
+                DB::rollBack();
+                $teacherConflict = collect($violations)->firstWhere('code', 'TEACHER_CONFLICT');
+                if ($teacherConflict && !$request->boolean('force')) {
+                    $conflictPayload = $this->calculateTeacherConflictOptions(
+                        $schoolId,
+                        $teacherId,
+                        $subjectId,
+                        $classSectionId,
+                        $day,
+                        $startTime,
+                        $endTime,
+                        $excludeId
+                    );
+                    return response()->json(array_merge([
+                        'error'                => true,
+                        'has_teacher_conflict' => true,
+                        'message'              => $violations[0]['message'],
+                        'violations'           => $violations,
+                    ], $conflictPayload), 409);
+                }
+
+                if (!$request->boolean('force')) {
+                    return response()->json([
+                        'error'      => true,
+                        'message'    => $violations[0]['message'],
+                        'violations' => $violations
+                    ], 422);
+                }
+            }
+
+            $currentSemester = $this->cache->getDefaultSemesterData();
+            $meta = [];
+            if ($teacherId) {
+                $teacherUser = User::find($teacherId);
+                $meta['primary_teacher_name'] = $teacherUser ? trim($teacherUser->first_name . ' ' . $teacherUser->last_name) : null;
+            }
+
+            $attributes = [
+                'school_id'          => $schoolId,
+                'class_section_id'   => $classSectionId,
+                'semester_id'        => $currentSemester?->id,
+                'subject_id'         => $subjectId,
+                'subject_teacher_id' => $subjectTeacherId,
+                'day'                => $day,
+                'start_time'         => $startTime,
+                'end_time'           => $endTime,
+                'type'               => $slotType,
+                'period_id'          => $periodId,
+                'resource_id'        => $resourceId,
+                'note'               => json_encode($meta),
+            ];
+
+            if ($existing) {
+                $existing->update($attributes);
+                $timetable = $existing;
+            } else {
+                $timetable = $this->timetable->create($attributes);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'error'   => false,
+                'message' => 'Subject assigned successfully.',
+                'slot'    => $timetable->fresh(['subject', 'resource', 'subject_teacher.teacher'])
+            ]);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            ResponseService::logErrorResponse($e, "TimetableController -> placeSlot");
+            return response()->json([
+                'error'   => true,
+                'message' => 'Failed to place slot: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Helper to compute detailed collision information and smart alternatives
+     * when a teacher collision occurs.
+     */
+    protected function calculateTeacherConflictOptions(
+        int $schoolId,
+        ?int $teacherId,
+        ?int $subjectId,
+        int $classSectionId,
+        string $targetDay,
+        string $targetStart,
+        string $targetEnd,
+        $excludeSlotId = null
+    ): array {
+        if (!$teacherId) {
+            return [];
+        }
+
+        $teacher = User::find($teacherId);
+        $teacherName = $teacher ? trim($teacher->first_name . ' ' . $teacher->last_name) : 'Teacher';
+
+        // 1. Fetch exact conflicting slot in another class
+        $clashSlot = $this->timetable->builder()
+            ->where('school_id', $schoolId)
+            ->where('day', $targetDay)
+            ->where('type', 'Lecture')
+            ->when($excludeSlotId, fn($q) => $q->where('id', '!=', $excludeSlotId))
+            ->whereHas('subject_teacher', fn($q) => $q->where('teacher_id', $teacherId))
+            ->where(function ($q) use ($targetStart, $targetEnd) {
+                $q->where('start_time', '<', $targetEnd)
+                  ->where('end_time', '>', $targetStart);
+            })
+            ->with(['class_section.class', 'class_section.section', 'class_section.medium', 'subject'])
+            ->first();
+
+        $conflictingClass = $clashSlot?->class_section?->full_name ?? ('Class #' . ($clashSlot->class_section_id ?? 'Unknown'));
+        $conflictingSubject = $clashSlot?->subject?->name ?? 'Subject';
+
+        // 2. Calculate alternative free slots where BOTH this teacher & this target class section are free
+        $template = $this->planningService->getDefaultTemplate($schoolId);
+        $workingDays = $template?->working_days ?? ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+        $periods = $template ? $template->instructional_periods->sortBy('start_time') : collect();
+
+        // All busy slots for teacher across entire school
+        $teacherBusy = $this->timetable->builder()
+            ->where('school_id', $schoolId)
+            ->where('type', 'Lecture')
+            ->whereHas('subject_teacher', fn($q) => $q->where('teacher_id', $teacherId))
+            ->get(['day', 'start_time', 'end_time']);
+
+        // All busy slots for target class section
+        $classBusy = $this->timetable->builder()
+            ->where('school_id', $schoolId)
+            ->where('class_section_id', $classSectionId)
+            ->where('type', 'Lecture')
+            ->when($excludeSlotId, fn($q) => $q->where('id', '!=', $excludeSlotId))
+            ->get(['day', 'start_time', 'end_time']);
+
+        $freeSlots = [];
+        foreach ($workingDays as $d) {
+            foreach ($periods as $p) {
+                $tOccupied = $teacherBusy->contains(function ($b) use ($d, $p) {
+                    return $b->day === $d && $b->start_time < $p->end_time && $b->end_time > $p->start_time;
+                });
+                if ($tOccupied) {
+                    continue;
+                }
+
+                $cOccupied = $classBusy->contains(function ($b) use ($d, $p) {
+                    return $b->day === $d && $b->start_time < $p->end_time && $b->end_time > $p->start_time;
+                });
+
+                $freeSlots[] = [
+                    'day'          => $d,
+                    'start_time'   => $p->start_time,
+                    'end_time'     => $p->end_time,
+                    'period_id'    => $p->id,
+                    'period_title' => $p->name ?: ('Period ' . $p->period_number),
+                    'is_empty'     => !$cOccupied,
+                ];
+
+                if (count($freeSlots) >= 8) {
+                    break 2;
+                }
+            }
+        }
+
+        // 3. Find other qualified teachers for this subject who are FREE at this targetDay/targetTime
+        $altTeachers = [];
+        if ($subjectId) {
+            $candidateTeacherIds = SubjectTeacher::where('school_id', $schoolId)
+                ->where('subject_id', $subjectId)
+                ->where('teacher_id', '!=', $teacherId)
+                ->pluck('teacher_id')
+                ->unique();
+
+            foreach ($candidateTeacherIds as $cTid) {
+                $cUser = User::find($cTid);
+                if (!$cUser) continue;
+
+                $cBusy = $this->timetable->builder()
+                    ->where('school_id', $schoolId)
+                    ->where('day', $targetDay)
+                    ->where('type', 'Lecture')
+                    ->whereHas('subject_teacher', fn($q) => $q->where('teacher_id', $cTid))
+                    ->where('start_time', '<', $targetEnd)
+                    ->where('end_time', '>', $targetStart)
+                    ->exists();
+
+                if (!$cBusy) {
+                    $altTeachers[] = [
+                        'id'   => $cUser->id,
+                        'name' => trim($cUser->first_name . ' ' . $cUser->last_name),
+                    ];
+                }
+            }
+        }
+
+        return [
+            'conflict_details' => [
+                'teacher_id'          => $teacherId,
+                'teacher_name'        => $teacherName,
+                'day'                 => $targetDay,
+                'start_time'          => $targetStart,
+                'end_time'            => $targetEnd,
+                'conflicting_class'    => $conflictingClass,
+                'clashing_class'       => $conflictingClass,
+                'conflicting_subject'  => $conflictingSubject,
+                'clashing_subject'     => $conflictingSubject,
+                'subject_id'           => $subjectId,
+            ],
+            'options' => [
+                'free_slots'           => $freeSlots,
+                'alternative_slots'    => $freeSlots,
+                'alternate_teachers'   => $altTeachers,
+                'alternative_teachers' => $altTeachers,
+            ]
+        ];
+    }
+
+    public function clearSlot(Request $request)
+    {
+        ResponseService::noFeatureThenRedirect('Timetable Management');
+        ResponseService::noPermissionThenSendJson('timetable-edit');
+
+        $request->validate([
+            'id'               => 'nullable|numeric',
+            'class_section_id' => 'nullable|numeric',
+            'day'              => 'nullable|string',
+            'start_time'       => 'nullable',
+            'end_time'         => 'nullable',
+        ]);
+
+        try {
+            DB::beginTransaction();
+            if ($request->filled('id')) {
+                $slot = Timetable::findOrFail($request->id);
+            } else {
+                $slot = Timetable::where('class_section_id', $request->class_section_id)
+                    ->where('day', $request->day)
+                    ->where('start_time', Carbon::parse($request->start_time)->format('H:i:s'))
+                    ->where('end_time', Carbon::parse($request->end_time)->format('H:i:s'))
+                    ->firstOrFail();
+            }
+
+            if ($slot->is_locked) {
+                DB::rollBack();
+                return response()->json([
+                    'error'   => true,
+                    'message' => 'This slot is locked. Unlock it before removing.'
+                ], 422);
+            }
+
+            $slot->delete();
+            DB::commit();
+
+            return response()->json([
+                'error'   => false,
+                'message' => 'Slot cleared successfully.'
+            ]);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            ResponseService::logErrorResponse($e, "TimetableController -> clearSlot");
+            return response()->json([
+                'error'   => true,
+                'message' => 'Failed to clear slot: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function saveClassBlock(Request $request)
+    {
+        ResponseService::noFeatureThenRedirect('Timetable Management');
+        ResponseService::noPermissionThenSendJson('timetable-edit');
+
+        $request->validate([
+            'class_section_id' => 'required|numeric',
+            'block'            => 'nullable|string|max:64',
+        ]);
+
+        try {
+            $classSection = ClassSection::findOrFail($request->class_section_id);
+            $classSection->block = $request->filled('block') ? trim($request->block) : null;
+            $classSection->save();
+
+            return response()->json([
+                'error'   => false,
+                'message' => 'Class block updated successfully.',
+                'block'   => $classSection->block
+            ]);
+        } catch (\Throwable $e) {
+            ResponseService::logErrorResponse($e, "TimetableController -> saveClassBlock");
+            return response()->json([
+                'error'   => true,
+                'message' => 'Failed to update block: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function saveBlockSettings(Request $request)
+    {
+        ResponseService::noFeatureThenRedirect('Timetable Management');
+        ResponseService::noPermissionThenSendJson('timetable-edit');
+
+        $request->validate([
+            'prioritize_same_block' => 'required|boolean',
+        ]);
+
+        try {
+            DB::beginTransaction();
+            $val = (bool)$request->prioritize_same_block;
+            $data = [
+                [
+                    'name' => 'timetable_prioritize_same_block',
+                    'data' => $val ? '1' : '0',
+                    'type' => 'string'
+                ]
+            ];
+            $this->schoolSettings->upsert($data, ['name'], ['data', 'type']);
+            $this->cache->removeSchoolCache(config('constants.CACHE.SCHOOL.SETTINGS'));
+            DB::commit();
+
+            return response()->json([
+                'error'                 => false,
+                'message'               => 'Block proximity preference updated successfully.',
+                'prioritize_same_block' => $val
+            ]);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            ResponseService::logErrorResponse($e, "TimetableController -> saveBlockSettings");
+            return response()->json([
+                'error'   => true,
+                'message' => 'Failed to save setting: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getCardViewData(Request $request)
+    {
+        ResponseService::noFeatureThenRedirect('Timetable Management');
+        ResponseService::noPermissionThenSendJson('timetable-list');
+
+        $schoolId = Auth::user()->school_id;
+        $classSections = ClassSection::where('school_id', $schoolId)
+            ->with(['class', 'section', 'medium', 'teachers'])
+            ->get();
+
+        $currentSemester = $this->cache->getDefaultSemesterData();
+        $allTimetables = Timetable::where('school_id', $schoolId)
+            ->where('type', 'Lecture')
+            ->when($currentSemester, fn($q) => $q->where(fn($sq) => $sq->where('semester_id', $currentSemester->id)->orWhereNull('semester_id')))
+            ->with(['subject:id,name,bg_color'])
+            ->get()
+            ->groupBy('class_section_id');
+
+        $requirements = SubjectScheduleRequirement::where('school_id', $schoolId)
+            ->where('is_active', true)
+            ->when($currentSemester, fn($q) => $q->where(fn($sq) => $sq->where('semester_id', $currentSemester->id)->orWhereNull('semester_id')))
+            ->get()
+            ->groupBy('class_section_id');
+
+        $cards = [];
+        foreach ($classSections as $cs) {
+            $slots = $allTimetables->get($cs->id, collect());
+            $reqs = $requirements->get($cs->id, collect());
+
+            $totalScheduled = $slots->count();
+            $totalRequired = (int)$reqs->sum('weekly_periods');
+            if ($totalRequired === 0) {
+                $classSubjectsCount = \App\Models\ClassSubject::where('class_id', $cs->class_id)->count();
+                $totalRequired = max($totalScheduled, $classSubjectsCount * 5);
+                if ($totalRequired === 0) $totalRequired = 30;
+            }
+
+            $percentage = $totalRequired > 0 ? min(100, round(($totalScheduled / $totalRequired) * 100)) : 0;
+
+            $subjectsScheduled = $slots->pluck('subject_id')->unique()->count();
+            $topSubjects = $slots->groupBy('subject_id')->map(function($grp) {
+                $first = $grp->first();
+                return [
+                    'name'     => $first->subject?->name ?? 'Subject',
+                    'count'    => $grp->count(),
+                    'bg_color' => $first->subject?->bg_color ?? '#4F46E5',
+                ];
+            })->values()->take(5);
+
+            $status = 'Empty';
+            if ($totalScheduled >= $totalRequired && $totalRequired > 0) {
+                $status = 'Complete';
+            } elseif ($totalScheduled > 0) {
+                $status = 'Incomplete';
+            }
+
+            $classTeacherName = $cs->teachers->first()
+                ? trim($cs->teachers->first()->first_name . ' ' . $cs->teachers->first()->last_name)
+                : null;
+
+            $cards[] = [
+                'id'                 => $cs->id,
+                'name'               => $cs->name,
+                'full_name'          => $cs->full_name,
+                'block'              => $cs->block,
+                'medium'             => $cs->medium?->name,
+                'class_teacher_name' => $classTeacherName,
+                'total_scheduled'    => $totalScheduled,
+                'total_required'     => $totalRequired,
+                'percentage'         => $percentage,
+                'subjects_count'     => $subjectsScheduled,
+                'top_subjects'       => $topSubjects,
+                'status'             => $status,
+            ];
+        }
+
+        return response()->json([
+            'error' => false,
+            'data'  => $cards,
         ]);
     }
 

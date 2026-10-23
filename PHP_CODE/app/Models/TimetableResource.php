@@ -14,6 +14,7 @@ class TimetableResource extends Model
         'school_id',
         'name',
         'type',
+        'block',
         'capacity',
         'description',
         'is_active'

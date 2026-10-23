@@ -205,7 +205,7 @@ class TimetableGenerationService
         }
 
         // 5. Build Lesson Blocks to Schedule
-        $blocks = $this->buildLessonBlocks($classSectionIds, $requirements, $lockedSlots, $externalOccupancies);
+        $blocks = $this->buildLessonBlocks($classSectionIds, $requirements, $lockedSlots, $externalOccupancies, $schoolId, $params);
 
         // 6. Run Deterministic Constraint Search Solver
         $solverResult = $this->solveDeterministic(
@@ -401,8 +401,12 @@ class TimetableGenerationService
     /**
      * Build lesson blocks from requirements, deducting already-scheduled locked slots.
      */
-    private function buildLessonBlocks(array $classSectionIds, $requirements, array $lockedSlots, array $externalOccupancies = []): array
+    private function buildLessonBlocks(array $classSectionIds, $requirements, array $lockedSlots, array $externalOccupancies = [], int $schoolId = 0, array $params = []): array
     {
+        if ($schoolId === 0 && count($requirements)) {
+            $schoolId = $requirements->first()?->school_id ?? 0;
+        }
+
         // Count already locked slots by [class_section_id][subject_id]
         $lockedCounts = [];
         foreach ($lockedSlots as $ls) {
@@ -417,6 +421,13 @@ class TimetableGenerationService
         $subjectTeachers = SubjectTeacher::whereIn('class_section_id', $classSectionIds)
             ->get()
             ->groupBy('class_section_id');
+
+        $prioritizeSameBlock = array_key_exists('prioritize_same_block', $params)
+            ? (bool)$params['prioritize_same_block']
+            : (bool)(\App\Models\SchoolSetting::where('school_id', $schoolId)->where('name', 'timetable_prioritize_same_block')->value('data') ?? true);
+
+        $schoolResources = TimetableResource::where('school_id', $schoolId)->get()->keyBy('id');
+        $classSectionBlocks = ClassSection::whereIn('id', $classSectionIds)->pluck('block', 'id');
 
         $blocks = [];
 
@@ -436,6 +447,20 @@ class TimetableGenerationService
             $teacherId = $st?->teacher_id;
             $subjectTeacherId = $st?->id;
 
+            $classBlock = $classSectionBlocks[$classId] ?? null;
+            $assignedResId = $req->resource_id;
+            if ($prioritizeSameBlock && $assignedResId && !empty($classBlock)) {
+                $res = $schoolResources->get($assignedResId);
+                if ($res && $res->block !== $classBlock) {
+                    $sameBlockRes = $schoolResources->first(fn($r) => $r->is_active && $r->type === $res->type && $r->block === $classBlock);
+                    if ($sameBlockRes) {
+                        $assignedResId = $sameBlockRes->id;
+                    }
+                }
+            }
+            $targetRes = $assignedResId ? $schoolResources->get($assignedResId) : null;
+            $resourceMatchesBlock = ($targetRes && !empty($classBlock) && $targetRes->block === $classBlock);
+
             $allowConsecutive = (bool)$req->allow_consecutive;
             $reqConsecutive = $allowConsecutive ? ((int)($req->required_consecutive_periods ?? 2)) : 1;
             if ($reqConsecutive <= 1) $reqConsecutive = 1;
@@ -447,19 +472,20 @@ class TimetableGenerationService
                     : 1;
 
                 $blocks[] = [
-                    'block_id'           => "{$classId}_{$subjectId}_{$blockIndex}",
-                    'class_section_id'   => $classId,
-                    'subject_id'         => $subjectId,
-                    'subject_teacher_id' => $subjectTeacherId,
-                    'teacher_id'         => $teacherId,
-                    'resource_id'        => $req->resource_id,
-                    'block_size'         => $blockSize,
-                    'priority'           => (int)$req->priority,
-                    'weekly_periods'     => $weeklyTotal,
-                    'avoid_first_period' => (bool)$req->avoid_first_period,
-                    'avoid_last_period'  => (bool)$req->avoid_last_period,
-                    'preferred_day'      => $req->preferred_day,
-                    'max_periods_per_day'=> max(1, (int)($req->max_periods_per_day ?? 2)),
+                    'block_id'               => "{$classId}_{$subjectId}_{$blockIndex}",
+                    'class_section_id'       => $classId,
+                    'subject_id'             => $subjectId,
+                    'subject_teacher_id'     => $subjectTeacherId,
+                    'teacher_id'             => $teacherId,
+                    'resource_id'            => $assignedResId,
+                    'resource_matches_block' => $resourceMatchesBlock,
+                    'block_size'             => $blockSize,
+                    'priority'               => (int)$req->priority,
+                    'weekly_periods'         => $weeklyTotal,
+                    'avoid_first_period'     => (bool)$req->avoid_first_period,
+                    'avoid_last_period'      => (bool)$req->avoid_last_period,
+                    'preferred_day'          => $req->preferred_day,
+                    'max_periods_per_day'    => max(1, (int)($req->max_periods_per_day ?? 2)),
                 ];
 
                 $remaining -= $blockSize;
@@ -811,6 +837,10 @@ class TimetableGenerationService
 
                     if ($teacherId) {
                         $softScore += $this->teacherLoadScore($occupancy[$day], $instPeriodsArr, $teacherId, $pIdx, $blockSize);
+                    }
+
+                    if (!empty($block['resource_matches_block'])) {
+                        $softScore += 40;
                     }
 
                     $candidates[] = [

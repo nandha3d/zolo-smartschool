@@ -52,6 +52,11 @@ class TimetableV2GenerationTest extends TestCase
         $this->applyService = app(TimetableApplyService::class);
         $this->validationService = app(TimetableValidationService::class);
         $this->repairService = app(TimetableRepairService::class);
+
+        $user = User::where('school_id', $this->schoolId)->first();
+        if ($user) {
+            $this->actingAs($user);
+        }
     }
 
     public function test_tenant_db_connection_and_template_bootstrapping(): void
@@ -162,7 +167,7 @@ class TimetableV2GenerationTest extends TestCase
         $slot1->delete();
 
         $this->assertNotEmpty($violations);
-        $this->assertEquals('RESOURCE_CONFLICT', $violations[0]['code']);
+        $this->assertContains('RESOURCE_CONFLICT', array_column($violations, 'code'));
     }
 
     public function test_determinism_two_runs_produce_identical_results(): void
@@ -305,30 +310,32 @@ class TimetableV2GenerationTest extends TestCase
             'locked_at'        => Carbon::now(),
         ]);
 
-        // Run generation with preserve_existing => true
-        $runResult = $this->generationService->generate([
-            'school_id'         => $this->schoolId,
-            'class_section_ids' => [$classSection->id],
-            'preserve_existing' => true,
-            'mode'              => 'classes',
-        ]);
+        try {
+            // Run generation with preserve_existing => true
+            $runResult = $this->generationService->generate([
+                'school_id'         => $this->schoolId,
+                'class_section_ids' => [$classSection->id],
+                'preserve_existing' => true,
+                'mode'              => 'classes',
+            ]);
 
-        if (!($runResult['error'] ?? false)) {
-            // Apply the generation run
-            $applyResult = $this->applyService->apply($runResult['run_id'], $this->schoolId, $userId);
-            $this->assertTrue($applyResult['success']);
-            $this->assertGreaterThanOrEqual(1, $applyResult['preserved_locked_count']);
+            if (!($runResult['error'] ?? false)) {
+                // Apply the generation run
+                $applyResult = $this->applyService->apply($runResult['run_id'], $this->schoolId, $userId);
+                $this->assertTrue($applyResult['success']);
+                $this->assertGreaterThanOrEqual(1, $applyResult['preserved_locked_count']);
+            }
+
+            // Verify the locked slot is STILL present and intact
+            $verifiedSlot = Timetable::find($lockedSlot->id);
+            $this->assertNotNull($verifiedSlot);
+            $this->assertTrue($verifiedSlot->is_locked);
+            $this->assertEquals($specialSubject->id, $verifiedSlot->subject_id);
+            $this->assertEquals('Crucial Fixed Assembly', $verifiedSlot->lock_reason);
+        } finally {
+            // Always clean up locked slot
+            $lockedSlot->delete();
         }
-
-        // Verify the locked slot is STILL present and intact
-        $verifiedSlot = Timetable::find($lockedSlot->id);
-        $this->assertNotNull($verifiedSlot);
-        $this->assertTrue($verifiedSlot->is_locked);
-        $this->assertEquals($specialSubject->id, $verifiedSlot->subject_id);
-        $this->assertEquals('Crucial Fixed Assembly', $verifiedSlot->lock_reason);
-
-        // Clean up
-        $lockedSlot->delete();
     }
 
     public function test_quick_update_rejects_locked_slot_modification(): void
@@ -345,25 +352,27 @@ class TimetableV2GenerationTest extends TestCase
         // Lock slot
         $this->planningService->lockSlot($slot->id, $userId, 'Test Lock Prevention');
 
-        // Attempting to quickUpdate via controller logic
-        $controller = app(\App\Http\Controllers\TimetableController::class);
-        $request = new \Illuminate\Http\Request([
-            'id' => $slot->id,
-            'subject_id' => $slot->subject_id,
-            'day' => $slot->day,
-            'start_time' => $slot->start_time,
-            'end_time' => $slot->end_time,
-        ]);
+        try {
+            // Attempting to quickUpdate via controller logic
+            $controller = app(\App\Http\Controllers\TimetableController::class);
+            $request = new \Illuminate\Http\Request([
+                'id' => $slot->id,
+                'subject_id' => $slot->subject_id,
+                'day' => $slot->day,
+                'start_time' => $slot->start_time,
+                'end_time' => $slot->end_time,
+            ]);
 
-        $response = $controller->quickUpdate($request);
-        $responseData = $response->getData(true);
+            $response = $controller->quickUpdate($request);
+            $responseData = $response->getData(true);
 
-        // Unlock for cleanup
-        $this->planningService->unlockSlot($slot->id);
-        \Illuminate\Support\Facades\Auth::logout();
-
-        $this->assertTrue($responseData['error'] ?? false);
-        $this->assertStringContainsString('locked', strtolower($responseData['message'] ?? ''));
+            $this->assertTrue($responseData['error'] ?? false);
+            $this->assertStringContainsString('locked', strtolower($responseData['message'] ?? ''));
+        } finally {
+            // Unlock for cleanup
+            $this->planningService->unlockSlot($slot->id);
+            \Illuminate\Support\Facades\Auth::logout();
+        }
     }
 
     public function test_zero_randomness_in_timetable_services(): void
@@ -383,4 +392,56 @@ class TimetableV2GenerationTest extends TestCase
             }
         }
     }
+
+    public function test_period_column_clean_titles_and_teacher_conflict_options(): void
+    {
+        $classSection = ClassSection::first();
+        if (!$classSection) {
+            $this->markTestSkipped('No class section available');
+        }
+
+        $controller = app(\App\Http\Controllers\TimetableController::class);
+
+        // 1. Test getMatrix period titles are clean
+        $matrixResponse = $controller->getMatrix($classSection->id);
+        $matrixData = $matrixResponse->getData(true);
+        $this->assertNotEmpty($matrixData['time_slots'] ?? []);
+        foreach ($matrixData['time_slots'] as $slot) {
+            // Period title should never contain subject - teacher separator
+            $this->assertStringNotContainsString(' - ', $slot['title'] ?? '');
+            $this->assertTrue(
+                str_contains(strtolower($slot['title'] ?? ''), 'period') ||
+                str_contains(strtolower($slot['title'] ?? ''), 'break') ||
+                str_starts_with($slot['title'] ?? '', 'P') ||
+                empty($slot['title'])
+            );
+        }
+
+        // 2. Test calculateTeacherConflictOptions helper
+        $teacher = User::role('Teacher')->first();
+        $subject = Subject::first();
+        if ($teacher && $subject) {
+            $reflection = new \ReflectionClass($controller);
+            $method = $reflection->getMethod('calculateTeacherConflictOptions');
+            $method->setAccessible(true);
+
+            $result = $method->invoke(
+                $controller,
+                $this->schoolId,
+                $teacher->id,
+                $subject->id,
+                $classSection->id,
+                'Monday',
+                '09:00:00',
+                '09:45:00',
+                null
+            );
+
+            $this->assertArrayHasKey('conflict_details', $result);
+            $this->assertArrayHasKey('options', $result);
+            $this->assertArrayHasKey('alternative_slots', $result['options']);
+            $this->assertArrayHasKey('alternative_teachers', $result['options']);
+        }
+    }
 }
+

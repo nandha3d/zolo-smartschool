@@ -303,6 +303,7 @@ class TimetablePlanningService
             'school_id'   => $schoolId,
             'name'        => $data['name'],
             'type'        => $data['type'] ?? 'Lab',
+            'block'       => $data['block'] ?? null,
             'capacity'    => !empty($data['capacity']) ? (int)$data['capacity'] : null,
             'description' => $data['description'] ?? null,
             'is_active'   => $data['is_active'] ?? true,
@@ -315,6 +316,7 @@ class TimetablePlanningService
         $resource->update([
             'name'        => $data['name'] ?? $resource->name,
             'type'        => $data['type'] ?? $resource->type,
+            'block'       => array_key_exists('block', $data) ? $data['block'] : $resource->block,
             'capacity'    => array_key_exists('capacity', $data) ? ($data['capacity'] ? (int)$data['capacity'] : null) : $resource->capacity,
             'description' => array_key_exists('description', $data) ? $data['description'] : $resource->description,
             'is_active'   => array_key_exists('is_active', $data) ? (bool)$data['is_active'] : $resource->is_active,

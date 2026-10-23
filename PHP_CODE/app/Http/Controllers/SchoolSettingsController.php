@@ -274,8 +274,45 @@ class SchoolSettingsController extends Controller
         ResponseService::noFeatureThenRedirect('ID Card - Certificate Generation');
         ResponseService::noPermissionThenRedirect('id-card-settings');
         $settings = $this->cache->getSchoolSettings();
-        $settings['student_id_card_fields'] = explode(",", $settings['student_id_card_fields'] ?? '');
-        $settings['staff_id_card_fields'] = explode(",", $settings['staff_id_card_fields'] ?? '');
+
+        // Defaults for Student
+        $settings['student_id_card_fields'] = !empty($settings['student_id_card_fields'])
+            ? (is_array($settings['student_id_card_fields']) ? $settings['student_id_card_fields'] : explode(",", $settings['student_id_card_fields']))
+            : ['student_name', 'class_section', 'roll_no', 'dob', 'gender', 'guardian_name', 'guardian_contact'];
+        $settings['header_color'] = $settings['header_color'] ?? '#1E293B';
+        $settings['footer_color'] = $settings['footer_color'] ?? '#1E293B';
+        $settings['header_footer_text_color'] = $settings['header_footer_text_color'] ?? '#FFFFFF';
+        $settings['layout_type'] = $settings['layout_type'] ?? 'vertical';
+        $settings['profile_image_style'] = $settings['profile_image_style'] ?? 'round';
+        $settings['page_width'] = $settings['page_width'] ?? 54;
+        $settings['page_height'] = $settings['page_height'] ?? 86;
+        $settings['template_design'] = $settings['template_design'] ?? 'wave';
+        $settings['primary_color'] = $settings['primary_color'] ?? $settings['header_color'] ?? '#1E293B';
+        $settings['accent_color'] = $settings['accent_color'] ?? '#06B6D4';
+
+        // Defaults for Student Backside
+        $settings['student_id_card_enable_backside'] = $settings['student_id_card_enable_backside'] ?? 1;
+        $settings['student_id_card_back_terms'] = $settings['student_id_card_back_terms'] ?? "1. This identity card is strictly non-transferable and remains the property of the school.\n2. The card must be carried and displayed by the student at all times during school hours.\n3. Loss of this card must be reported immediately to the school administration office.\n4. Misuse or alteration of this identity badge is subject to school disciplinary action.";
+        $settings['student_id_card_back_emergency'] = $settings['student_id_card_back_emergency'] ?? 1;
+        $settings['student_id_card_back_barcode'] = $settings['student_id_card_back_barcode'] ?? 1;
+        $settings['student_id_card_back_signatures'] = $settings['student_id_card_back_signatures'] ?? 1;
+        $settings['student_id_card_back_parent_sign'] = $settings['student_id_card_back_parent_sign'] ?? 1;
+        $settings['student_id_card_back_return_info'] = $settings['student_id_card_back_return_info'] ?? ($settings['school_address'] ?? 'If found, please return to school administration office.');
+
+        // Defaults for Staff
+        $settings['staff_id_card_fields'] = !empty($settings['staff_id_card_fields'])
+            ? (is_array($settings['staff_id_card_fields']) ? $settings['staff_id_card_fields'] : explode(",", $settings['staff_id_card_fields']))
+            : ['name', 'role', 'email', 'mobile', 'dob', 'gender'];
+        $settings['staff_header_color'] = $settings['staff_header_color'] ?? '#1E293B';
+        $settings['staff_footer_color'] = $settings['staff_footer_color'] ?? '#1E293B';
+        $settings['staff_header_footer_text_color'] = $settings['staff_header_footer_text_color'] ?? '#FFFFFF';
+        $settings['staff_layout_type'] = $settings['staff_layout_type'] ?? 'vertical';
+        $settings['staff_profile_image_style'] = $settings['staff_profile_image_style'] ?? 'round';
+        $settings['staff_page_width'] = $settings['staff_page_width'] ?? 54;
+        $settings['staff_page_height'] = $settings['staff_page_height'] ?? 86;
+        $settings['staff_template_design'] = $settings['staff_template_design'] ?? 'modern_split';
+        $settings['staff_primary_color'] = $settings['staff_primary_color'] ?? '#1E293B';
+        $settings['staff_accent_color'] = $settings['staff_accent_color'] ?? '#2563EB';
 
         $formFields = $this->formField->builder()->whereNot('type', 'file')->get();
 
@@ -286,6 +323,20 @@ class SchoolSettingsController extends Controller
     {
         ResponseService::noFeatureThenSendJson('ID Card - Certificate Generation');
         ResponseService::noAnyPermissionThenSendJson(['id-card-settings']);
+
+        // Fill color fallbacks if primary/accent provided
+        if ($request->filled('primary_color') && !$request->filled('header_color')) {
+            $request->merge(['header_color' => $request->primary_color]);
+        }
+        if ($request->filled('accent_color') && !$request->filled('footer_color')) {
+            $request->merge(['footer_color' => $request->accent_color]);
+        }
+        if ($request->filled('staff_primary_color') && !$request->filled('staff_header_color')) {
+            $request->merge(['staff_header_color' => $request->staff_primary_color]);
+        }
+        if ($request->filled('staff_accent_color') && !$request->filled('staff_footer_color')) {
+            $request->merge(['staff_footer_color' => $request->staff_accent_color]);
+        }
 
         if ($request->type == 'Student') {
             $settings = [
@@ -298,8 +349,17 @@ class SchoolSettingsController extends Controller
                 'page_width' => 'required',
                 'page_height' => 'required',
                 'student_id_card_fields' => 'nullable',
-
+                'template_design' => 'nullable|string',
+                'primary_color' => 'nullable|string',
+                'accent_color' => 'nullable|string',
                 'signature' => 'nullable|image|max:2048',
+                'student_id_card_enable_backside' => 'nullable',
+                'student_id_card_back_terms' => 'nullable|string',
+                'student_id_card_back_emergency' => 'nullable',
+                'student_id_card_back_barcode' => 'nullable',
+                'student_id_card_back_signatures' => 'nullable',
+                'student_id_card_back_parent_sign' => 'nullable',
+                'student_id_card_back_return_info' => 'nullable|string',
             ];
         } else {
             // Staff
@@ -313,10 +373,12 @@ class SchoolSettingsController extends Controller
                 'staff_page_width' => 'required',
                 'staff_page_height' => 'required',
                 'staff_id_card_fields' => 'nullable',
+                'staff_template_design' => 'nullable|string',
+                'staff_primary_color' => 'nullable|string',
+                'staff_accent_color' => 'nullable|string',
                 'signature' => 'nullable|image|max:2048',
             ];
         }
-
 
         $validator = Validator::make($request->all(), $settings);
 
@@ -324,22 +386,14 @@ class SchoolSettingsController extends Controller
             ResponseService::validationError($validator->errors()->first());
         }
 
-        // $request->validate([
-        //     'student_id_card_fields' => 'required',
-        //     'staff_id_card_fields' => 'required_if:type,Staff'
-        // ],[
-        //     'student_id_card_fields.required' => 'Please select at least one field.',
-        //     'staff_id_card_fields.required' => 'Please select at least one field.'
-        // ]);
-
-        $request->validate([
-            'staff_id_card_fields' => 'required_if:type,Staff'
-        ], [
-            'staff_id_card_fields.required_if' => 'Please select at least one field.'
-        ]);
-
-        if (!$request->student_id_card_fields && !$request->extra_form_fields) {
-            ResponseService::errorResponse('Please select at least one field');
+        if ($request->type == 'Student') {
+            if (!$request->student_id_card_fields && !$request->extra_form_fields) {
+                ResponseService::errorResponse('Please select at least one field');
+            }
+        } else {
+            if (!$request->staff_id_card_fields) {
+                ResponseService::errorResponse('Please select at least one field');
+            }
         }
 
         try {
@@ -372,14 +426,24 @@ class SchoolSettingsController extends Controller
                     ];
 
                 } else {
-                    if ($request->$key) {
+                    $val = $request->input($key);
+                    // For boolean toggles, if checkbox is unchecked in form, save 0
+                    if (in_array($key, [
+                        'student_id_card_enable_backside',
+                        'student_id_card_back_emergency',
+                        'student_id_card_back_barcode',
+                        'student_id_card_back_signatures',
+                        'student_id_card_back_parent_sign'
+                    ])) {
+                        $val = $request->has($key) ? 1 : 0;
+                    }
+                    if ($val !== null) {
                         $data[] = [
                             "name" => $key,
-                            "data" => $request->$key,
+                            "data" => $val,
                             "type" => "string"
                         ];
                     }
-
                 }
             }
 

@@ -36,20 +36,16 @@
                                 </div>
 
                                 <div class="form-group col-sm-12 col-md-12">
-                                    <label>{{ __('gender') }} <span class="text-danger">*</span></label><br>
-                                    <div class="d-flex">
-                                        <div class="form-check form-check-inline">
-                                            <label class="form-check-label">
-                                                {!! Form::radio('gender', 'male',true) !!}
-                                                {{ __('male') }}
-                                            </label>
-                                        </div>
-                                        <div class="form-check form-check-inline">
-                                            <label class="form-check-label">
-                                                {!! Form::radio('gender', 'female') !!}
-                                                {{ __('female') }}
-                                            </label>
-                                        </div>
+                                    <label>{{ __('gender') }} <span class="text-danger">*</span></label>
+                                    <div class="zolo-segmented-control" style="max-width: 320px;" role="group" aria-label="Gender">
+                                        <label class="zolo-segment-btn active" for="teacher_create_male">
+                                            <input type="radio" name="gender" value="male" id="teacher_create_male" class="zolo-segment-input" checked required>
+                                            <span class="zolo-segment-content"><i class="fa fa-mars segment-icon icon-male"></i> {{ __('male') }}</span>
+                                        </label>
+                                        <label class="zolo-segment-btn" for="teacher_create_female">
+                                            <input type="radio" name="gender" value="female" id="teacher_create_female" class="zolo-segment-input" required>
+                                            <span class="zolo-segment-content"><i class="fa fa-venus segment-icon icon-female"></i> {{ __('female') }}</span>
+                                        </label>
                                     </div>
                                 </div>
 
@@ -445,19 +441,15 @@
                             </div>
                             <div class="form-group col-sm-12 col-md-12 col-lg-12">
                                 <label>{{ __('gender') }} <span class="text-danger">*</span></label>
-                                <div class="d-flex">
-                                    <div class="form-check form-check-inline">
-                                        <label class="form-check-label">
-                                            {!! Form::radio('gender', 'male', null, ['class' => 'form-check-input edit', 'id' => 'gender']) !!}
-                                            {{ __('male') }}
-                                        </label>
-                                    </div>
-                                    <div class="form-check form-check-inline">
-                                        <label class="form-check-label">
-                                            {!! Form::radio('gender', 'female', null, ['class' => 'form-check-input edit', 'id' => 'gender']) !!}
-                                            {{ __('female') }}
-                                        </label>
-                                    </div>
+                                <div class="zolo-segmented-control" style="max-width: 320px;" role="group" aria-label="Gender">
+                                    <label class="zolo-segment-btn" for="edit_teacher_male">
+                                        <input type="radio" name="gender" value="male" id="edit_teacher_male" class="zolo-segment-input edit" required>
+                                        <span class="zolo-segment-content"><i class="fa fa-mars segment-icon icon-male"></i> {{ __('male') }}</span>
+                                    </label>
+                                    <label class="zolo-segment-btn" for="edit_teacher_female">
+                                        <input type="radio" name="gender" value="female" id="edit_teacher_female" class="zolo-segment-input edit" required>
+                                        <span class="zolo-segment-content"><i class="fa fa-venus segment-icon icon-female"></i> {{ __('female') }}</span>
+                                    </label>
                                 </div>
                             </div>
 
