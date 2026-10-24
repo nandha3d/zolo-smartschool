@@ -168,7 +168,10 @@ A continuous backup system is integrated directly into the workspace under `back
 * **Multi-Tenant Database Migrations Applied (`php artisan migrate:school`)**:
   - The application switches to tenant-specific databases (e.g. `zolo_schools_3_demo`) via `SwitchDatabase` middleware.
   - Copied all 5 new migrations into `PHP_CODE/database/migrations/schools/` and executed `php artisan migrate:school`.
-  - Resolved `500 Server Error` (missing tables `exam_schedule_blocks` and `student_groups`) on both `/students/groups-leadership` and `/exams/blocks`. Both routes now render with HTTP 200.
+  - Resolved `500 Server Error` on both `/students/groups-leadership` and `/exams/blocks`.
+* **Exam Blocks & Leadership Cockpit Bugfixes**:
+  - Fixed `BadMethodCallException: Call to undefined method App\Models\Staff::owner()` by using `Staff::with('user')->get()` in `ExamScheduleBlockController.php` and adding `scopeOwner()` to `Staff.php`.
+  - Added AJAX submission handlers for `assignRoleForm`, `createGroupForm`, and `createBlockForm` with loading buttons, SweetAlert/Toastr notifications, modal auto-dismiss, and page refresh to avoid navigating to raw JSON endpoints.
 
 ---
 
