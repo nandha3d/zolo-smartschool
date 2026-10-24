@@ -1255,18 +1255,21 @@ body::-webkit-scrollbar-track {
 html::-webkit-scrollbar-thumb,
 body::-webkit-scrollbar-thumb {
   background: rgba(34, 87, 122, 0.35) !important;
+  background: color-mix(in srgb, var(--theme-color, #22577A) 40%, transparent) !important;
   border-radius: 99px !important;
   border: 2px solid var(--zolo-bg, #EEF2F6) !important;
 }
 html::-webkit-scrollbar-thumb:hover,
 body::-webkit-scrollbar-thumb:hover {
-  background: rgba(34, 87, 122, 0.55) !important;
+  background: rgba(34, 87, 122, 0.6) !important;
+  background: color-mix(in srgb, var(--theme-color, #22577A) 65%, transparent) !important;
 }
 
 /* Firefox scrollbar-color */
 html, body {
   scrollbar-width: thin !important;
   scrollbar-color: rgba(34, 87, 122, 0.35) var(--zolo-bg, #EEF2F6) !important;
+  scrollbar-color: color-mix(in srgb, var(--theme-color, #22577A) 40%, transparent) var(--zolo-bg, #EEF2F6) !important;
 }
 
 /* --- Sidebar Scrollbar (Translucent white on dark theme bg) --- */
@@ -1286,19 +1289,19 @@ html, body {
 .sidebar .nav::-webkit-scrollbar-thumb,
 .sidebar-fixed .sidebar::-webkit-scrollbar-thumb,
 .sidebar-fixed .nav::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2) !important;
+  background: rgba(255, 255, 255, 0.22) !important;
   border-radius: 99px !important;
 }
 .sidebar::-webkit-scrollbar-thumb:hover,
 .sidebar .nav::-webkit-scrollbar-thumb:hover,
 .sidebar-fixed .sidebar::-webkit-scrollbar-thumb:hover,
 .sidebar-fixed .nav::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.4) !important;
+  background: rgba(255, 255, 255, 0.45) !important;
 }
 .sidebar, .sidebar .nav,
 .sidebar-fixed .sidebar, .sidebar-fixed .nav {
   scrollbar-width: thin !important;
-  scrollbar-color: rgba(255, 255, 255, 0.2) transparent !important;
+  scrollbar-color: rgba(255, 255, 255, 0.22) transparent !important;
 }
 
 /* --- Content Area Scrollable Containers --- */
@@ -1326,6 +1329,7 @@ html, body {
 .fixed-table-body::-webkit-scrollbar-thumb,
 .sc::-webkit-scrollbar-thumb {
   background: rgba(34, 87, 122, 0.25) !important;
+  background: color-mix(in srgb, var(--theme-color, #22577A) 32%, transparent) !important;
   border-radius: 99px !important;
 }
 .content-wrapper::-webkit-scrollbar-thumb:hover,
@@ -1335,13 +1339,21 @@ html, body {
 .fixed-table-body::-webkit-scrollbar-thumb:hover,
 .sc::-webkit-scrollbar-thumb:hover {
   background: rgba(34, 87, 122, 0.45) !important;
+  background: color-mix(in srgb, var(--theme-color, #22577A) 55%, transparent) !important;
 }
 
 /* --- Select2 Dropdown Scrollbar --- */
 .select2-results__options::-webkit-scrollbar { width: 5px !important; }
 .select2-results__options::-webkit-scrollbar-track { background: transparent !important; }
-.select2-results__options::-webkit-scrollbar-thumb { background: rgba(34, 87, 122, 0.22) !important; border-radius: 99px !important; }
-.select2-results__options::-webkit-scrollbar-thumb:hover { background: rgba(34, 87, 122, 0.4) !important; }
+.select2-results__options::-webkit-scrollbar-thumb {
+  background: rgba(34, 87, 122, 0.25) !important;
+  background: color-mix(in srgb, var(--theme-color, #22577A) 30%, transparent) !important;
+  border-radius: 99px !important;
+}
+.select2-results__options::-webkit-scrollbar-thumb:hover {
+  background: rgba(34, 87, 122, 0.45) !important;
+  background: color-mix(in srgb, var(--theme-color, #22577A) 50%, transparent) !important;
+}
 
 /* --- Stat Strip & Sparklines --- */
 .zolo-stat-grid {
