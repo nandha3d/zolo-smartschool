@@ -482,32 +482,39 @@ fieldset:disabled .btn {
 .zolo-card-header .card-title { margin: 0; flex: 1 1 160px; min-width: 0; }
 .zolo-card-header select { width: auto; }
 
-/* ---------- Tables with Theme Color Headers ---------- */
+/* ---------- Tables with Clean Slate Headers & High Contrast Text ---------- */
 .table thead th,
 .bootstrap-table thead th,
 .fixed-table-container thead th,
-.table-bordered thead th {
+.table-bordered thead th,
+.bootstrap-table .table thead th {
   font-family: var(--zolo-font-heading) !important;
-  font-size: 12.5px !important;
-  font-weight: 600 !important;
-  letter-spacing: 0.04em !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.05em !important;
   text-transform: uppercase !important;
-  color: #FFFFFF !important;
-  background: var(--theme-color, #22577A) !important;
-  border: 1px solid rgba(255, 255, 255, 0.15) !important;
-  border-bottom: 2px solid rgba(0, 0, 0, 0.15) !important;
-  padding: 10px 12px !important;
+  color: #0F172A !important;
+  background-color: #F1F5F9 !important;
+  border-top: none !important;
+  border-bottom: 2px solid #CBD5E1 !important;
+  border-left: none !important;
+  border-right: none !important;
+  padding: 12px 14px !important;
   vertical-align: middle !important;
 }
 .table thead th a,
 .bootstrap-table thead th a,
-.bootstrap-table thead th .th-inner {
-  color: #FFFFFF !important;
-  font-weight: 600 !important;
+.bootstrap-table thead th .th-inner,
+.fixed-table-container thead th .th-inner,
+.fixed-table-header th .th-inner {
+  color: #0F172A !important;
+  font-weight: 700 !important;
 }
 .bootstrap-table thead th .sortable:after,
-.bootstrap-table thead th .both:after {
-  color: rgba(255, 255, 255, 0.6) !important;
+.bootstrap-table thead th .both:after,
+.bootstrap-table thead th.sortable > .th-inner:after {
+  color: #64748B !important;
+  opacity: 0.7 !important;
 }
 .table td, .table th, .bootstrap-table .table td, .fixed-table-container td {
   font-family: var(--zolo-font-body) !important;
@@ -2117,18 +2124,24 @@ a.restore-data:hover,
 
 .bootstrap-table .table thead th,
 .fixed-table-container thead th {
-  background: #FAFBFD !important;
-  color: #64748B !important;
+  background: #F1F5F9 !important;
+  color: #0F172A !important;
   font-size: 11px !important;
   font-weight: 700 !important;
   text-transform: uppercase !important;
   letter-spacing: 0.07em !important;
-  border-bottom: 1px solid #E2E8F0 !important;
+  border-bottom: 2px solid #CBD5E1 !important;
   border-top: none !important;
   border-left: none !important;
   border-right: none !important;
   padding: 12px 16px !important;
   vertical-align: middle !important;
+}
+
+.bootstrap-table .table thead th .th-inner,
+.fixed-table-container thead th .th-inner {
+  color: #0F172A !important;
+  font-weight: 700 !important;
 }
 
 .bootstrap-table .table tbody td,
@@ -3250,17 +3263,22 @@ textarea.form-control {
 }
 
 .bootstrap-table .table thead th {
-  background: #F8FAFC !important;
-  color: #475569 !important;
+  background: #F1F5F9 !important;
+  color: #0F172A !important;
   font-weight: 700 !important;
   font-size: 11.5px !important;
   letter-spacing: 0.5px !important;
   text-transform: uppercase !important;
   padding: 12px 14px !important;
   border-top: none !important;
-  border-bottom: 2px solid #E2E8F0 !important;
+  border-bottom: 2px solid #CBD5E1 !important;
   vertical-align: middle !important;
   white-space: nowrap;
+}
+
+.bootstrap-table .table thead th .th-inner {
+  color: #0F172A !important;
+  font-weight: 700 !important;
 }
 
 .bootstrap-table .table tbody td {
@@ -3471,15 +3489,23 @@ textarea.form-control {
 .bootstrap-table .table:not([class*="timetable"]) thead th,
 .card .table:not([class*="timetable"]) thead th {
   background-color: #F1F5F9 !important;
-  color: #334155 !important;
+  color: #0F172A !important;
   font-weight: 700 !important;
   font-size: 12px !important;
   text-transform: uppercase !important;
   letter-spacing: 0.5px !important;
   border-top: none !important;
-  border-bottom: 2px solid #E2E8F0 !important;
+  border-bottom: 2px solid #CBD5E1 !important;
   padding: 13px 16px !important;
   vertical-align: middle !important;
+}
+
+.bootstrap-table .table:not([class*="timetable"]) thead th .th-inner,
+.card .table:not([class*="timetable"]) thead th .th-inner,
+.bootstrap-table thead th .th-inner,
+.fixed-table-container thead th .th-inner {
+  color: #0F172A !important;
+  font-weight: 700 !important;
 }
 
 /* Zebra striping for regular tables (Alternate Rows) */

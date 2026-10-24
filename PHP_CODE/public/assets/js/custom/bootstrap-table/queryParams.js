@@ -440,6 +440,9 @@ function studentRollNumberQueryParams(p) {
         'class_section_id': $('#filter_roll_number_class_section_id').val(),
         'sort_by': $('#sort_by').val(),
         'order_by': $('#order_by').val(),
+        'prefix': $('#roll_number_prefix').val(),
+        'digits': $('#roll_number_digits').val(),
+        'start_number': $('#roll_number_start').val(),
     };
 }
 

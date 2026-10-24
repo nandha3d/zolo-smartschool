@@ -589,8 +589,12 @@ class StudentController extends Controller
     {
         ResponseService::noPermissionThenRedirect('student-list');
         $class_section = $this->classSection->all(['*'], ['class', 'class.stream', 'section', 'medium']);
+        $schoolSettings = $this->cache->getSchoolSettings();
+        $defaultPrefix = $schoolSettings['roll_number_prefix'] ?? '';
+        $defaultDigits = $schoolSettings['roll_number_digits'] ?? '0';
+        $defaultStart = $schoolSettings['roll_number_start'] ?? '1';
 
-        return view('students.assign_roll_no', compact('class_section'));
+        return view('students.assign_roll_no', compact('class_section', 'defaultPrefix', 'defaultDigits', 'defaultStart'));
     }
 
     public function rollNumberUpdate(Request $request)
@@ -639,6 +643,13 @@ class StudentController extends Controller
         try {
             ResponseService::noPermissionThenRedirect('student-list');
             $currentSessionYear = $this->cache->getDefaultSessionYear();
+            $schoolSettings = $this->cache->getSchoolSettings();
+
+            $prefix = $request->has('prefix') ? (string)$request->prefix : ($schoolSettings['roll_number_prefix'] ?? '');
+            $digits = $request->has('digits') ? (int)$request->digits : (int)($schoolSettings['roll_number_digits'] ?? 0);
+            $startNumber = $request->has('start_number') ? (int)$request->start_number : (int)($schoolSettings['roll_number_start'] ?? 1);
+            if ($startNumber < 1) $startNumber = 1;
+
             $class_section_id = $request->class_section_id;
             $sql = $this->user->builder()->with('student');
             $sql = $sql->whereHas('student', function ($q) use ($class_section_id, $currentSessionYear) {
@@ -679,28 +690,26 @@ class StudentController extends Controller
             $bulkData['total'] = $total;
             $rows = array();
             $no = 1;
-            $roll = 1;
             $index = 0;
 
-            // TODO : improve this
             foreach ($res as $row) {
                 $tempRow = $row->toArray();
                 $tempRow['no'] = $no++;
                 $tempRow['student_id'] = $row->student->id;
                 $tempRow['old_roll_number'] = $row->student->roll_number;
 
-                // for edit roll number comment below line
-                $tempRow['new_roll_number'] = "<input type='hidden' name='roll_number_data[" . $index . "][student_id]' class='form-control' readonly value=" . $row->student->id . "> <input type='hidden' name='roll_number_data[" . $index . "][roll_number]' class='form-control' value=" . $roll . ">" . $roll;
+                $currentSeq = $startNumber + $index;
+                $paddedNum = ($digits > 0) ? str_pad((string)$currentSeq, $digits, '0', STR_PAD_LEFT) : (string)$currentSeq;
+                $fullRoll = $prefix . $paddedNum;
 
-                // and uncomment below line
-                // $tempRow['new_roll_number'] = "<input type='hidden' name='roll_number_data[" . $index . "][student_id]' class='form-control' readonly value=" . $row->student->id . "> <input type='text' name='roll_number_data[" . $index . "][roll_number]' class='form-control' value=" . $roll . ">";
+                $tempRow['new_roll_number'] = "<input type='hidden' name='roll_number_data[" . $index . "][student_id]' value='" . $row->student->id . "'>" .
+                    "<input type='text' name='roll_number_data[" . $index . "][roll_number]' class='form-control form-control-sm font-weight-bold text-primary roll-number-input' style='max-width:130px;min-width:90px;height:34px;background:#FFFFFF;border:1.5px solid #CBD5E1;border-radius:6px;padding:4px 8px;font-size:13px;' value='" . htmlspecialchars($fullRoll) . "'>";
 
                 $tempRow['user_id'] = $row->id;
                 $tempRow['admission_no'] = $row->student->admission_no;
                 $tempRow['admission_date'] = $row->student->admission_date;
                 $rows[] = $tempRow;
                 $index++;
-                $roll++;
             }
 
             $bulkData['rows'] = $rows;

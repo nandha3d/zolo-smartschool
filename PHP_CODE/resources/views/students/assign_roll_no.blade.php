@@ -24,10 +24,10 @@
                         <h4 class="card-title">
                             {{ __('list') . ' ' . __('students') }}
                         </h4>
-                        <div id="toolbar">
-                            <div class="row">
+                        <div id="toolbar" class="w-100">
+                            <div class="row align-items-end">
                                 <div class="form-group col-sm-12 col-md-3">
-                                    <label class="filter-menu" for="filter_roll_number_class_section_id">{{ __('Class Section') }} </label>
+                                    <label class="filter-menu font-weight-bold" for="filter_roll_number_class_section_id">{{ __('Class Section') }} </label>
                                     <select name="filter_roll_number_class_section_id" id="filter_roll_number_class_section_id" class="form-control">
                                         @foreach ($class_section as $class)
                                             <option value={{ $class->id }}>
@@ -37,22 +37,55 @@
                                     </select>
                                 </div>
 
-                                <div class="form-group col-sm-12 col-md-3">
-                                    <label class="filter-menu" for="sort_by">{{ __('sort_by') }} </label>
+                                <div class="form-group col-sm-6 col-md-2">
+                                    <label class="filter-menu font-weight-bold" for="sort_by">{{ __('Sort By') }} </label>
                                     <select name="sort_by" id="sort_by" class="form-control">
-                                        <option value="first_name">{{ __('first_name') }}</option>
-                                        <option value="last_name">{{ __('last_name') }}</option>
+                                        <option value="first_name">{{ __('First Name') }}</option>
+                                        <option value="last_name">{{ __('Last Name') }}</option>
                                     </select>
                                 </div>
 
-                                <div class="form-group col-sm-12 col-md-3">
-                                    <label class="filter-menu" for="order_by">{{ __('Order By') }} </label>
+                                <div class="form-group col-sm-6 col-md-2">
+                                    <label class="filter-menu font-weight-bold" for="order_by">{{ __('Order') }} </label>
                                     <select name="order_by" id="order_by" class="form-control">
                                         <option value="asc" selected>{{ __('Ascending') }}</option>
                                         <option value="desc">{{ __('Descending') }}</option>
                                     </select>
                                 </div>
 
+                                <div class="form-group col-sm-6 col-md-2">
+                                    <label class="filter-menu font-weight-bold" for="roll_number_prefix">
+                                        <i class="fa fa-tag text-primary mr-1"></i>{{ __('Prefix') }}
+                                    </label>
+                                    <input type="text" id="roll_number_prefix" name="roll_number_prefix" class="form-control" placeholder="e.g. 26/ or R-" value="{{ $defaultPrefix ?? '' }}">
+                                </div>
+
+                                <div class="form-group col-sm-6 col-md-2">
+                                    <label class="filter-menu font-weight-bold" for="roll_number_digits">
+                                        <i class="fa fa-hashtag text-primary mr-1"></i>{{ __('Digits Format') }}
+                                    </label>
+                                    <select name="roll_number_digits" id="roll_number_digits" class="form-control">
+                                        <option value="0" {{ ($defaultDigits ?? '0') == '0' ? 'selected' : '' }}>{{ __('Auto (1, 2, 3...)') }}</option>
+                                        <option value="2" {{ ($defaultDigits ?? '0') == '2' ? 'selected' : '' }}>{{ __('2 Digits (01, 02...)') }}</option>
+                                        <option value="3" {{ ($defaultDigits ?? '0') == '3' ? 'selected' : '' }}>{{ __('3 Digits (001, 002...)') }}</option>
+                                        <option value="4" {{ ($defaultDigits ?? '0') == '4' ? 'selected' : '' }}>{{ __('4 Digits (0001...)') }}</option>
+                                        <option value="5" {{ ($defaultDigits ?? '0') == '5' ? 'selected' : '' }}>{{ __('5 Digits (00001...)') }}</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group col-sm-6 col-md-1">
+                                    <label class="filter-menu font-weight-bold" for="roll_number_start">{{ __('Start') }}</label>
+                                    <input type="number" id="roll_number_start" name="roll_number_start" min="1" class="form-control" value="{{ $defaultStart ?? '1' }}">
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-2 px-1">
+                                <span class="text-muted" style="font-size:12px;">
+                                    <i class="fa fa-info-circle text-info mr-1"></i>
+                                    {{ __('Type a prefix or select digit padding to re-calculate sequence automatically. You can also edit individual roll numbers directly in the table.') }}
+                                </span>
+                                <button type="button" id="btn_refresh_roll_sequence" class="btn btn-xs btn-outline-primary">
+                                    <i class="fa fa-refresh mr-1"></i>{{ __('Recalculate') }}
+                                </button>
                             </div>
                         </div>
                         <form id="assign-roll-no-form" action="{{ route('students.roll-number.update') }}" method="post">
@@ -80,7 +113,9 @@
                                 </div>
                             </div>
                             <div class="text-left">
-                                <input class="btn btn-theme btn_generate_roll_number my-4 float-right" id="create-btn" type="submit" value={{ __('submit') }}>
+                                <button class="btn btn-theme my-4 float-right px-4" id="submit-roll-btn" type="submit">
+                                    <i class="fa fa-check mr-1"></i> {{ __('Save Roll Numbers') }}
+                                </button>
                             </div>
                         </form>
                     </div>
@@ -88,4 +123,57 @@
             </div>
         </div>
     </div>
+
+    <script>
+    $(document).ready(function() {
+        // Auto-refresh table when class section, sorting, prefix, digits, or start changes
+        $('#filter_roll_number_class_section_id, #sort_by, #order_by, #roll_number_digits, #roll_number_start').on('change', function() {
+            $('#table_list').bootstrapTable('refresh');
+        });
+
+        // Trigger on prefix typing with slight debounce
+        let prefixTimer;
+        $('#roll_number_prefix').on('keyup input', function() {
+            clearTimeout(prefixTimer);
+            prefixTimer = setTimeout(function() {
+                $('#table_list').bootstrapTable('refresh');
+            }, 400);
+        });
+
+        $('#btn_refresh_roll_sequence').on('click', function() {
+            $('#table_list').bootstrapTable('refresh');
+        });
+
+        // AJAX submit with feedback
+        $('#assign-roll-no-form').on('submit', function(e) {
+            e.preventDefault();
+            let form = $(this);
+            let btn = $('#submit-roll-btn');
+            let origHtml = btn.html();
+            btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin mr-1"></i> Saving Roll Numbers...');
+
+            $.ajax({
+                url: form.attr('action'),
+                type: 'POST',
+                data: form.serialize(),
+                success: function(res) {
+                    btn.prop('disabled', false).html(origHtml);
+                    if (typeof showSuccessToast === 'function') {
+                        showSuccessToast(res.message || 'Roll numbers updated successfully!');
+                    }
+                    $('#table_list').bootstrapTable('refresh');
+                },
+                error: function(err) {
+                    btn.prop('disabled', false).html(origHtml);
+                    let msg = (err.responseJSON && err.responseJSON.message) ? err.responseJSON.message : 'Failed to update roll numbers';
+                    if (typeof showErrorToast === 'function') {
+                        showErrorToast(msg);
+                    } else {
+                        alert(msg);
+                    }
+                }
+            });
+        });
+    });
+    </script>
 @endsection

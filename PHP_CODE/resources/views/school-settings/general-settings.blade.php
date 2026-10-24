@@ -237,25 +237,55 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="border border-secondary rounded-lg my-4 mx-1">
-                                <div class="col-md-12 mt-3"><h4>{{__("Roll Number Settings")}}</h4></div>
+                            <div class="border border-secondary rounded-lg my-4 mx-1 p-3">
+                                <div class="col-md-12 mt-1"><h4>{{__("Roll Number Settings & Formatting")}}</h4></div>
                                 <div class="col-12 mb-3">
                                     <hr class="mt-0">
                                 </div>
-                                <div class="form-group col-md-12 col-sm-12">
-                                    <label for="roll-number-order">{{__("Roll Number Sorting")}}</label>
-                                    <input type="hidden" id="roll-number-sort-column" name="roll_number_sort_column" value="{{ $settings['roll_number_sort_column'] ?? "" }}">
-                                    <input type="hidden" id="roll-number-sort-order" name="roll_number_sort_order" value="{{ $settings['roll_number_sort_order'] ?? "" }}">
-                                    <select name="" id="roll-number-order" class="form-control" required>
-                                        <option value="" hidden="">-- {{__('Select')}} --</option>
-                                        <option value="first_name,asc">{{__("First Name - Ascending")}}</option>
-                                        <option value="first_name,desc">{{__("First Name - Descending")}}</option>
-                                        <option value="last_name,asc">{{__("Last Name - Ascending")}}</option>
-                                        <option value="last_name,desc">{{__("Last Name - Descending")}}</option>
-                                    </select>
+                                <div class="row px-2">
+                                    <div class="form-group col-md-4 col-sm-12">
+                                        <label for="roll_number_prefix">{{__("Roll Number Prefix (Optional)")}}</label>
+                                        <input type="text" id="roll_number_prefix" name="roll_number_prefix" value="{{ $settings['roll_number_prefix'] ?? '' }}" class="form-control" placeholder="e.g. 26/ or R-">
+                                        <small class="text-muted">{{ __('Prefix attached to every generated student roll number.') }}</small>
+                                    </div>
 
-                                    <div class="form-check">
-                                        <label class="form-check-label"> <input type="checkbox" class="form-check-input" name="change_roll_number" id="change-roll-ckh-settings" value="1"> {{ __('Change Roll Number for All Classes') }} <i class="input-helper"></i></label>
+                                    <div class="form-group col-md-4 col-sm-12">
+                                        <label for="roll_number_digits">{{__("Digit Length (Padding)")}}</label>
+                                        @php $currentDigits = $settings['roll_number_digits'] ?? '0'; @endphp
+                                        <select name="roll_number_digits" id="roll_number_digits" class="form-control">
+                                            <option value="0" {{ $currentDigits == '0' ? 'selected' : '' }}>{{ __('Auto / No Padding (1, 2, 3...)') }}</option>
+                                            <option value="2" {{ $currentDigits == '2' ? 'selected' : '' }}>{{ __('2 Digits (01, 02, 03...)') }}</option>
+                                            <option value="3" {{ $currentDigits == '3' ? 'selected' : '' }}>{{ __('3 Digits (001, 002, 003...)') }}</option>
+                                            <option value="4" {{ $currentDigits == '4' ? 'selected' : '' }}>{{ __('4 Digits (0001, 0002...)') }}</option>
+                                            <option value="5" {{ $currentDigits == '5' ? 'selected' : '' }}>{{ __('5 Digits (00001...)') }}</option>
+                                        </select>
+                                        <small class="text-muted">{{ __('Pads numbers with leading zeros.') }}</small>
+                                    </div>
+
+                                    <div class="form-group col-md-4 col-sm-12">
+                                        <label for="roll_number_start">{{__("Starting Number")}}</label>
+                                        <input type="number" id="roll_number_start" name="roll_number_start" value="{{ $settings['roll_number_start'] ?? '1' }}" min="1" class="form-control" placeholder="1">
+                                        <small class="text-muted">{{ __('Sequence begins from this number.') }}</small>
+                                    </div>
+                                </div>
+
+                                <div class="row px-2">
+                                    <div class="form-group col-md-12 col-sm-12">
+                                        <label for="roll-number-order">{{__("Roll Number Sorting")}}</label>
+                                        <input type="hidden" id="roll-number-sort-column" name="roll_number_sort_column" value="{{ $settings['roll_number_sort_column'] ?? "" }}">
+                                        <input type="hidden" id="roll-number-sort-order" name="roll_number_sort_order" value="{{ $settings['roll_number_sort_order'] ?? "" }}">
+                                        @php $currentSortOrder = ($settings['roll_number_sort_column'] ?? '') . ',' . ($settings['roll_number_sort_order'] ?? ''); @endphp
+                                        <select name="" id="roll-number-order" class="form-control">
+                                            <option value="" hidden="">-- {{__('Select')}} --</option>
+                                            <option value="first_name,asc" {{ $currentSortOrder == 'first_name,asc' ? 'selected' : '' }}>{{__("First Name - Ascending")}}</option>
+                                            <option value="first_name,desc" {{ $currentSortOrder == 'first_name,desc' ? 'selected' : '' }}>{{__("First Name - Descending")}}</option>
+                                            <option value="last_name,asc" {{ $currentSortOrder == 'last_name,asc' ? 'selected' : '' }}>{{__("Last Name - Ascending")}}</option>
+                                            <option value="last_name,desc" {{ $currentSortOrder == 'last_name,desc' ? 'selected' : '' }}>{{__("Last Name - Descending")}}</option>
+                                        </select>
+
+                                        <div class="form-check mt-3">
+                                            <label class="form-check-label"> <input type="checkbox" class="form-check-input" name="change_roll_number" id="change-roll-ckh-settings" value="1"> {{ __('Regenerate Roll Numbers for All Classes using this format') }} <i class="input-helper"></i></label>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

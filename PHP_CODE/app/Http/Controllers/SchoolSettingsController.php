@@ -97,6 +97,9 @@ class SchoolSettingsController extends Controller
             'vertical_logo' => 'nullable|image|max:2048',
             'roll_number_sort_column' => 'nullable|in:first_name,last_name',
             'roll_number_sort_order' => 'nullable|in:asc,desc',
+            'roll_number_prefix' => 'nullable|string|max:30',
+            'roll_number_digits' => 'nullable|numeric|min:0|max:10',
+            'roll_number_start' => 'nullable|numeric|min:1',
             'change_roll_number' => 'nullable',
             'school_tagline' => 'required',
             'date_format' => 'required',
@@ -221,13 +224,20 @@ class SchoolSettingsController extends Controller
 
                 // Loop towards Class Section Data And make Array To get Student's id and Count Roll Number
                 $studentArray = array();
+                $prefix = $request->roll_number_prefix ?? '';
+                $digits = (int)($request->roll_number_digits ?? 0);
+                $start = (int)($request->roll_number_start ?? 1);
+                if ($start < 1) $start = 1;
+
                 foreach ($classSections as $classSection) {
                     if (isset($classSection->students) && $classSection->students->isNotEmpty()) {
                         foreach ($classSection->students as $key => $student) {
+                            $num = $start + $key;
+                            $numStr = ($digits > 0) ? str_pad((string)$num, $digits, '0', STR_PAD_LEFT) : (string)$num;
                             $studentArray[] = array(
                                 'id' => $student->id,
                                 'class_section_id' => $student->class_section_id,
-                                'roll_number' => (int) $key + 1
+                                'roll_number' => $prefix . $numStr
                             );
                         }
                     }
