@@ -303,4 +303,47 @@ class Students extends Model
         return $this->hasOne(PromoteStudent::class, 'student_id', 'user_id');
     }
 
+    public function leadershipRoles()
+    {
+        return $this->hasMany(StudentLeadershipRole::class, 'student_id');
+    }
+
+    public function activeLeadershipRoles()
+    {
+        return $this->hasMany(StudentLeadershipRole::class, 'student_id')->where('is_active', true);
+    }
+
+    public function groups()
+    {
+        return $this->belongsToMany(StudentGroup::class, 'student_group_members', 'student_id', 'student_group_id')
+                    ->withPivot('bench_number', 'role_in_group', 'joined_at')
+                    ->withTimestamps();
+    }
+
+    public function labBatches()
+    {
+        return $this->belongsToMany(LabBatch::class, 'lab_batch_students', 'student_id', 'lab_batch_id')
+                    ->withPivot('workstation_number')
+                    ->withTimestamps();
+    }
+
+    public function periodAttendances()
+    {
+        return $this->hasMany(PeriodAttendance::class, 'student_id');
+    }
+
+    public function movementLogs()
+    {
+        return $this->hasMany(StudentMovementLog::class, 'student_id');
+    }
+
+    public function achievements()
+    {
+        return $this->hasMany(StudentAchievement::class, 'student_id');
+    }
+
+    public function leaderboardSnapshots()
+    {
+        return $this->hasMany(AcademicLeaderboardSnapshot::class, 'student_id');
+    }
 }

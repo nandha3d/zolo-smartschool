@@ -176,6 +176,29 @@ class ClassSection extends Model {
     {
         return $this->formatDateValue($this->getRawOriginal('updated_at'));
     }
-    
 
+    public function studentGroups()
+    {
+        return $this->hasMany(StudentGroup::class, 'class_section_id');
+    }
+
+    public function leadershipRoles()
+    {
+        return $this->hasMany(StudentLeadershipRole::class, 'class_section_id');
+    }
+
+    public function labBatches()
+    {
+        return $this->hasMany(LabBatch::class, 'class_section_id');
+    }
+
+    public function periodAttendances()
+    {
+        return $this->hasMany(PeriodAttendance::class, 'class_section_id');
+    }
+
+    public function examBlocks()
+    {
+        return $this->hasMany(ExamScheduleBlock::class, 'class_section_id');
+    }
 }

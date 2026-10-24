@@ -1,16 +1,34 @@
-﻿{
-    "timestamp":  "2026-10-23 19:51:59",
-    "branch":  "main",
-    "commit":  "aa2bf9e",
-    "description":  "Unified blue buttons and elements to side panel theme color",
-    "snapshot":  {
-                     "file":  "zolo_snapshot_20261023_195159_aa2bf9e.zip",
-                     "size_bytes":  27962589,
-                     "size_mb":  26.67
-                 },
-    "git_bundle":  {
-                       "file":  "zolo_git_20261023_195159_aa2bf9e.bundle",
-                       "size_bytes":  34849607,
-                       "size_mb":  33.24
-                   }
-}
+﻿[
+    {
+        "timestamp":  "2026-10-23 19:51:59",
+        "branch":  "main",
+        "commit":  "aa2bf9e",
+        "description":  "Unified blue buttons and elements to side panel theme color",
+        "snapshot":  {
+                         "file":  "zolo_snapshot_20261023_195159_aa2bf9e.zip",
+                         "size_bytes":  27962589,
+                         "size_mb":  26.67
+                     },
+        "git_bundle":  {
+                           "file":  "zolo_git_20261023_195159_aa2bf9e.bundle",
+                           "size_bytes":  34849607,
+                           "size_mb":  33.24
+                       }
+    },
+    {
+        "timestamp":  "2026-10-24 09:44:13",
+        "branch":  "main",
+        "commit":  "3751457",
+        "description":  "Automated session backup",
+        "snapshot":  {
+                         "file":  "zolo_snapshot_20261024_094413_3751457.zip",
+                         "size_bytes":  27964270,
+                         "size_mb":  26.67
+                     },
+        "git_bundle":  {
+                           "file":  "zolo_git_20261024_094413_3751457.bundle",
+                           "size_bytes":  34858048,
+                           "size_mb":  33.24
+                       }
+    }
+]
