@@ -165,6 +165,10 @@ A continuous backup system is integrated directly into the workspace under `back
   - Controller: [`ExamScheduleBlockController.php`](file:///d:/PROJECTS/WEBSITES/zolo-smartschool/PHP_CODE/app/Http/Controllers/Exam/ExamScheduleBlockController.php)
   - View: [`PHP_CODE/resources/views/exams/blocks/index.blade.php`](file:///d:/PROJECTS/WEBSITES/zolo-smartschool/PHP_CODE/resources/views/exams/blocks/index.blade.php)
   - Navigation: Added **`Exam Block Schedule`** under `ACADEMICS -> Offline Exam` in the sidebar (`/exams/blocks`).
+* **Multi-Tenant Database Migrations Applied (`php artisan migrate:school`)**:
+  - The application switches to tenant-specific databases (e.g. `zolo_schools_3_demo`) via `SwitchDatabase` middleware.
+  - Copied all 5 new migrations into `PHP_CODE/database/migrations/schools/` and executed `php artisan migrate:school`.
+  - Resolved `500 Server Error` (missing tables `exam_schedule_blocks` and `student_groups`) on both `/students/groups-leadership` and `/exams/blocks`. Both routes now render with HTTP 200.
 
 ---
 
@@ -172,6 +176,8 @@ A continuous backup system is integrated directly into the workspace under `back
 When resuming work in a new conversation:
 1. **Read this file** (`SESSION_HISTORY.md`) to re-hydrate state and current design system conventions.
 2. Check `git status` and `git log -n 3` to verify HEAD.
-3. If modifying styles, make updates in `PHP_CODE/public/assets/css/zolo-theme.css`.
-4. Run `php artisan view:clear` whenever testing Blade UI changes.
-5. Execute `scripts/backup_project.ps1` to take a local snapshot before major refactoring.
+3. If creating migrations for school tenant features (students, classes, timetable, exams, etc.), place migration files in `PHP_CODE/database/migrations/schools/` and run `php artisan migrate:school`.
+4. If modifying styles, make updates in `PHP_CODE/public/assets/css/zolo-theme.css`.
+5. Run `php artisan view:clear` whenever testing Blade UI changes.
+6. Execute `scripts/backup_project.ps1` to take a local snapshot before major refactoring.
+
