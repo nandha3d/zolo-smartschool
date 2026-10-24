@@ -177,6 +177,11 @@ A continuous backup system is integrated directly into the workspace under `back
   - School Settings: Added `roll_number_prefix`, `roll_number_digits` (Auto/None, 2 digits `01`, 3 digits `001`, 4 digits `0001`, 5 digits `00001`), and `roll_number_start` in [`SchoolSettingsController.php`](file:///d:/PROJECTS/WEBSITES/zolo-smartschool/PHP_CODE/app/Http/Controllers/SchoolSettingsController.php) and [`school-settings/general-settings.blade.php`](file:///d:/PROJECTS/WEBSITES/zolo-smartschool/PHP_CODE/resources/views/school-settings/general-settings.blade.php).
   - Assign Roll Number Cockpit: Enhanced [`assign_roll_no.blade.php`](file:///d:/PROJECTS/WEBSITES/zolo-smartschool/PHP_CODE/resources/views/students/assign_roll_no.blade.php) toolbar with live Prefix input, Digit Padding dropdown, Starting Number input, instant recalculation, and inline AJAX submission without page refresh.
   - Controller Calculation: Updated `StudentController::rollNumberShow` to dynamically format with `str_pad` and prefix while keeping inputs editable for manual fine-tuning.
+* **Dynamic Class-Specific Roll Number Prefixing & Auto-Sync**:
+  - Problem Solved: Previously, when switching between classes (e.g. Class 1 A and Class 2 A), the Prefix input retained whatever was typed earlier (e.g. `CL1B`), assigning the same prefix across different classes.
+  - Smart Prefix Tokenization: Added `ClassSection::getSmartRollPrefix($template)` supporting dynamic templates (`CL{class}{section}`, `{class}{section}-`, `{year}/{class}{section}/`) as well as default smart class-specific prefixes (`CL1A`, `CL1B`, `CL2A`, `CL10B`, `CL11SA` for Class 11 Science A, `CL12CB` for Class 12 Commerce B).
+  - Auto Class Prefix Toggle: Added an `[Auto]` checkbox toggle directly beside the Prefix input on `/students/roll-number`. When toggled ON (default), changing the Class Section dropdown dynamically populates `#roll_number_prefix` with that class's unique prefix and updates student roll numbers instantly. Typing a custom prefix unchecks Auto to preserve the manual override.
+  - Settings Bulk Recalculation: Updated `SchoolSettingsController::store` to resolve `$classSection->getSmartRollPrefix($prefixTemplate)` for every class section, ensuring bulk roll number regenerations assign correct distinct prefixes per section.
 
 ---
 
