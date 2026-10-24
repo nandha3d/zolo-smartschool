@@ -61,7 +61,7 @@ class ExamScheduleBlockController extends Controller
             $periods = TimetablePeriod::owner()->orderBy('start_time', 'asc')->get();
             $cs = ClassSection::with('class.all_subjects')->find($selected_class_section_id);
             $subjects = $cs?->class?->all_subjects ?? Subject::owner()->get();
-            $staffMembers = Staff::owner()->with('user')->get();
+            $staffMembers = Staff::with('user')->get();
             $resources = TimetableResource::owner()->where('is_active', true)->get();
         }
 

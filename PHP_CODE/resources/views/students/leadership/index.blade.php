@@ -405,5 +405,65 @@ function deleteStudentGroup(id) {
         }
     });
 }
+
+$(document).ready(function() {
+    $('#assignRoleForm').on('submit', function(e) {
+        e.preventDefault();
+        let form = $(this);
+        let btn = form.find('button[type="submit"]');
+        let origText = btn.html();
+        btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin mr-1"></i> Saving...');
+        $.ajax({
+            url: form.attr('action'),
+            type: 'POST',
+            data: form.serialize(),
+            success: function(res) {
+                $('#assignRoleModal').modal('hide');
+                if (typeof showSuccessToast === 'function') {
+                    showSuccessToast(res.message || 'Student leadership role assigned successfully.');
+                }
+                setTimeout(function() { location.reload(); }, 600);
+            },
+            error: function(err) {
+                btn.prop('disabled', false).html(origText);
+                let msg = (err.responseJSON && err.responseJSON.message) ? err.responseJSON.message : 'Failed to assign role';
+                if (typeof showErrorToast === 'function') {
+                    showErrorToast(msg);
+                } else {
+                    alert(msg);
+                }
+            }
+        });
+    });
+
+    $('#createGroupForm').on('submit', function(e) {
+        e.preventDefault();
+        let form = $(this);
+        let btn = form.find('button[type="submit"]');
+        let origText = btn.html();
+        btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin mr-1"></i> Saving...');
+        $.ajax({
+            url: form.attr('action'),
+            type: 'POST',
+            data: form.serialize(),
+            success: function(res) {
+                $('#createGroupModal').modal('hide');
+                if (typeof showSuccessToast === 'function') {
+                    showSuccessToast(res.message || 'Student group created successfully.');
+                }
+                setTimeout(function() { location.reload(); }, 600);
+            },
+            error: function(err) {
+                btn.prop('disabled', false).html(origText);
+                let msg = (err.responseJSON && err.responseJSON.message) ? err.responseJSON.message : 'Failed to create group';
+                if (typeof showErrorToast === 'function') {
+                    showErrorToast(msg);
+                } else {
+                    alert(msg);
+                }
+            }
+        });
+    });
+});
 </script>
 @endsection

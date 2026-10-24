@@ -34,6 +34,11 @@ class Staff extends Model
         return $this->belongsTo(User::class)->withTrashed();
     }
 
+    public function scopeOwner($query)
+    {
+        return $query;
+    }
+
     //Getter Attributes
     public function getImageAttribute($value)
     {
