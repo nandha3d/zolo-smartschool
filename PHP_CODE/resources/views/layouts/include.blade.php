@@ -54,7 +54,7 @@
 <script src="{{url('/js/lang')}}"></script>
 <style>
     :root {
-        --theme-color: <?=$systemSettings['theme_color']??"#22577A" ?>;
+        --theme-color: <?= $schoolSettings['theme_color'] ?? $systemSettings['theme_color'] ?? "#22577A" ?>;
     }
     /* Styles for sidebar sub-categories in theme color sidebar */
     .sub-category {

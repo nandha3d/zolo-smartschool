@@ -61,6 +61,14 @@
                 </div>
             </li> --}}
 
+            @if(Auth::user()->can('school-setting-manage') || Auth::user()->can('system-setting-manage'))
+                <li class="nav-item d-none d-md-block mr-1">
+                    <a class="nav-link text-dark p-2" href="{{ Auth::user()->can('school-setting-manage') ? route('school-settings.index') : route('system-settings.index') }}" title="{{ __('Theme Settings') }}">
+                        <i class="fa fa-paint-brush text-muted"></i>
+                    </a>
+                </li>
+            @endif
+
             <li class="nav-item dropdown">
                 <a class="nav-link count-indicator dropdown-toggle" id="messageDropdown" href="#" data-toggle="dropdown" aria-expanded="false">
                     <i class="fa fa-language"></i>
@@ -95,6 +103,13 @@
                         <a class="dropdown-item" href="{{ route('auth.profile.edit') }}"><i class="fa fa-user mr-2"></i>{{ __('profile') }}</a>
                         <div class="dropdown-divider"></div>
                     {{-- @endcan --}}
+                    @if(Auth::user()->can('school-setting-manage'))
+                        <a class="dropdown-item" href="{{ route('school-settings.index') }}"><i class="fa fa-paint-brush mr-2 text-warning"></i>{{ __('Theme & Settings') }}</a>
+                        <div class="dropdown-divider"></div>
+                    @elseif(Auth::user()->can('system-setting-manage'))
+                        <a class="dropdown-item" href="{{ route('system-settings.index') }}"><i class="fa fa-paint-brush mr-2 text-warning"></i>{{ __('Theme & Settings') }}</a>
+                        <div class="dropdown-divider"></div>
+                    @endif
                     <a class="dropdown-item" href="{{ route('auth.change-password.index') }}">
                         <i class="fa fa-refresh mr-2 text-success"></i>{{ __('change_password') }}</a>
                     <div class="dropdown-divider"></div>

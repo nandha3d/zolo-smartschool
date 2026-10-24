@@ -101,6 +101,7 @@ class SchoolSettingsController extends Controller
             'school_tagline' => 'required',
             'date_format' => 'required',
             'time_format' => 'required',
+            'theme_color' => 'nullable',
             'domain' => 'nullable|unique:schools,domain,' . Auth::user()->school_id,
             'google_map_link' => 'nullable',
             'fees_remainder_duration' => 'required'

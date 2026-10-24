@@ -303,6 +303,13 @@
                             </a>
                         </li>
 
+                        <li class="nav-item">
+                            <a href="{{ route('exams.blocks.index') }}" class="nav-link"
+                                data-name="{{ Auth::user()->getRoleNames()[0] }}" data-access="@hasFeatureAccess('Exam Management')">
+                                {{ __('Exam Block Schedule') }}
+                            </a>
+                        </li>
+
                         @can('view-exam-marks')
                             <li class="nav-item">
                                 <a href="{{ route('exam.view-marks') }}" class="nav-link"
@@ -433,6 +440,8 @@
                         @canany(['student-list', 'class-teacher'])
                             <li class="nav-item"><a href="{{ route('students.index') }}"
                                     class="nav-link">{{ __('student_details') }}</a></li>
+                            <li class="nav-item"><a href="{{ route('students.leadership.index') }}"
+                                    class="nav-link">{{ __('Groups & Leadership') }}</a></li>
                         @endcanany
 
                         @can('student-reset-password')

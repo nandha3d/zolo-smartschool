@@ -16,6 +16,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DatabaseBackupController;
 use App\Http\Controllers\Exam\ExamController;
 use App\Http\Controllers\Exam\ExamTimetableController;
+use App\Http\Controllers\Exam\ExamScheduleBlockController;
 use App\Http\Controllers\Exam\GradeController;
 use App\Http\Controllers\ExpenseCategoryController;
 use App\Http\Controllers\ExpenseController;
@@ -55,6 +56,7 @@ use App\Http\Controllers\StaffController;
 use App\Http\Controllers\StaffAttendanceController;
 use App\Http\Controllers\StreamController;
 use App\Http\Controllers\StudentController;
+use App\Http\Controllers\StudentLeadershipController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\SubscriptionBillPaymentController;
 use App\Http\Controllers\SubscriptionController;
@@ -511,6 +513,14 @@ Route::group(['middleware' => ['Role', 'checkSchoolStatus', 'status','SwitchData
             Route::post('update-bulk-application-status',[StudentController::class, 'updateBulkApplicationStatus'])->name('update-bulk-application-status');
             Route::post('update-application-status',[StudentController::class, 'updateApplicationStatus'])->name('update-application-status');
             Route::get('get-class-section-by-class/{class_id}',[StudentController::class, 'getclassSectionByClass']);
+
+            /*** Class Groups & Leadership ***/
+            Route::get('groups-leadership', [StudentLeadershipController::class, 'index'])->name('students.leadership.index');
+            Route::post('groups-leadership/assign-role', [StudentLeadershipController::class, 'assignRole'])->name('students.leadership.assign-role');
+            Route::delete('groups-leadership/role/{id}', [StudentLeadershipController::class, 'removeRole'])->name('students.leadership.remove-role');
+            Route::post('groups-leadership/group', [StudentLeadershipController::class, 'storeGroup'])->name('students.leadership.store-group');
+            Route::delete('groups-leadership/group/{id}', [StudentLeadershipController::class, 'deleteGroup'])->name('students.leadership.delete-group');
+            Route::get('by-class-section/{id}', [StudentLeadershipController::class, 'getStudentsByClassSection'])->name('students.by-class-section');
         });
         Route::resource('students', StudentController::class)->only(['index', 'create', 'store', 'show', 'update', 'destroy']);
 
@@ -677,6 +687,11 @@ Route::group(['middleware' => ['Role', 'checkSchoolStatus', 'status','SwitchData
         Route::get('exams/result-report/{session_year_id}/{exam_name}', [ExamController::class, 'resultReport']);
         Route::get('exams/timetable', [ExamController::class, 'examTimetableIndex'])->name('exams.timetable');
         Route::get('exams/timetable/{id?}', [ExamController::class, 'examTimetableShow'])->name('exams.timetable.show');
+
+        // Exam Schedule Blocks (Morning Exam + Afternoon Revision)
+        Route::get('exams/blocks', [ExamScheduleBlockController::class, 'index'])->name('exams.blocks.index');
+        Route::post('exams/blocks', [ExamScheduleBlockController::class, 'store'])->name('exams.blocks.store');
+        Route::delete('exams/blocks/{id}', [ExamScheduleBlockController::class, 'destroy'])->name('exams.blocks.destroy');
         Route::get('exams/bulk-upload-marks', [ExamController::class, 'bulkUploadIndex'])->name('exam.bulk-upload-marks');
         Route::get('exams/download-sample-file', [ExamController::class, 'downloadSampleFile'])->name('exam.download-sample-file');
         Route::post('exams/store-bulk-data', [ExamController::class, 'storeBulkData'])->name('exam.store-bulk-data');
