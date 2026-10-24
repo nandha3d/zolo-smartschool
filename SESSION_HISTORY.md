@@ -107,7 +107,31 @@ A continuous backup system is integrated directly into the workspace under `back
 
 ---
 
-## 5. Handoff Checklist for Next Session
+---
+
+## 5. UI Theming & Scrollbar System (Oct 2026)
+* **Global Scrollbars**: Slim (6px-8px) with `color-mix(in srgb, var(--theme-color, #22577A) ...)` thumb styling, automatically adapting to whichever theme is chosen.
+* **Sidebar Scrollbar**: Subtle translucent white (`rgba(255, 255, 255, 0.22)`) thumb blending into dark theme sidebar backgrounds.
+* **20 Theme Color Presets with Dark Mode**: Added to [`PHP_CODE/resources/views/settings/forms/system-settings-form.blade.php`](file:///d:/PROJECTS/WEBSITES/zolo-smartschool/PHP_CODE/resources/views/settings/forms/system-settings-form.blade.php):
+  - 10 Light / Professional Palettes (Deep Teal, Dark Cyan, Navy Slate, Forest Green, Charcoal Indigo, Gunmetal Blue, Dark Sea Green, Warm Slate, Teal, Royal Purple).
+  - 10 Dark Mode / Bold Palettes (Midnight Navy, Dark Slate, Jet Black, Obsidian, Dark Charcoal, Deep Indigo, Dark Magenta, Burnt Sienna, Deep Amber, Emerald Dark).
+  - Native color picker fallback for infinite custom brand colors.
+
+---
+
+## 6. Student Management, Lab Batches & Exam Timetable Master Plan
+* Detailed architectural specification documented in [`student_management_and_academics_master_plan.md`](file:///C:/Users/gnand/.gemini/antigravity-ide/brain/eef9a6ab-fffa-4915-a4d9-aa2aad2cc3c0/student_management_and_academics_master_plan.md).
+* Features covered:
+  1. **Student Grouping & Leadership**: Class Leader, Vice Class Leader, Bench Leader, Group Leader with visual badges.
+  2. **Lab Batches & Batch Leaders**: Practical division (Batch A/B/C) with capacity enforcement and Timetable Resource mapping.
+  3. **Parent Portal 360° Cockpit**: Subject radar charts, live period attendance heatmaps, upcoming exam blocks, fee status.
+  4. **Motivational Leaderboard & Wall of Fame**: Top 3 marks per class/section, extra-curricular champions, multi-dimensional filtering.
+  5. **Exam Timetable Block Model**: Morning Exam Block + Afternoon Revision / Practice Block overlay on the regular timetable grid.
+  6. **Period-Wise Attendance**: Real-time period tracking, "Was Present in Prev Period" alerts, and gate pass / infirmary departure tracking.
+
+---
+
+## 7. Handoff Checklist for Next Session
 When resuming work in a new conversation:
 1. **Read this file** (`SESSION_HISTORY.md`) to re-hydrate state and current design system conventions.
 2. Check `git status` and `git log -n 3` to verify HEAD.
