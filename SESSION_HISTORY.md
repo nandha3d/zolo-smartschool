@@ -169,9 +169,14 @@ A continuous backup system is integrated directly into the workspace under `back
   - The application switches to tenant-specific databases (e.g. `zolo_schools_3_demo`) via `SwitchDatabase` middleware.
   - Copied all 5 new migrations into `PHP_CODE/database/migrations/schools/` and executed `php artisan migrate:school`.
   - Resolved `500 Server Error` on both `/students/groups-leadership` and `/exams/blocks`.
-* **Exam Blocks & Leadership Cockpit Bugfixes**:
-  - Fixed `BadMethodCallException: Call to undefined method App\Models\Staff::owner()` by using `Staff::with('user')->get()` in `ExamScheduleBlockController.php` and adding `scopeOwner()` to `Staff.php`.
-  - Added AJAX submission handlers for `assignRoleForm`, `createGroupForm`, and `createBlockForm` with loading buttons, SweetAlert/Toastr notifications, modal auto-dismiss, and page refresh to avoid navigating to raw JSON endpoints.
+* **Table Header Visibility Fix Across Entire Application**:
+  - Diagnosed cause: Bootstrap Table wraps header titles in `<div class="th-inner">...</div>`. A legacy CSS rule forced `.th-inner { color: #FFFFFF !important; }` while headers used light backgrounds (`#F1F5F9`), rendering headers invisible.
+  - Resolved across [`PHP_CODE/public/assets/css/zolo-theme.css`](file:///d:/PROJECTS/WEBSITES/zolo-smartschool/PHP_CODE/public/assets/css/zolo-theme.css) by enforcing crisp slate dark ink `#0F172A !important`, `font-weight: 700`, and `#64748B` sort arrows on all `.th-inner`, `th`, and `th a` elements.
+* **Configurable Roll Number Prefix, Starting Number & Digit Padding**:
+  - Migration: [`2026_10_25_000006_change_roll_number_to_string_in_students_table.php`](file:///d:/PROJECTS/WEBSITES/zolo-smartschool/PHP_CODE/database/migrations/schools/2026_10_25_000006_change_roll_number_to_string_in_students_table.php) converted `roll_number` in `students` from `INT` to `VARCHAR(64)` in tenant databases.
+  - School Settings: Added `roll_number_prefix`, `roll_number_digits` (Auto/None, 2 digits `01`, 3 digits `001`, 4 digits `0001`, 5 digits `00001`), and `roll_number_start` in [`SchoolSettingsController.php`](file:///d:/PROJECTS/WEBSITES/zolo-smartschool/PHP_CODE/app/Http/Controllers/SchoolSettingsController.php) and [`school-settings/general-settings.blade.php`](file:///d:/PROJECTS/WEBSITES/zolo-smartschool/PHP_CODE/resources/views/school-settings/general-settings.blade.php).
+  - Assign Roll Number Cockpit: Enhanced [`assign_roll_no.blade.php`](file:///d:/PROJECTS/WEBSITES/zolo-smartschool/PHP_CODE/resources/views/students/assign_roll_no.blade.php) toolbar with live Prefix input, Digit Padding dropdown, Starting Number input, instant recalculation, and inline AJAX submission without page refresh.
+  - Controller Calculation: Updated `StudentController::rollNumberShow` to dynamically format with `str_pad` and prefix while keeping inputs editable for manual fine-tuning.
 
 ---
 
