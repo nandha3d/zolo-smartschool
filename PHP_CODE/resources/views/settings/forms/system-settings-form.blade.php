@@ -121,9 +121,63 @@
             </div>
         </div>
 
-        <div class="form-group col-md-6 col-lg-6 col-xl-4 col-sm-12">
-            <label for="theme_color">{{ __('color') }}</label>
-            <input name="theme_color" id="theme_color" value="{{ $settings['theme_color'] ?? '' }}" type="text" required placeholder="{{ __('color') }}" class="color-picker"/>
+        <div class="form-group col-md-12 col-lg-12 col-xl-8 col-sm-12">
+            <label for="theme_color">{{ __('Theme Color') }}</label>
+            <input name="theme_color" id="theme_color" value="{{ $settings['theme_color'] ?? '#22577A' }}" type="hidden" required/>
+            <div class="zolo-theme-color-grid" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;">
+                {{-- Light / Professional Palette (10) --}}
+                @php
+                $presets = [
+                    ['#22577A', 'Deep Teal'],
+                    ['#1A535C', 'Dark Cyan'],
+                    ['#2E4057', 'Navy Slate'],
+                    ['#1B4332', 'Forest Green'],
+                    ['#3D405B', 'Charcoal Indigo'],
+                    ['#2D3142', 'Gunmetal Blue'],
+                    ['#264653', 'Dark Sea Green'],
+                    ['#4A5568', 'Warm Slate'],
+                    ['#285E61', 'Teal'],
+                    ['#553C9A', 'Royal Purple'],
+                    {{-- Dark Mode / Bold Palette (10) --}}
+                    ['#0F172A', 'Midnight Navy'],
+                    ['#1E293B', 'Dark Slate'],
+                    ['#18181B', 'Jet Black'],
+                    ['#171923', 'Obsidian'],
+                    ['#1A202C', 'Dark Charcoal'],
+                    ['#312E81', 'Deep Indigo'],
+                    ['#701A75', 'Dark Magenta'],
+                    ['#7C2D12', 'Burnt Sienna'],
+                    ['#92400E', 'Deep Amber'],
+                    ['#065F46', 'Emerald Dark'],
+                ];
+                @endphp
+                @foreach ($presets as $preset)
+                    <button type="button"
+                        class="zolo-color-swatch{{ ($settings['theme_color'] ?? '#22577A') === $preset[0] ? ' active' : '' }}"
+                        data-color="{{ $preset[0] }}"
+                        title="{{ $preset[1] }} ({{ $preset[0] }})"
+                        style="width:38px;height:38px;border-radius:8px;border:2px solid transparent;background:{{ $preset[0] }};cursor:pointer;transition:all 0.15s ease;position:relative;display:inline-flex;align-items:center;justify-content:center;"
+                        onclick="document.getElementById('theme_color').value=this.dataset.color;
+                                 document.getElementById('custom_theme_color').value=this.dataset.color;
+                                 document.querySelectorAll('.zolo-color-swatch').forEach(s=>s.classList.remove('active'));
+                                 this.classList.add('active');">
+                        <i class="fa fa-check" style="color:#fff;font-size:13px;opacity:0;transition:opacity 0.15s;"></i>
+                    </button>
+                @endforeach
+                {{-- Custom Color Picker --}}
+                <div style="position:relative;width:38px;height:38px;">
+                    <input type="color" id="custom_theme_color" value="{{ $settings['theme_color'] ?? '#22577A' }}"
+                        style="position:absolute;inset:0;width:100%;height:100%;border:2px dashed #CBD5E1;border-radius:8px;padding:2px;cursor:pointer;background:#F8FAFC;"
+                        title="Custom Color"
+                        oninput="document.getElementById('theme_color').value=this.value;
+                                 document.querySelectorAll('.zolo-color-swatch').forEach(s=>s.classList.remove('active'));">
+                </div>
+            </div>
+            <style>
+                .zolo-color-swatch:hover { transform: scale(1.12); box-shadow: 0 2px 8px rgba(0,0,0,0.22); }
+                .zolo-color-swatch.active { border-color: #FFFFFF !important; box-shadow: 0 0 0 2px var(--zolo-ink, #0F172A), 0 2px 8px rgba(0,0,0,0.25) !important; transform: scale(1.08); }
+                .zolo-color-swatch.active .fa-check { opacity: 1 !important; }
+            </style>
         </div>
 
         <div class="form-group col-md-4 col-sm-12">
