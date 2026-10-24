@@ -151,7 +151,24 @@ A continuous backup system is integrated directly into the workspace under `back
 
 ---
 
-## 8. Handoff Checklist for Next Session
+## 8. UI Cockpits & Navigation Integrated (Oct 2026)
+* **Theme Settings Access**:
+  - Added 20 theme color presets with dark mode directly into School Admin's [`PHP_CODE/resources/views/school-settings/general-settings.blade.php`](file:///d:/PROJECTS/WEBSITES/zolo-smartschool/PHP_CODE/resources/views/school-settings/general-settings.blade.php) (`/school-settings`).
+  - Added paint-brush shortcut icon in top header navbar and profile dropdown.
+  - Prioritized `$schoolSettings['theme_color']` with fallback to `$systemSettings['theme_color']`.
+* **Class Groups & Leadership Cockpit**:
+  - Controller: [`StudentLeadershipController.php`](file:///d:/PROJECTS/WEBSITES/zolo-smartschool/PHP_CODE/app/Http/Controllers/StudentLeadershipController.php)
+  - View: [`PHP_CODE/resources/views/students/leadership/index.blade.php`](file:///d:/PROJECTS/WEBSITES/zolo-smartschool/PHP_CODE/resources/views/students/leadership/index.blade.php)
+  - Navigation: Added **`Groups & Leadership`** under `PEOPLE -> Students` in the sidebar (`/students/groups-leadership`).
+  - Supports assigning Class Leaders (Monitors), Vice Class Leaders, Bench/Row Leaders, and Study/Project Group Leaders with visual badge icons and color swatches.
+* **Exam Block Schedule (Morning Exam + Afternoon Revision)**:
+  - Controller: [`ExamScheduleBlockController.php`](file:///d:/PROJECTS/WEBSITES/zolo-smartschool/PHP_CODE/app/Http/Controllers/Exam/ExamScheduleBlockController.php)
+  - View: [`PHP_CODE/resources/views/exams/blocks/index.blade.php`](file:///d:/PROJECTS/WEBSITES/zolo-smartschool/PHP_CODE/resources/views/exams/blocks/index.blade.php)
+  - Navigation: Added **`Exam Block Schedule`** under `ACADEMICS -> Offline Exam` in the sidebar (`/exams/blocks`).
+
+---
+
+## 9. Handoff Checklist for Next Session
 When resuming work in a new conversation:
 1. **Read this file** (`SESSION_HISTORY.md`) to re-hydrate state and current design system conventions.
 2. Check `git status` and `git log -n 3` to verify HEAD.
