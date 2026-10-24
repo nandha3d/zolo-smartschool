@@ -594,7 +594,10 @@ class StudentController extends Controller
         $defaultDigits = $schoolSettings['roll_number_digits'] ?? '0';
         $defaultStart = $schoolSettings['roll_number_start'] ?? '1';
 
-        return view('students.assign_roll_no', compact('class_section', 'defaultPrefix', 'defaultDigits', 'defaultStart'));
+        $firstClass = $class_section->first();
+        $initialClassPrefix = $firstClass ? $firstClass->getSmartRollPrefix($defaultPrefix) : ($defaultPrefix ?: '');
+
+        return view('students.assign_roll_no', compact('class_section', 'defaultPrefix', 'initialClassPrefix', 'defaultDigits', 'defaultStart'));
     }
 
     public function rollNumberUpdate(Request $request)
@@ -645,12 +648,25 @@ class StudentController extends Controller
             $currentSessionYear = $this->cache->getDefaultSessionYear();
             $schoolSettings = $this->cache->getSchoolSettings();
 
-            $prefix = $request->has('prefix') ? (string)$request->prefix : ($schoolSettings['roll_number_prefix'] ?? '');
+            $class_section_id = $request->class_section_id;
+            $classSection = $this->classSection->builder()->with(['class', 'class.stream', 'section', 'medium'])->find($class_section_id);
+            $prefixTemplate = $schoolSettings['roll_number_prefix'] ?? '';
+            $smartPrefix = $classSection ? $classSection->getSmartRollPrefix($prefixTemplate) : '';
+
+            $isAuto = $request->input('is_auto_prefix');
+            if ($isAuto === '1' || $isAuto === 1 || $isAuto === true || $isAuto === 'true') {
+                $prefix = $smartPrefix;
+            } elseif ($request->has('prefix') && $request->prefix !== null && $request->prefix !== '') {
+                // If prefix has dynamic placeholders like {class} or {section}, resolve against class section
+                $prefix = $classSection ? $classSection->getSmartRollPrefix((string)$request->prefix) : (string)$request->prefix;
+            } else {
+                $prefix = $smartPrefix;
+            }
+
             $digits = $request->has('digits') ? (int)$request->digits : (int)($schoolSettings['roll_number_digits'] ?? 0);
             $startNumber = $request->has('start_number') ? (int)$request->start_number : (int)($schoolSettings['roll_number_start'] ?? 1);
             if ($startNumber < 1) $startNumber = 1;
 
-            $class_section_id = $request->class_section_id;
             $sql = $this->user->builder()->with('student');
             $sql = $sql->whereHas('student', function ($q) use ($class_section_id, $currentSessionYear) {
                 $q->where(['class_section_id' => $class_section_id, 'session_year_id' => $currentSessionYear->id]);

@@ -441,6 +441,7 @@ function studentRollNumberQueryParams(p) {
         'sort_by': $('#sort_by').val(),
         'order_by': $('#order_by').val(),
         'prefix': $('#roll_number_prefix').val(),
+        'is_auto_prefix': $('#auto_class_prefix_toggle').is(':checked') ? 1 : 0,
         'digits': $('#roll_number_digits').val(),
         'start_number': $('#roll_number_start').val(),
     };

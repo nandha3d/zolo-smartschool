@@ -14,8 +14,58 @@ class ClassSection extends Model {
     use HasFactory, DateFormatTrait;
 
     protected $fillable = ['class_id', 'section_id', 'class_teacher_id', 'school_id', 'medium_id', 'block'];
-    protected $appends = ['name', 'full_name'];
+    protected $appends = ['name', 'full_name', 'smart_roll_prefix'];
     protected $hidden = ['created_at','updated_at'];
+
+    /**
+     * Generate class-aware smart roll number prefix.
+     * Supports templates like:
+     *   "CL{class}{section}" -> "CL1A", "CL2B"
+     *   "{class}{section}-"  -> "1A-", "2B-"
+     *   "{year}/{class}{section}/" -> "26/1A/"
+     */
+    public function getSmartRollPrefix(?string $template = null): string
+    {
+        $classObj = $this->relationLoaded('class') ? $this->class : ($this->class()->first());
+        $rawClassName = $classObj ? ($classObj->name ?? '') : '';
+
+        $sectionObj = $this->relationLoaded('section') ? $this->section : ($this->section()->first());
+        $sectionName = $sectionObj ? trim($sectionObj->name ?? '') : '';
+
+        preg_match('/\d+/', $rawClassName, $numMatches);
+        $num = $numMatches[0] ?? '';
+
+        $streamCode = '';
+        if (stripos($rawClassName, 'science') !== false) {
+            $streamCode = 'S';
+        } elseif (stripos($rawClassName, 'commerce') !== false) {
+            $streamCode = 'C';
+        } elseif (stripos($rawClassName, 'arts') !== false) {
+            $streamCode = 'A';
+        }
+
+        $classToken = $num ? ($num . $streamCode) : preg_replace('/[^A-Za-z0-9]/', '', $rawClassName);
+
+        if (empty($template)) {
+            return 'CL' . $classToken . $sectionName;
+        }
+
+        // If template uses tokens
+        if (strpos($template, '{') !== false) {
+            return str_replace(
+                ['{class}', '{section}', '{class_raw}', '{section_raw}', '{year}', '{yy}'],
+                [$classToken, $sectionName, $rawClassName, $sectionName, date('Y'), date('y')],
+                $template
+            );
+        }
+
+        return $template;
+    }
+
+    public function getSmartRollPrefixAttribute(): string
+    {
+        return $this->getSmartRollPrefix();
+    }
 
     public function class() {
         return $this->belongsTo(ClassSchool::class)->withTrashed();

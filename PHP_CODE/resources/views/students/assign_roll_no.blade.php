@@ -30,7 +30,7 @@
                                     <label class="filter-menu font-weight-bold" for="filter_roll_number_class_section_id">{{ __('Class Section') }} </label>
                                     <select name="filter_roll_number_class_section_id" id="filter_roll_number_class_section_id" class="form-control">
                                         @foreach ($class_section as $class)
-                                            <option value={{ $class->id }}>
+                                            <option value="{{ $class->id }}" data-smart-prefix="{{ $class->getSmartRollPrefix($defaultPrefix ?? null) }}">
                                                 {{ $class->full_name }}
                                             </option>
                                         @endforeach
@@ -54,10 +54,15 @@
                                 </div>
 
                                 <div class="form-group col-sm-6 col-md-2">
-                                    <label class="filter-menu font-weight-bold" for="roll_number_prefix">
-                                        <i class="fa fa-tag text-primary mr-1"></i>{{ __('Prefix') }}
-                                    </label>
-                                    <input type="text" id="roll_number_prefix" name="roll_number_prefix" class="form-control" placeholder="e.g. 26/ or R-" value="{{ $defaultPrefix ?? '' }}">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <label class="filter-menu font-weight-bold mb-1" for="roll_number_prefix">
+                                            <i class="fa fa-tag text-primary mr-1"></i>{{ __('Prefix') }}
+                                        </label>
+                                        <label class="small text-muted mb-1 font-weight-normal" style="cursor:pointer;" title="{{ __('Auto-generate class prefix (e.g. CL1A, CL2A) per selected class') }}">
+                                            <input type="checkbox" id="auto_class_prefix_toggle" checked> {{ __('Auto') }}
+                                        </label>
+                                    </div>
+                                    <input type="text" id="roll_number_prefix" name="roll_number_prefix" class="form-control" placeholder="e.g. CL1A or 26/" value="{{ $initialClassPrefix ?? $defaultPrefix ?? '' }}">
                                 </div>
 
                                 <div class="form-group col-sm-6 col-md-2">
@@ -126,18 +131,46 @@
 
     <script>
     $(document).ready(function() {
-        // Auto-refresh table when class section, sorting, prefix, digits, or start changes
-        $('#filter_roll_number_class_section_id, #sort_by, #order_by, #roll_number_digits, #roll_number_start').on('change', function() {
+        function syncSmartPrefix(force) {
+            if ($('#auto_class_prefix_toggle').is(':checked') || force) {
+                let selectedOpt = $('#filter_roll_number_class_section_id').find(':selected');
+                let smartPrefix = selectedOpt.data('smart-prefix');
+                if (typeof smartPrefix !== 'undefined') {
+                    $('#roll_number_prefix').val(smartPrefix);
+                }
+            }
+        }
+
+        // Initialize prefix on page load with selected class's smart prefix
+        syncSmartPrefix(false);
+
+        // When class section dropdown changes: auto-sync prefix and refresh table
+        $('#filter_roll_number_class_section_id').on('change', function() {
+            syncSmartPrefix(false);
             $('#table_list').bootstrapTable('refresh');
         });
 
-        // Trigger on prefix typing with slight debounce
+        // When auto toggle is clicked
+        $('#auto_class_prefix_toggle').on('change', function() {
+            if ($(this).is(':checked')) {
+                syncSmartPrefix(true);
+                $('#table_list').bootstrapTable('refresh');
+            }
+        });
+
+        // If user manually types into the prefix field, uncheck Auto so custom prefix stays
         let prefixTimer;
-        $('#roll_number_prefix').on('keyup input', function() {
+        $('#roll_number_prefix').on('input keyup', function() {
+            $('#auto_class_prefix_toggle').prop('checked', false);
             clearTimeout(prefixTimer);
             prefixTimer = setTimeout(function() {
                 $('#table_list').bootstrapTable('refresh');
             }, 400);
+        });
+
+        // Auto-refresh table when sorting, digits, or start changes
+        $('#sort_by, #order_by, #roll_number_digits, #roll_number_start').on('change', function() {
+            $('#table_list').bootstrapTable('refresh');
         });
 
         $('#btn_refresh_roll_sequence').on('click', function() {

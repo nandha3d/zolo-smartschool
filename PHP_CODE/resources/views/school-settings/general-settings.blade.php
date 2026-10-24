@@ -245,8 +245,8 @@
                                 <div class="row px-2">
                                     <div class="form-group col-md-4 col-sm-12">
                                         <label for="roll_number_prefix">{{__("Roll Number Prefix (Optional)")}}</label>
-                                        <input type="text" id="roll_number_prefix" name="roll_number_prefix" value="{{ $settings['roll_number_prefix'] ?? '' }}" class="form-control" placeholder="e.g. 26/ or R-">
-                                        <small class="text-muted">{{ __('Prefix attached to every generated student roll number.') }}</small>
+                                        <input type="text" id="roll_number_prefix" name="roll_number_prefix" value="{{ $settings['roll_number_prefix'] ?? '' }}" class="form-control" placeholder="e.g. CL{class}{section} or R-">
+                                        <small class="text-muted">{{ __('Leave blank or use CL{class}{section} for class-specific prefixes (e.g. CL1A, CL2A). Supports {class}, {section}, {year}.') }}</small>
                                     </div>
 
                                     <div class="form-group col-md-4 col-sm-12">

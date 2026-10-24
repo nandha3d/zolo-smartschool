@@ -211,9 +211,11 @@ class SchoolSettingsController extends Controller
                 $sort = $request->roll_number_sort_column;
                 $order = $request->roll_number_sort_order;
 
-                //Get Class Section's Data With Student Sorted By There Names
+                //Get Class Section's Data With Student Sorted By Their Names
                 $classSections = $this->classSection->builder()
                     ->with([
+                        'class',
+                        'section',
                         'students' => function ($query) use ($sort, $order) {
                             $query->join('users', 'students.user_id', '=', 'users.id')
                                 ->select('students.*', 'users.first_name', 'users.last_name')
@@ -224,12 +226,13 @@ class SchoolSettingsController extends Controller
 
                 // Loop towards Class Section Data And make Array To get Student's id and Count Roll Number
                 $studentArray = array();
-                $prefix = $request->roll_number_prefix ?? '';
+                $prefixTemplate = $request->roll_number_prefix ?? '';
                 $digits = (int)($request->roll_number_digits ?? 0);
                 $start = (int)($request->roll_number_start ?? 1);
                 if ($start < 1) $start = 1;
 
                 foreach ($classSections as $classSection) {
+                    $classPrefix = $classSection->getSmartRollPrefix($prefixTemplate);
                     if (isset($classSection->students) && $classSection->students->isNotEmpty()) {
                         foreach ($classSection->students as $key => $student) {
                             $num = $start + $key;
@@ -237,7 +240,7 @@ class SchoolSettingsController extends Controller
                             $studentArray[] = array(
                                 'id' => $student->id,
                                 'class_section_id' => $student->class_section_id,
-                                'roll_number' => $prefix . $numStr
+                                'roll_number' => $classPrefix . $numStr
                             );
                         }
                     }
