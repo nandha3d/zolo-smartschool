@@ -185,12 +185,26 @@ A continuous backup system is integrated directly into the workspace under `back
 
 ---
 
-## 9. Handoff Checklist for Next Session
+## 9. Transport, Attendance & Timetable Architecture (Oct 30, 2026)
+* Detailed engineering specification authored in [`ZOLO_SMARTSCHOOL_TRANSPORT_ATTENDANCE_TIMETABLE_IMPLEMENTATION_SPEC.md`](file:///d:/PROJECTS/WEBSITES/zolo-smartschool/ZOLO_SMARTSCHOOL_TRANSPORT_ATTENDANCE_TIMETABLE_IMPLEMENTATION_SPEC.md).
+* Core modules specified:
+  1. **GPS Speed Tracking & Admin Intimation**: Dynamic vehicle speed limits (`vehicles.speed_limit_kmh`), 5-second sustained overspeed evaluation in `AlertService.php`, multi-channel alerting (browser audio siren, modal, FCM push to admin phone, live map flashing red marker).
+  2. **Transport Route & Stops Customization**: Leaflet / OpenStreetMap visual stop placement, independent morning pickup vs afternoon drop sequencing, stop-level geofence radius & halt buffers, road polyline coordinates.
+  3. **Driver Management & Alternate Drivers**: Roster model `route_vehicle_alternate_drivers`, 1-click substitute handover, mobile driver app auth sync, automated parent SMS/push notification.
+  4. **Teachers Attendance by Admin**: Dedicated teaching faculty cockpit with department/subject filters, daily status codes (P, A, HD, OD, CL, ML), and automated timetable conflict analysis triggering the proxy/substitute teacher assignment wizard.
+  5. **View Attendance Filter Fix & Period Matrix View**: Root-cause fix for `#timetable_class_section` missing change event listener; persistent filter in `localStorage`; period-wise student attendance matrix header (`Roll No`, `Student Name`, `P1 [Time]`, `P2 [Time]`, ..., `Daily Status`) with green `P` and red `A` badges.
+  6. **Teacher Period Marking Eligibility & Timetable Submenu**: Server-side assigned teacher validation (`403 Forbidden` for unauthorized staff); timetable card click launches Action Submenu modal (Mark Period Attendance, Class Diary / Lesson Plan, Student Manifest, Gate Pass / Infirmary Log).
+  7. **Timetable Period Alignment & Time Mismatch Fix**: Root-cause analysis of FullCalendar linear continuous time grid vs school bell schedules with breaks (Image 3 defect); implementation of pure Period-Grid Matrix architecture and 15-minute GCD slot snapping with background break blocks.
+
+---
+
+## 10. Handoff Checklist for Next Session
 When resuming work in a new conversation:
 1. **Read this file** (`SESSION_HISTORY.md`) to re-hydrate state and current design system conventions.
 2. Check `git status` and `git log -n 3` to verify HEAD.
-3. If creating migrations for school tenant features (students, classes, timetable, exams, etc.), place migration files in `PHP_CODE/database/migrations/schools/` and run `php artisan migrate:school`.
+3. If creating migrations for school tenant features (students, classes, timetable, exams, transport, etc.), place migration files in `PHP_CODE/database/migrations/schools/` and run `php artisan migrate:school`.
 4. If modifying styles, make updates in `PHP_CODE/public/assets/css/zolo-theme.css`.
 5. Run `php artisan view:clear` whenever testing Blade UI changes.
 6. Execute `scripts/backup_project.ps1` to take a local snapshot before major refactoring.
+
 
