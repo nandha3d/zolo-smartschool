@@ -86,7 +86,7 @@ class SubscriptionWebhookController extends Controller
                     Log::error($transaction_id);
                     $paymentTransactionData = $this->paymentTransaction->findById($transaction_id);
                     if (!empty($paymentTransactionData)) {
-                        if ($paymentTransactionData->status != 1) {
+                        if ($paymentTransactionData->payment_status != "succeed") {
                             $school_id = $paymentTransactionData->school_id;
     
                             $this->paymentTransaction->update($transaction_id,['payment_status' => "succeed",'school_id' => $school_id]);
@@ -105,7 +105,7 @@ class SubscriptionWebhookController extends Controller
                 case 'payment_intent.payment_failed':
                     $paymentTransactionData = $this->paymentTransaction->findById($transaction_id);
                     if (!empty($paymentTransactionData)) {
-                        if ($paymentTransactionData->status != 1) {
+                        if ($paymentTransactionData->payment_status != "succeed") {
                             $school_id = $paymentTransactionData->school_id;
     
                             $this->paymentTransaction->update($transaction_id,['payment_status' => "failed",'school_id' => $school_id]);
@@ -120,7 +120,7 @@ class SubscriptionWebhookController extends Controller
                     Log::error($transaction_id);
                     $paymentTransactionData = $this->paymentTransaction->findById($transaction_id);
                     if (!empty($paymentTransactionData)) {
-                        if ($paymentTransactionData->status != 1) {
+                        if ($paymentTransactionData->payment_status != "succeed") {
                             $school_id = $paymentTransactionData->school_id;
     
                             $this->paymentTransaction->update($transaction_id,['payment_status' => "succeed",'school_id' => $school_id]);
@@ -180,6 +180,68 @@ class SubscriptionWebhookController extends Controller
             );
         } catch (Throwable $e) {
             Log::warning('Razorpay Webhook : rejected, signature verification failed');
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Paystack signs the raw body with the account secret key (HMAC-SHA512) and sends
+     * the hex digest in X-Paystack-Signature. Without this check anyone could POST a
+     * charge.success and activate a package or addon for any school.
+     */
+    private function paystackSignatureIsValid(Request $request): bool
+    {
+        $signature = (string) $request->header('X-Paystack-Signature', '');
+        if ($signature === '') {
+            Log::warning('Paystack Webhook : rejected, no signature header');
+            return false;
+        }
+
+        DB::setDefaultConnection('mysql');
+        $paymentConfiguration = PaymentConfiguration::where('payment_method', 'Paystack')
+            ->whereNull('school_id')
+            ->first();
+
+        if (empty($paymentConfiguration->secret_key)) {
+            Log::error('Paystack Webhook : rejected, secret key is not configured');
+            return false;
+        }
+
+        $calculated = hash_hmac('sha512', $request->getContent(), $paymentConfiguration->secret_key);
+        if (!hash_equals($calculated, $signature)) {
+            Log::warning('Paystack Webhook : rejected, signature verification failed');
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Flutterwave sends the "secret hash" configured on its dashboard in the verif-hash
+     * header. It is compared against the stored webhook secret before the body is used.
+     */
+    private function flutterwaveSignatureIsValid(Request $request): bool
+    {
+        $signature = (string) $request->header('verif-hash', '');
+        if ($signature === '') {
+            Log::warning('Flutterwave Webhook : rejected, no verif-hash header');
+            return false;
+        }
+
+        DB::setDefaultConnection('mysql');
+        $paymentConfiguration = PaymentConfiguration::where('payment_method', 'Flutterwave')
+            ->whereNull('school_id')
+            ->first();
+
+        if (empty($paymentConfiguration->webhook_secret_key)) {
+            Log::error('Flutterwave Webhook : rejected, webhook secret is not configured');
+            return false;
+        }
+
+        if (!hash_equals((string) $paymentConfiguration->webhook_secret_key, $signature)) {
+            Log::warning('Flutterwave Webhook : rejected, signature verification failed');
             return false;
         }
 
@@ -470,10 +532,13 @@ class SubscriptionWebhookController extends Controller
     public function flutterwave(Request $request)
     {
         Log::info('Flutterwave Webhook Called');
-        $webhookBody = file_get_contents('php://input');
+        if (!$this->flutterwaveSignatureIsValid($request)) {
+            return response()->json(['status' => 'invalid signature'], 400);
+        }
+
+        $webhookBody = $request->getContent();
         try {
             $data = json_decode($webhookBody, true);
-            Log::info("Flutterwave Webhook Data:", [$data]);
 
             if (!$data) {
                 throw new Exception('Invalid webhook payload');
@@ -664,11 +729,13 @@ class SubscriptionWebhookController extends Controller
     public function paystack(Request $request)
     {
         Log::info('Paystack Webhook Called');
-        
-        $webhookBody = file_get_contents('php://input');
+        if (!$this->paystackSignatureIsValid($request)) {
+            return response()->json(['status' => 'invalid signature'], 400);
+        }
+
+        $webhookBody = $request->getContent();
         try {
             $data = json_decode($webhookBody, true);
-            Log::info("Paystack Webhook Data:", [$data]);
 
             if (!$data) {
                 throw new Exception('Invalid webhook payload');

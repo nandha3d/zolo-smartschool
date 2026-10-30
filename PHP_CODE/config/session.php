@@ -46,7 +46,9 @@ return [
     |
     */
 
-    'encrypt' => false,
+    // On by default: sessions hold the tenant DB name and the selected child.
+    // Turning it on logs existing users out once (old plain sessions can't be decrypted).
+    'encrypt' => env('SESSION_ENCRYPT', true),
 
     /*
     |--------------------------------------------------------------------------

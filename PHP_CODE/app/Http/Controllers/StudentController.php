@@ -605,7 +605,10 @@ class StudentController extends Controller
         ResponseService::noPermissionThenRedirect('student-list');
         $validator = Validator::make(
             $request->all(),
-            ['roll_number_data.*.roll_number' => 'required',],
+            [
+                'roll_number_data.*.roll_number' => 'required|string|max:64',
+                'roll_number_data.*.sequence'    => 'nullable|integer|min:0',
+            ],
             ['roll_number_data.*.roll_number.required' => trans('please_fill_all_roll_numbers_data')]
         );
         if ($validator->fails()) {
@@ -614,8 +617,17 @@ class StudentController extends Controller
         try {
             DB::beginTransaction();
             foreach ($request->roll_number_data as $data) {
+                // roll_number must stay an integer (apps cast it, lists sort on it). The typed
+                // value may carry a prefix like "CL1A07", so it is kept as the display label.
+                $label = trim((string)$data['roll_number']);
+                if (preg_match('/(\d+)\D*$/', $label, $m)) {
+                    $number = (int)$m[1];
+                } else {
+                    $number = isset($data['sequence']) && $data['sequence'] !== '' ? (int)$data['sequence'] : null;
+                }
                 $updateRollNumberData = array(
-                    'roll_number' => $data['roll_number']
+                    'roll_number' => $number,
+                    'roll_number_label' => ctype_digit($label) ? null : $label,
                 );
 
                 // validation required when the edit of roll number is enabled
@@ -712,13 +724,15 @@ class StudentController extends Controller
                 $tempRow = $row->toArray();
                 $tempRow['no'] = $no++;
                 $tempRow['student_id'] = $row->student->id;
-                $tempRow['old_roll_number'] = $row->student->roll_number;
+                $tempRow['old_roll_number'] = e($row->student->roll_number_label ?? $row->student->roll_number);
 
                 $currentSeq = $startNumber + $index;
                 $paddedNum = ($digits > 0) ? str_pad((string)$currentSeq, $digits, '0', STR_PAD_LEFT) : (string)$currentSeq;
                 $fullRoll = $prefix . $paddedNum;
 
+                // sequence is the integer roll_number; the text box is only the display label.
                 $tempRow['new_roll_number'] = "<input type='hidden' name='roll_number_data[" . $index . "][student_id]' value='" . $row->student->id . "'>" .
+                    "<input type='hidden' name='roll_number_data[" . $index . "][sequence]' value='" . $currentSeq . "'>" .
                     "<input type='text' name='roll_number_data[" . $index . "][roll_number]' class='form-control form-control-sm font-weight-bold text-primary roll-number-input' style='max-width:130px;min-width:90px;height:34px;background:#FFFFFF;border:1.5px solid #CBD5E1;border-radius:6px;padding:4px 8px;font-size:13px;' value='" . htmlspecialchars($fullRoll) . "'>";
 
                 $tempRow['user_id'] = $row->id;

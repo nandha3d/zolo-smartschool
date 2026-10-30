@@ -52,7 +52,7 @@ class LanguageController extends Controller
         ResponseService::noPermissionThenRedirect('language-create');
         $request->validate([
             'name' => 'required',
-            'code' => 'required|unique:languages,code',
+            'code' => ['required', 'regex:/^[A-Za-z]{2,3}([_-][A-Za-z0-9]{2,8})?$/', 'unique:languages,code'],
             'file' => 'required|mimes:json',
         ]);
 
@@ -60,7 +60,7 @@ class LanguageController extends Controller
 
             if ($request->hasFile('file')) {
                 $file = $request->file('file');
-                $filename = $request->code . '.' . $file->getClientOriginalExtension();
+                $filename = $request->code . '.json';
                 $file->move(base_path('resources/lang/'), $filename);
             }
 
@@ -136,7 +136,7 @@ class LanguageController extends Controller
         ResponseService::noPermissionThenRedirect('language-edit');
         $request->validate([
             'name' => 'required',
-            'code' => 'required|unique:languages,code,' . $id,
+            'code' => ['required', 'regex:/^[A-Za-z]{2,3}([_-][A-Za-z0-9]{2,8})?$/', 'unique:languages,code,' . $id],
             'file' => 'required|mimes:json',
         ]);
 
@@ -154,7 +154,7 @@ class LanguageController extends Controller
                     File::delete(base_path("resources/lang/") . $languageDB->file);
                 }
                 $file = $request->file('file');
-                $filename = $request->code . '.' . $file->getClientOriginalExtension();
+                $filename = $request->code . '.json';
                 $file->move(base_path('resources/lang/'), $filename);
                 //                $language['file'] = $filename;
             }
@@ -203,6 +203,9 @@ class LanguageController extends Controller
 
     public function language_file($code = null)
     {
+        if (!is_string($code) || !preg_match('/^[A-Za-z]{2,3}([_-][A-Za-z0-9]{2,8})?$/', $code)) {
+            return redirect()->back()->with('error', 'No file found.');
+        }
         try {
             $filePath = base_path("resources/lang");
             $filePath .= '/' . $code . '.json';

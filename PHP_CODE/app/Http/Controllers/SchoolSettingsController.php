@@ -240,14 +240,17 @@ class SchoolSettingsController extends Controller
                             $studentArray[] = array(
                                 'id' => $student->id,
                                 'class_section_id' => $student->class_section_id,
-                                'roll_number' => $classPrefix . $numStr
+                                // roll_number stays an integer (apps parse it as int and lists sort on it);
+                                // the prefixed / padded form is only a display label.
+                                'roll_number' => $num,
+                                'roll_number_label' => $classPrefix . $numStr
                             );
                         }
                     }
                 }
 
                 // Update Roll Number Of Students
-                $this->student->upsert($studentArray, ['id'], ['roll_number']);
+                $this->student->upsert($studentArray, ['id'], ['roll_number', 'roll_number_label']);
 
             }
             DB::commit();

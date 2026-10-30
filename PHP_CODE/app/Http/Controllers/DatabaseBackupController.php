@@ -197,6 +197,7 @@ class DatabaseBackupController extends Controller
 
     public function restore(Request $request)
     {
+        ResponseService::noPermissionThenSendJson('database-backup');
         $validator = Validator::make($request->all(), [
             'zip_file' => 'required|file|mimes:zip',
         ]);
@@ -234,20 +235,33 @@ class DatabaseBackupController extends Controller
         }
 
         try {
-            $this->replaceMedia($zip, $ownerId, $mediaEntries);
-            $zip->close();
+            // TRUNCATE and CREATE TABLE commit implicitly in MySQL, so a failed restore used
+            // to leave the school with empty tables. Create any missing tables first (no-ops
+            // for existing ones), then swap the rows inside one transaction with DELETE so a
+            // failure rolls back to the data that was there before.
+            [$createStatements, $insertStatements] = collect($statements)
+                ->partition(fn ($s) => str_starts_with($s, 'CREATE TABLE IF NOT EXISTS'));
 
             DB::statement("SET FOREIGN_KEY_CHECKS = 0");
             try {
-                foreach (array_diff($currentTables, $excludedTables) as $table) {
-                    DB::table($table)->truncate();
-                }
-                foreach ($statements as $statement) {
+                foreach ($createStatements as $statement) {
                     DB::unprepared($statement);
                 }
+                DB::transaction(function () use ($currentTables, $excludedTables, $insertStatements) {
+                    foreach (array_diff($currentTables, $excludedTables) as $table) {
+                        DB::table($table)->delete();
+                    }
+                    foreach ($insertStatements as $statement) {
+                        DB::unprepared($statement);
+                    }
+                });
             } finally {
                 DB::statement("SET FOREIGN_KEY_CHECKS = 1");
             }
+
+            // Only replace files once the database restore has committed.
+            $this->replaceMedia($zip, $ownerId, $mediaEntries);
+            $zip->close();
 
             if ($backupType === 'schools') {
                 // add school current version migration

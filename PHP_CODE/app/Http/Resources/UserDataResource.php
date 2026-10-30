@@ -43,6 +43,7 @@ class UserDataResource extends JsonResource
                 'last_name'         => $this->last_name,
                 'mobile'            => $this->mobile,
                 'roll_number'       => $this->student->roll_number,
+                'roll_number_label' => $this->student->roll_number_label,
                 'admission_no'      => $this->student->admission_no,
                 'admission_date'    => $this->student->admission_date,
                 'gender'            => $this->gender,

@@ -29,6 +29,7 @@ class StudentLeadershipController extends Controller
      */
     public function index()
     {
+        ResponseService::noPermissionThenRedirect('student-list');
         $request = request();
         $sessionYear = $this->cache->getDefaultSessionYear();
         $class_sections = ClassSection::owner()->with(['class', 'section', 'medium'])->get();
@@ -76,6 +77,7 @@ class StudentLeadershipController extends Controller
      */
     public function getStudentsByClassSection($id)
     {
+        ResponseService::noPermissionThenSendJson('student-list');
         $sessionYear = $this->cache->getDefaultSessionYear();
         $students = Students::owner()
             ->where('class_section_id', $id)
@@ -102,6 +104,7 @@ class StudentLeadershipController extends Controller
      */
     public function assignRole(Request $request)
     {
+        ResponseService::noPermissionThenSendJson('student-edit');
         $validator = Validator::make($request->all(), [
             'class_section_id' => 'required|numeric',
             'student_id' => 'required|numeric',
@@ -115,19 +118,24 @@ class StudentLeadershipController extends Controller
             return ResponseService::validationError($validator->errors()->first());
         }
 
+        $sessionYear = $this->cache->getDefaultSessionYear();
+        if (!$this->studentsBelongToSection([$request->student_id], $request->class_section_id, $sessionYear->id)) {
+            ResponseService::validationError('Selected student does not belong to this class section.');
+        }
+
         try {
             DB::beginTransaction();
-            $sessionYear = $this->cache->getDefaultSessionYear();
             $schoolId = Auth::user()->school_id;
 
-            // If class_leader or vice_class_leader, can optionally deactivate previous holder of same specific role title in section
+            // A section has one active class leader and one vice leader: retire the previous
+            // holder whatever title they were given, keeping the row as history.
             if (in_array($request->role_type, ['class_leader', 'vice_class_leader'])) {
                 StudentLeadershipRole::where('school_id', $schoolId)
                     ->where('session_year_id', $sessionYear->id)
                     ->where('class_section_id', $request->class_section_id)
                     ->where('role_type', $request->role_type)
-                    ->where('title', $request->title)
-                    ->update(['is_active' => false]);
+                    ->where('is_active', true)
+                    ->update(['is_active' => false, 'valid_until' => now()->toDateString()]);
             }
 
             $badgeIcon = $request->badge_icon ?: match ($request->role_type) {
@@ -167,25 +175,31 @@ class StudentLeadershipController extends Controller
             ]);
 
             DB::commit();
-            return ResponseService::successResponse('Student leadership role successfully assigned.');
         } catch (Throwable $e) {
             DB::rollBack();
-            return ResponseService::errorResponse('Failed to assign leadership role: ' . $e->getMessage());
+            ResponseService::logErrorResponse($e, 'StudentLeadershipController -> assignRole');
+            ResponseService::errorResponse('Failed to assign leadership role.');
         }
+        ResponseService::successResponse('Student leadership role successfully assigned.');
     }
 
     /**
-     * Remove / deactivate a leadership role.
+     * Remove / deactivate a leadership role. The row is kept (inactive) as history.
      */
     public function removeRole($id)
     {
-        try {
-            $role = StudentLeadershipRole::owner()->findOrFail($id);
-            $role->delete();
-            return ResponseService::successResponse('Leadership role removed successfully.');
-        } catch (Throwable $e) {
-            return ResponseService::errorResponse('Failed to remove role: ' . $e->getMessage());
+        ResponseService::noPermissionThenSendJson('student-edit');
+        $role = StudentLeadershipRole::owner()->find($id);
+        if (!$role) {
+            ResponseService::errorResponse('Leadership role not found.');
         }
+        try {
+            $role->update(['is_active' => false, 'valid_until' => now()->toDateString()]);
+        } catch (Throwable $e) {
+            ResponseService::logErrorResponse($e, 'StudentLeadershipController -> removeRole');
+            ResponseService::errorResponse('Failed to remove role.');
+        }
+        ResponseService::successResponse('Leadership role removed successfully.');
     }
 
     /**
@@ -193,6 +207,7 @@ class StudentLeadershipController extends Controller
      */
     public function storeGroup(Request $request)
     {
+        ResponseService::noPermissionThenSendJson('student-edit');
         $validator = Validator::make($request->all(), [
             'class_section_id' => 'required|numeric',
             'name' => 'required|string|max:191',
@@ -208,9 +223,25 @@ class StudentLeadershipController extends Controller
             return ResponseService::validationError($validator->errors()->first());
         }
 
+        $sessionYear = $this->cache->getDefaultSessionYear();
+
+        // Leader and vice leader are always members of their own group.
+        $memberIds = collect($request->student_ids ?? [])
+            ->push($request->leader_student_id, $request->vice_leader_student_id)
+            ->filter()
+            ->map(fn ($id) => (int)$id)
+            ->unique()
+            ->values()
+            ->all();
+        if (!empty($memberIds) && !$this->studentsBelongToSection($memberIds, $request->class_section_id, $sessionYear->id)) {
+            ResponseService::validationError('All group members must belong to the selected class section.');
+        }
+        if ($request->leader_student_id && $request->leader_student_id == $request->vice_leader_student_id) {
+            ResponseService::validationError('Leader and vice leader must be different students.');
+        }
+
         try {
             DB::beginTransaction();
-            $sessionYear = $this->cache->getDefaultSessionYear();
             $schoolId = Auth::user()->school_id;
 
             $group = StudentGroup::create([
@@ -249,37 +280,73 @@ class StudentLeadershipController extends Controller
             }
 
             // Attach group members
-            if (!empty($request->student_ids) && is_array($request->student_ids)) {
-                foreach ($request->student_ids as $stId) {
-                    StudentGroupMember::create([
-                        'student_group_id' => $group->id,
-                        'student_id' => $stId,
-                        'bench_number' => $request->bench_number,
-                        'role_in_group' => ($stId == $request->leader_student_id) ? 'leader' : 'member',
-                        'joined_at' => now()->toDateString(),
-                    ]);
-                }
+            foreach ($memberIds as $stId) {
+                StudentGroupMember::create([
+                    'student_group_id' => $group->id,
+                    'student_id' => $stId,
+                    'bench_number' => $request->bench_number,
+                    'role_in_group' => match (true) {
+                        $stId == $request->leader_student_id => 'leader',
+                        $stId == $request->vice_leader_student_id => 'vice_leader',
+                        default => 'member',
+                    },
+                    'joined_at' => now()->toDateString(),
+                ]);
             }
 
             DB::commit();
-            return ResponseService::successResponse('Student group successfully created with assigned leader.');
         } catch (Throwable $e) {
             DB::rollBack();
-            return ResponseService::errorResponse('Failed to create group: ' . $e->getMessage());
+            ResponseService::logErrorResponse($e, 'StudentLeadershipController -> storeGroup');
+            ResponseService::errorResponse('Failed to create group.');
         }
+        ResponseService::successResponse('Student group successfully created with assigned leader.');
     }
 
     /**
-     * Delete a student group.
+     * Delete a student group and retire the leader badge it awarded.
      */
     public function deleteGroup($id)
     {
-        try {
-            $group = StudentGroup::owner()->findOrFail($id);
-            $group->delete();
-            return ResponseService::successResponse('Student group deleted successfully.');
-        } catch (Throwable $e) {
-            return ResponseService::errorResponse('Failed to delete group: ' . $e->getMessage());
+        ResponseService::noPermissionThenSendJson('student-delete');
+        $group = StudentGroup::owner()->find($id);
+        if (!$group) {
+            ResponseService::errorResponse('Student group not found.');
         }
+        try {
+            DB::beginTransaction();
+            if ($group->leader_student_id) {
+                StudentLeadershipRole::where('school_id', $group->school_id)
+                    ->where('session_year_id', $group->session_year_id)
+                    ->where('class_section_id', $group->class_section_id)
+                    ->where('student_id', $group->leader_student_id)
+                    ->whereIn('role_type', ['group_leader', 'bench_leader'])
+                    ->where('title', $group->name . ' Leader')
+                    ->where('is_active', true)
+                    ->update(['is_active' => false, 'valid_until' => now()->toDateString()]);
+            }
+            $group->delete();
+            DB::commit();
+        } catch (Throwable $e) {
+            DB::rollBack();
+            ResponseService::logErrorResponse($e, 'StudentLeadershipController -> deleteGroup');
+            ResponseService::errorResponse('Failed to delete group.');
+        }
+        ResponseService::successResponse('Student group deleted successfully.');
+    }
+
+    /**
+     * True when every id is a student of this school enrolled in the class section for the session.
+     */
+    private function studentsBelongToSection(array $studentIds, $classSectionId, $sessionYearId): bool
+    {
+        $studentIds = array_values(array_unique(array_map('intval', $studentIds)));
+        $found = Students::owner()
+            ->whereIn('id', $studentIds)
+            ->where('class_section_id', $classSectionId)
+            ->where('session_year_id', $sessionYearId)
+            ->count();
+
+        return $found === count($studentIds);
     }
 }

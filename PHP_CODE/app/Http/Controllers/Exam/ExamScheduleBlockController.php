@@ -33,6 +33,8 @@ class ExamScheduleBlockController extends Controller
      */
     public function index()
     {
+        ResponseService::noFeatureThenRedirect('Exam Management');
+        ResponseService::noPermissionThenRedirect('exam-list');
         $request = request();
         $sessionYear = $this->cache->getDefaultSessionYear();
         $schoolId = Auth::user()->school_id;
@@ -84,6 +86,8 @@ class ExamScheduleBlockController extends Controller
      */
     public function store(Request $request)
     {
+        ResponseService::noFeatureThenSendJson('Exam Management');
+        ResponseService::noPermissionThenSendJson('exam-create');
         $validator = Validator::make($request->all(), [
             'exam_id' => 'required|numeric',
             'class_section_id' => 'required|numeric',
@@ -92,26 +96,79 @@ class ExamScheduleBlockController extends Controller
             'subject_id' => 'nullable|numeric',
             'start_period_id' => 'nullable|numeric',
             'end_period_id' => 'nullable|numeric',
-            'custom_start_time' => 'nullable',
-            'custom_end_time' => 'nullable',
+            'custom_start_time' => 'nullable|date_format:H:i,H:i:s',
+            'custom_end_time' => 'nullable|date_format:H:i,H:i:s',
             'exam_incharge_staff_id' => 'nullable|numeric',
-            'assistant_incharge_staff_id' => 'nullable|numeric',
+            'assistant_incharge_staff_id' => 'nullable|numeric|different:exam_incharge_staff_id',
             'hall_or_resource_id' => 'nullable|numeric',
-            'total_marks' => 'nullable|numeric',
-            'passing_marks' => 'nullable|numeric',
+            'total_marks' => 'nullable|numeric|min:0',
+            'passing_marks' => 'nullable|numeric|min:0|lte:total_marks',
             'instructions' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
-            return ResponseService::validationError($validator->errors()->first());
+            ResponseService::validationError($validator->errors()->first());
+        }
+
+        $sessionYear = $this->cache->getDefaultSessionYear();
+        $schoolId = Auth::user()->school_id;
+
+        $exam = Exam::owner()->where('session_year_id', $sessionYear->id)->find($request->exam_id);
+        $classSection = ClassSection::owner()->find($request->class_section_id);
+        if (!$exam || !$classSection) {
+            ResponseService::validationError('Invalid exam or class section.');
+        }
+
+        $periods = TimetablePeriod::owner()->get()->keyBy('id');
+        [$start, $end] = $this->blockWindow(
+            $request->custom_start_time,
+            $request->custom_end_time,
+            $request->start_period_id,
+            $request->end_period_id,
+            $periods
+        );
+        if ($start >= $end) {
+            ResponseService::validationError('End time must be after start time.');
+        }
+
+        // A class, a hall and an invigilator can each only be in one block at a time.
+        $staffIds = array_filter([(int)$request->exam_incharge_staff_id, (int)$request->assistant_incharge_staff_id]);
+        $sameDay = ExamScheduleBlock::owner()
+            ->whereDate('date', $request->date)
+            ->where(function ($q) use ($request, $staffIds) {
+                $q->where('class_section_id', $request->class_section_id);
+                if ($request->hall_or_resource_id) {
+                    $q->orWhere('hall_or_resource_id', $request->hall_or_resource_id);
+                }
+                if (!empty($staffIds)) {
+                    $q->orWhereIn('exam_incharge_staff_id', $staffIds)
+                        ->orWhereIn('assistant_incharge_staff_id', $staffIds);
+                }
+            })
+            ->get();
+
+        foreach ($sameDay as $existing) {
+            [$exStart, $exEnd] = $this->blockWindow(
+                $existing->custom_start_time,
+                $existing->custom_end_time,
+                $existing->start_period_id,
+                $existing->end_period_id,
+                $periods
+            );
+            if ($start >= $exEnd || $end <= $exStart) {
+                continue;
+            }
+            if ($existing->class_section_id == $request->class_section_id) {
+                ResponseService::validationError('This class already has a block scheduled at that time.');
+            }
+            if ($request->hall_or_resource_id && $existing->hall_or_resource_id == $request->hall_or_resource_id) {
+                ResponseService::validationError('This hall / room is already booked at that time.');
+            }
+            ResponseService::validationError('The selected invigilator is already assigned to another block at that time.');
         }
 
         try {
             DB::beginTransaction();
-            $sessionYear = $this->cache->getDefaultSessionYear();
-            $schoolId = Auth::user()->school_id;
-
-            $classSection = ClassSection::findOrFail($request->class_section_id);
 
             ExamScheduleBlock::create([
                 'school_id' => $schoolId,
@@ -135,11 +192,12 @@ class ExamScheduleBlockController extends Controller
             ]);
 
             DB::commit();
-            return ResponseService::successResponse('Exam schedule block added successfully.');
         } catch (Throwable $e) {
             DB::rollBack();
-            return ResponseService::errorResponse('Failed to create block: ' . $e->getMessage());
+            ResponseService::logErrorResponse($e, 'ExamScheduleBlockController -> store');
+            ResponseService::errorResponse('Failed to create block.');
         }
+        ResponseService::successResponse('Exam schedule block added successfully.');
     }
 
     /**
@@ -147,12 +205,33 @@ class ExamScheduleBlockController extends Controller
      */
     public function destroy($id)
     {
-        try {
-            $block = ExamScheduleBlock::owner()->findOrFail($id);
-            $block->delete();
-            return ResponseService::successResponse('Schedule block deleted successfully.');
-        } catch (Throwable $e) {
-            return ResponseService::errorResponse('Failed to delete block: ' . $e->getMessage());
+        ResponseService::noFeatureThenSendJson('Exam Management');
+        ResponseService::noPermissionThenSendJson('exam-delete');
+        $block = ExamScheduleBlock::owner()->find($id);
+        if (!$block) {
+            ResponseService::errorResponse('Schedule block not found.');
         }
+        try {
+            $block->delete();
+        } catch (Throwable $e) {
+            ResponseService::logErrorResponse($e, 'ExamScheduleBlockController -> destroy');
+            ResponseService::errorResponse('Failed to delete block.');
+        }
+        ResponseService::successResponse('Schedule block deleted successfully.');
+    }
+
+    /**
+     * Time window of a block as "HH:MM:SS" strings: custom times win, then the period
+     * range, and a block with neither occupies the whole day.
+     */
+    private function blockWindow($customStart, $customEnd, $startPeriodId, $endPeriodId, $periods): array
+    {
+        $normalize = static fn ($t) => $t ? date('H:i:s', strtotime($t)) : null;
+
+        $start = $normalize($customStart) ?? $normalize($periods->get($startPeriodId)?->start_time);
+        $end = $normalize($customEnd)
+            ?? $normalize($periods->get($endPeriodId ?: $startPeriodId)?->end_time);
+
+        return [$start ?? '00:00:00', $end ?? '23:59:59'];
     }
 }
