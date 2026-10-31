@@ -418,4 +418,44 @@ class RouteVehicleController extends Controller
             ResponseService::errorResponse();
         }
     }
+
+    public function getRouteTimings($routeId)
+    {
+        ResponseService::noAnyPermissionThenSendJson(['RouteVehicle-list', 'route-list']);
+        $route = Route::with('routePickupPoints')->find($routeId);
+        if (!$route) {
+            return response()->json(['error' => true, 'message' => 'Route not found'], 404);
+        }
+
+        $stops = $route->routePickupPoints;
+        if ($stops->isEmpty()) {
+            return response()->json([
+                'error' => false,
+                'has_stops' => false,
+                'pickup_trip_start_time' => '07:00',
+                'pickup_trip_end_time'   => '08:30',
+                'drop_trip_start_time'   => '15:00',
+                'drop_trip_end_time'     => '16:30',
+            ]);
+        }
+
+        $earliestPickup = $stops->min('pickup_time');
+        $latestPickup   = $stops->max('pickup_time');
+        $earliestDrop   = $stops->min('drop_time');
+        $latestDrop     = $stops->max('drop_time');
+
+        $pickupStart = $earliestPickup ? Carbon::parse($earliestPickup)->subMinutes(10)->format('H:i') : '07:00';
+        $pickupEnd   = $latestPickup ? Carbon::parse($latestPickup)->addMinutes(10)->format('H:i') : '08:30';
+        $dropStart   = $earliestDrop ? Carbon::parse($earliestDrop)->subMinutes(10)->format('H:i') : '15:00';
+        $dropEnd     = $latestDrop ? Carbon::parse($latestDrop)->addMinutes(10)->format('H:i') : '16:30';
+
+        return response()->json([
+            'error'                  => false,
+            'has_stops'              => true,
+            'pickup_trip_start_time' => $pickupStart,
+            'pickup_trip_end_time'   => $pickupEnd,
+            'drop_trip_start_time'   => $dropStart,
+            'drop_trip_end_time'     => $dropEnd,
+        ]);
+    }
 }

@@ -8,7 +8,10 @@ use App\Http\Controllers\Controller;
 use App\Models\PickupPoint;
 use App\Models\Route;
 use App\Models\RoutePickupPoint;
+use App\Models\RouteVehicle;
 use App\Models\TransportationPayment;
+use App\Models\User;
+use App\Models\Vehicle;
 use App\Services\ResponseService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -33,8 +36,15 @@ class GpsRouteController extends Controller
 
         $routes = Route::with(['routePickupPoints.pickupPoint', 'shift'])->get();
         $pickupPoints = PickupPoint::where('status', 1)->orderBy('name')->get(['id', 'name', 'latitude', 'longitude']);
+        $vehicles = Vehicle::where('status', 1)->orderBy('name')->get();
+        $drivers = User::builder()
+            ->whereHas('roles', fn ($q) => $q->where('name', 'Driver'))
+            ->with('staff')->get();
+        $helpers = User::builder()
+            ->whereHas('roles', fn ($q) => $q->where('name', 'Helper'))
+            ->with('staff')->get();
 
-        return view('gpstransport::route-builder', compact('routes', 'pickupPoints'));
+        return view('gpstransport::route-builder', compact('routes', 'pickupPoints', 'vehicles', 'drivers', 'helpers'));
     }
 
     /**
@@ -80,6 +90,27 @@ class GpsRouteController extends Controller
             ->sortBy(fn ($s) => $s['morning_order'] ?? PHP_INT_MAX)
             ->values();
 
+        $assignedVehicles = RouteVehicle::with(['vehicle', 'driver', 'helper'])
+            ->where('route_id', $route->id)
+            ->get()
+            ->map(function ($rv) {
+                return [
+                    'id'                     => $rv->id,
+                    'vehicle_id'             => $rv->vehicle_id,
+                    'vehicle_name'           => $rv->vehicle?->name ?? 'Vehicle',
+                    'vehicle_number'         => $rv->vehicle?->vehicle_number ?? '-',
+                    'driver_id'              => $rv->driver_id,
+                    'driver_name'            => $rv->driver?->full_name ?? ($rv->driver?->first_name ? $rv->driver->first_name . ' ' . $rv->driver->last_name : 'No Driver Assigned'),
+                    'driver_phone'           => $rv->driver?->mobile ?? $rv->driver?->phone ?? '-',
+                    'helper_id'              => $rv->helper_id,
+                    'helper_name'            => $rv->helper?->full_name ?? ($rv->helper?->first_name ? $rv->helper->first_name . ' ' . $rv->helper->last_name : '-'),
+                    'pickup_trip_start_time' => $rv->pickup_start_time ? substr($rv->pickup_start_time, 0, 5) : null,
+                    'pickup_trip_end_time'   => $rv->pickup_end_time ? substr($rv->pickup_end_time, 0, 5) : null,
+                    'drop_trip_start_time'   => $rv->drop_start_time ? substr($rv->drop_start_time, 0, 5) : null,
+                    'drop_trip_end_time'     => $rv->drop_end_time ? substr($rv->drop_end_time, 0, 5) : null,
+                ];
+            });
+
         return response()->json([
             'error'  => false,
             'route'  => [
@@ -89,6 +120,7 @@ class GpsRouteController extends Controller
                 'start_landmark' => $route->start_landmark,
                 'end_landmark'   => $route->end_landmark,
             ],
+            'assigned_vehicles' => $assignedVehicles,
             'stops'    => $stops,
             'geometry' => $geometry ? ($geometry->waypoints_json ?? []) : [],
         ]);
@@ -238,5 +270,99 @@ class GpsRouteController extends Controller
         Route::where('id', $request->input('route_id'))->update(['distance' => $distance]);
 
         return response()->json(['error' => false, 'message' => 'Route geometry saved successfully']);
+    }
+
+    /**
+     * Assign vehicle, driver, and helper to the route with automatic trip timing calculation.
+     */
+    public function assignVehicle(Request $request, $routeId): JsonResponse
+    {
+        ResponseService::noFeatureThenSendJson(GpsTransportServiceProvider::FEATURE);
+        ResponseService::noAnyPermissionThenSendJson(['route-edit', 'RouteVehicle-create']);
+
+        $validator = Validator::make($request->all(), [
+            'vehicle_id'             => 'required|integer|exists:vehicles,id',
+            'driver_id'              => 'nullable|integer|exists:users,id',
+            'helper_id'              => 'nullable|integer|exists:users,id',
+            'pickup_trip_start_time' => 'nullable|date_format:H:i',
+            'pickup_trip_end_time'   => 'nullable|date_format:H:i',
+            'drop_trip_start_time'   => 'nullable|date_format:H:i',
+            'drop_trip_end_time'     => 'nullable|date_format:H:i',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['error' => true, 'message' => $validator->errors()->first()], 422);
+        }
+
+        $route = Route::with('routePickupPoints')->find($routeId);
+        if (!$route) {
+            return response()->json(['error' => true, 'message' => 'Route not found'], 404);
+        }
+
+        $stops = $route->routePickupPoints;
+        $earliestPickup = $stops->min('pickup_time');
+        $latestPickup   = $stops->max('pickup_time');
+        $earliestDrop   = $stops->min('drop_time');
+        $latestDrop     = $stops->max('drop_time');
+
+        $pStart = $request->pickup_trip_start_time ?: ($earliestPickup ? Carbon::parse($earliestPickup)->subMinutes(10)->format('H:i') : '07:00');
+        $pEnd   = $request->pickup_trip_end_time ?: ($latestPickup ? Carbon::parse($latestPickup)->addMinutes(10)->format('H:i') : '08:30');
+        $dStart = $request->drop_trip_start_time ?: ($earliestDrop ? Carbon::parse($earliestDrop)->subMinutes(10)->format('H:i') : '15:00');
+        $dEnd   = $request->drop_trip_end_time ?: ($latestDrop ? Carbon::parse($latestDrop)->addMinutes(10)->format('H:i') : '16:30');
+
+        $rv = RouteVehicle::updateOrCreate(
+            ['route_id' => $route->id, 'vehicle_id' => $request->vehicle_id],
+            [
+                'driver_id'          => $request->driver_id ?: null,
+                'helper_id'          => $request->helper_id ?: null,
+                'status'             => 1,
+                'pickup_start_time'  => $pStart,
+                'pickup_end_time'    => $pEnd,
+                'drop_start_time'    => $dStart,
+                'drop_end_time'      => $dEnd,
+            ]
+        );
+
+        $rv->load(['vehicle', 'driver', 'helper']);
+
+        return response()->json([
+            'error'      => false,
+            'message'    => 'Vehicle successfully assigned to route!',
+            'assignment' => [
+                'id'                     => $rv->id,
+                'vehicle_id'             => $rv->vehicle_id,
+                'vehicle_name'           => $rv->vehicle?->name ?? 'Vehicle',
+                'vehicle_number'         => $rv->vehicle?->vehicle_number ?? '-',
+                'driver_id'              => $rv->driver_id,
+                'driver_name'            => $rv->driver?->full_name ?? ($rv->driver?->first_name ? $rv->driver->first_name . ' ' . $rv->driver->last_name : 'No Driver Assigned'),
+                'driver_phone'           => $rv->driver?->mobile ?? $rv->driver?->phone ?? '-',
+                'helper_id'              => $rv->helper_id,
+                'helper_name'            => $rv->helper?->full_name ?? ($rv->helper?->first_name ? $rv->helper->first_name . ' ' . $rv->helper->last_name : '-'),
+                'pickup_trip_start_time' => $rv->pickup_start_time ? substr($rv->pickup_start_time, 0, 5) : null,
+                'pickup_trip_end_time'   => $rv->pickup_end_time ? substr($rv->pickup_end_time, 0, 5) : null,
+                'drop_trip_start_time'   => $rv->drop_start_time ? substr($rv->drop_start_time, 0, 5) : null,
+                'drop_trip_end_time'     => $rv->drop_end_time ? substr($rv->drop_end_time, 0, 5) : null,
+            ],
+        ]);
+    }
+
+    /**
+     * Remove a vehicle assignment from the route.
+     */
+    public function unassignVehicle($routeId, $assignmentId): JsonResponse
+    {
+        ResponseService::noFeatureThenSendJson(GpsTransportServiceProvider::FEATURE);
+        ResponseService::noAnyPermissionThenSendJson(['route-edit', 'RouteVehicle-delete']);
+
+        $rv = RouteVehicle::where('route_id', $routeId)->find($assignmentId);
+        if (!$rv) {
+            return response()->json(['error' => true, 'message' => 'Assignment not found'], 404);
+        }
+
+        $rv->delete();
+
+        return response()->json([
+            'error'   => false,
+            'message' => 'Vehicle removed from route.',
+        ]);
     }
 }

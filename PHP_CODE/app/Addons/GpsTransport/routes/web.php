@@ -41,6 +41,8 @@ Route::middleware([
     Route::get('routes/{id}/data', [GpsRouteController::class, 'getRouteData'])->name('gps.routes.data');
     Route::post('routes/save-geometry', [GpsRouteController::class, 'saveGeometry'])->name('gps.routes.save-geometry');
     Route::post('routes/save', [GpsRouteController::class, 'saveRoute'])->name('gps.routes.save');
+    Route::post('routes/{id}/assign-vehicle', [GpsRouteController::class, 'assignVehicle'])->name('gps.routes.assign-vehicle');
+    Route::delete('routes/{id}/vehicles/{assignmentId}', [GpsRouteController::class, 'unassignVehicle'])->name('gps.routes.unassign-vehicle');
 
     // 4. Trip Management
     Route::get('trips', [GpsTripController::class, 'index'])->name('gps.trips.index');
