@@ -247,5 +247,33 @@
 @endsection
 
 @section('js')
-    {{-- JS to handle AJAX operations --}}
+    <script>
+        $(document).ready(function () {
+            function autoFillRouteTimings(routeId, prefix) {
+                if (!routeId) return;
+                var url = "{{ url('route-vehicle/route-timings') }}/" + routeId;
+                $.get(url, function (res) {
+                    if (!res.error) {
+                        var pStartInput = prefix ? $('input[name="' + prefix + 'pickup_trip_start_time"]') : $('input[name="pickup_trip_start_time"]');
+                        var pEndInput = prefix ? $('input[name="' + prefix + 'pickup_trip_end_time"]') : $('input[name="pickup_trip_end_time"]');
+                        var dStartInput = prefix ? $('input[name="' + prefix + 'drop_trip_start_time"]') : $('input[name="drop_trip_start_time"]');
+                        var dEndInput = prefix ? $('input[name="' + prefix + 'drop_trip_end_time"]') : $('input[name="drop_trip_end_time"]');
+
+                        pStartInput.val(res.pickup_trip_start_time);
+                        pEndInput.val(res.pickup_trip_end_time);
+                        dStartInput.val(res.drop_trip_start_time);
+                        dEndInput.val(res.drop_trip_end_time);
+                    }
+                });
+            }
+
+            $('#route_id').on('change', function () {
+                autoFillRouteTimings($(this).val(), '');
+            });
+
+            $('#edit_route_id').on('change', function () {
+                autoFillRouteTimings($(this).val(), 'edit_');
+            });
+        });
+    </script>
 @endsection

@@ -48,6 +48,51 @@
                                         <option value="0" {{ !$route->status ? 'selected' : '' }}>{{ __('Inactive') }}</option>
                                     </select>
                                 </div>
+
+                                <!-- Assign Vehicle (Optional) -->
+                                <div class="col-md-12 mb-3">
+                                    <div class="card border rounded p-3" style="background:#f8fafc;">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <h6 class="font-weight-bold mb-0 text-primary"><i class="fa fa-bus mr-1"></i>{{ __('Assign Vehicle & Staff') }}</h6>
+                                            <small class="text-muted">{{ __('Trip start/end times will automatically align with earliest and latest stops.') }}</small>
+                                        </div>
+                                        <div class="row">
+                                            <div class="form-group col-md-4 mb-2 mb-md-0">
+                                                <label class="text-xs text-muted mb-1">{{ __('Vehicle') }}</label>
+                                                <select name="vehicle_id" class="form-control form-control-sm">
+                                                    <option value="">{{ __('-- Select Vehicle --') }}</option>
+                                                    @foreach ($vehicles as $v)
+                                                        <option value="{{ $v->id }}" {{ (isset($assignedRouteVehicle) && $assignedRouteVehicle->vehicle_id == $v->id) ? 'selected' : '' }}>
+                                                            {{ $v->name }} {{ $v->vehicle_number ? '('.$v->vehicle_number.')' : '' }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="form-group col-md-4 mb-2 mb-md-0">
+                                                <label class="text-xs text-muted mb-1">{{ __('Driver') }}</label>
+                                                <select name="driver_id" class="form-control form-control-sm">
+                                                    <option value="">{{ __('-- Select Driver --') }}</option>
+                                                    @foreach ($drivers as $d)
+                                                        <option value="{{ $d->id }}" {{ (isset($assignedRouteVehicle) && $assignedRouteVehicle->driver_id == $d->id) ? 'selected' : '' }}>
+                                                            {{ $d->full_name }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="form-group col-md-4 mb-0">
+                                                <label class="text-xs text-muted mb-1">{{ __('Helper') }}</label>
+                                                <select name="helper_id" class="form-control form-control-sm">
+                                                    <option value="">{{ __('-- Select Helper --') }}</option>
+                                                    @foreach ($helpers as $h)
+                                                        <option value="{{ $h->id }}" {{ (isset($assignedRouteVehicle) && $assignedRouteVehicle->helper_id == $h->id) ? 'selected' : '' }}>
+                                                            {{ $h->full_name }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                             
                             <!-- Pickup Points Repeater Section -->

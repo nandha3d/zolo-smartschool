@@ -9,25 +9,31 @@
 <script src="{{ asset('assets/vendor/leaflet/leaflet.js') }}"></script>
 
 <style>
-    .builder-container { display: flex; height: calc(100vh - 160px); min-height: 620px; background: #fff; border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0; }
-    .builder-sidebar { width: 400px; background: #fafafa; border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; overflow-y: auto; }
+    .builder-container { display: flex; height: calc(100vh - 160px); min-height: 640px; background: #fff; border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0; }
+    .builder-sidebar { width: 420px; background: #fafafa; border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; overflow-y: auto; }
     .builder-map { flex: 1; position: relative; }
     #route-builder-map { width: 100%; height: 100%; }
-    .stop-item { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 10px; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between; }
+    .stop-item { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 10px; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between; transition: all .2s; }
     .stop-item.inactive { opacity: .55; }
-    .stop-item:hover { border-color: #3b82f6; }
+    .stop-item:hover { border-color: #3b82f6; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
     .stop-seq-badge { width: 24px; height: 24px; border-radius: 50%; background: #2563eb; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 11px; margin-right: 8px; flex-shrink: 0; }
     .afternoon .stop-seq-badge { background: #d97706; }
     .stop-actions .btn { padding: 1px 6px; }
     .builder-mode .btn.active { background: #2563eb; color: #fff; }
-    @media (max-width: 900px) { .builder-container { flex-direction: column; height: auto; } .builder-sidebar { width: 100%; } #route-builder-map { height: 480px; } }
+    .map-floating-search { position: absolute; top: 12px; left: 60px; z-index: 1000; width: 320px; }
+    .search-results-dropdown { max-height: 220px; overflow-y: auto; background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: none; }
+    .search-result-item { padding: 6px 10px; cursor: pointer; border-bottom: 1px solid #f1f5f9; font-size: 12px; }
+    .search-result-item:hover { background: #f8fafc; color: #2563eb; }
+    .stop-quick-popup .leaflet-popup-content-wrapper { padding: 8px; border-radius: 8px; }
+    .stop-quick-popup .leaflet-popup-content { margin: 4px; font-size: 12px; min-width: 230px; }
+    @media (max-width: 900px) { .builder-container { flex-direction: column; height: auto; } .builder-sidebar { width: 100%; } #route-builder-map { height: 480px; } .map-floating-search { width: calc(100% - 80px); } }
 </style>
 
 <div class="content-wrapper p-3">
     <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
         <div>
             <h4 class="mb-0 font-weight-bold text-dark"><i class="fa fa-map text-primary mr-2"></i>{{ __('Route Builder') }}</h4>
-            <small class="text-muted">{{ __('Place stops on the map, set geofence and halt time per stop, and order the morning pickup and afternoon drop separately.') }}</small>
+            <small class="text-muted">{{ __('Interactive stop placement, vehicle assignment, geofencing, and intelligent timing calculator.') }}</small>
         </div>
         <div class="mt-2">
             <button id="btn-save-route" class="btn btn-primary btn-sm" disabled><i class="fa fa-save mr-1"></i>{{ __('Save route') }}</button>
@@ -59,12 +65,26 @@
                     </div>
                 </div>
 
+                <!-- Assigned Vehicle & Driver Card -->
+                <div class="card border rounded p-2 mb-2 bg-white shadow-sm" id="route-vehicle-card">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="font-weight-bold text-xs text-uppercase text-muted"><i class="fa fa-bus text-primary mr-1"></i>{{ __('Assigned Vehicle') }}</span>
+                        <button type="button" class="btn btn-xs btn-outline-primary" id="btn-manage-vehicle"><i class="fa fa-pencil mr-1"></i>{{ __('Assign / Change') }}</button>
+                    </div>
+                    <div id="route-vehicle-info" class="text-xs">
+                        <span class="text-muted">{{ __('No vehicle assigned to this route yet.') }}</span>
+                    </div>
+                </div>
+
                 <div class="mb-2">
                     <span class="text-xs text-muted d-block mb-1">{{ __('Clicking the map will') }}</span>
                     <div class="btn-group btn-group-sm builder-mode w-100" role="group">
                         <button type="button" class="btn btn-outline-primary active" data-mode="stop"><i class="fa fa-map-marker mr-1"></i>{{ __('Add a stop') }}</button>
                         <button type="button" class="btn btn-outline-primary" data-mode="path"><i class="fa fa-pencil mr-1"></i>{{ __('Add a path point') }}</button>
                     </div>
+                    <small class="text-muted d-block mt-1" style="font-size:11px;">
+                        <i class="fa fa-info-circle text-info mr-1"></i>{{ __('Tip: Click anywhere on the map to drop a stop instantly with auto-timing!') }}
+                    </small>
                 </div>
 
                 <div class="input-group input-group-sm mb-2">
@@ -74,7 +94,18 @@
                             <option value="{{ $p->id }}" data-lat="{{ $p->latitude }}" data-lng="{{ $p->longitude }}">{{ $p->name }}</option>
                         @endforeach
                     </select>
-                    <div class="input-group-append"><button class="btn btn-outline-primary" type="button" id="btn-add-existing">{{ __('Add') }}</button></div>
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-primary" type="button" id="btn-add-existing">{{ __('Add') }}</button>
+                        <button class="btn btn-outline-secondary" type="button" id="btn-open-batch-add" title="{{ __('Batch Add Multiple Stops') }}"><i class="fa fa-list-ul mr-1"></i>{{ __('Batch') }}</button>
+                    </div>
+                </div>
+
+                <!-- Sequence Header & Auto-Scheduler -->
+                <div class="d-flex justify-content-between align-items-center mt-2 mb-1">
+                    <span class="text-xs text-muted font-weight-bold text-uppercase">{{ __('Stops Sequence') }}</span>
+                    <button type="button" class="btn btn-xs btn-outline-info" id="btn-open-auto-schedule" title="{{ __('Calculate sequential stop times automatically') }}">
+                        <i class="fa fa-clock-o mr-1"></i>{{ __('⚡ Auto-Schedule Times') }}
+                    </button>
                 </div>
 
                 <ul class="nav nav-tabs nav-fill mb-2" role="tablist">
@@ -104,15 +135,26 @@
             <div id="route-placeholder" class="text-center text-muted p-4 text-sm">{{ __('Select a route above to load its stops on the map.') }}</div>
         </div>
 
-        <div class="builder-map"><div id="route-builder-map"></div></div>
+        <div class="builder-map">
+            <!-- Search location directly on map -->
+            <div class="map-floating-search">
+                <div class="input-group input-group-sm shadow-sm">
+                    <div class="input-group-prepend"><span class="input-group-text bg-white border-right-0"><i class="fa fa-search text-primary"></i></span></div>
+                    <input type="text" id="map-search-input" class="form-control border-left-0" placeholder="{{ __('Search place or address to drop stop...') }}" autocomplete="off">
+                </div>
+                <div id="map-search-results" class="search-results-dropdown"></div>
+            </div>
+            <div id="route-builder-map"></div>
+        </div>
     </div>
 </div>
 
+<!-- Modal 1: Stop Details (Advanced) -->
 <div class="modal fade" id="stopModal" tabindex="-1" role="dialog" aria-labelledby="stopModalTitle">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header py-2">
-                <h5 class="modal-title" id="stopModalTitle">{{ __('Stop details') }}</h5>
+                <h5 class="modal-title font-weight-bold" id="stopModalTitle">{{ __('Stop details') }}</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="{{ __('Close') }}">&times;</button>
             </div>
             <div class="modal-body">
@@ -148,16 +190,147 @@
     </div>
 </div>
 
+<!-- Modal 2: Assign Vehicle to Route -->
+<div class="modal fade" id="vehicleAssignModal" tabindex="-1" role="dialog" aria-labelledby="vehicleAssignModalTitle">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header py-2">
+                <h5 class="modal-title font-weight-bold" id="vehicleAssignModalTitle"><i class="fa fa-bus text-primary mr-1"></i>{{ __('Assign Vehicle to Route') }}</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="{{ __('Close') }}">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info py-2 text-xs">
+                    <i class="fa fa-info-circle mr-1"></i>{{ __('Assigning a vehicle automatically aligns the route trip times with the earliest and latest stops.') }}
+                </div>
+                <div class="form-group">
+                    <label for="va-vehicle" class="font-weight-bold text-xs">{{ __('Vehicle') }} <span class="text-danger">*</span></label>
+                    <select id="va-vehicle" class="form-control" required>
+                        <option value="">{{ __('-- Select Vehicle --') }}</option>
+                        @foreach ($vehicles as $v)
+                            <option value="{{ $v->id }}">{{ $v->name }} {{ $v->vehicle_number ? '('.$v->vehicle_number.')' : '' }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group col-6">
+                        <label for="va-driver" class="font-weight-bold text-xs">{{ __('Driver') }}</label>
+                        <select id="va-driver" class="form-control">
+                            <option value="">{{ __('-- Select Driver --') }}</option>
+                            @foreach ($drivers as $d)
+                                <option value="{{ $d->id }}">{{ $d->full_name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="form-group col-6">
+                        <label for="va-helper" class="font-weight-bold text-xs">{{ __('Helper') }}</label>
+                        <select id="va-helper" class="form-control">
+                            <option value="">{{ __('-- Select Helper --') }}</option>
+                            @foreach ($helpers as $h)
+                                <option value="{{ $h->id }}">{{ $h->full_name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group col-6 mb-0">
+                        <label for="va-pickup-start" class="text-xs text-muted mb-0">{{ __('Morning Start Time') }}</label>
+                        <input type="time" id="va-pickup-start" class="form-control form-control-sm">
+                        <small class="text-muted" style="font-size:10px;">{{ __('Leave blank to auto-calculate') }}</small>
+                    </div>
+                    <div class="form-group col-6 mb-0">
+                        <label for="va-drop-end" class="text-xs text-muted mb-0">{{ __('Afternoon End Time') }}</label>
+                        <input type="time" id="va-drop-end" class="form-control form-control-sm">
+                        <small class="text-muted" style="font-size:10px;">{{ __('Leave blank to auto-calculate') }}</small>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer py-2">
+                <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">{{ __('Cancel') }}</button>
+                <button type="button" class="btn btn-primary btn-sm" id="btn-save-vehicle-assign"><i class="fa fa-check mr-1"></i>{{ __('Save Assignment') }}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal 3: Auto-Schedule Times -->
+<div class="modal fade" id="autoScheduleModal" tabindex="-1" role="dialog" aria-labelledby="autoScheduleModalTitle">
+    <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+            <div class="modal-header py-2">
+                <h5 class="modal-title font-weight-bold text-sm" id="autoScheduleModalTitle"><i class="fa fa-clock-o text-info mr-1"></i>{{ __('⚡ Auto-Schedule Times') }}</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="{{ __('Close') }}">&times;</button>
+            </div>
+            <div class="modal-body py-2">
+                <p class="text-xs text-muted mb-2">{{ __('Automatically calculate sequential times for all stops with a single click.') }}</p>
+                <div class="form-group mb-2">
+                    <label for="as-morning-start" class="text-xs font-weight-bold mb-1">{{ __('Morning Route Start') }}</label>
+                    <input type="time" id="as-morning-start" class="form-control form-control-sm" value="07:15">
+                </div>
+                <div class="form-group mb-2">
+                    <label for="as-morning-interval" class="text-xs font-weight-bold mb-1">{{ __('Interval Between Stops (mins)') }}</label>
+                    <input type="number" id="as-morning-interval" class="form-control form-control-sm" value="5" min="1" max="60">
+                </div>
+                <hr class="my-2">
+                <div class="form-group mb-2">
+                    <label for="as-drop-start" class="text-xs font-weight-bold mb-1">{{ __('Afternoon Drop Start') }}</label>
+                    <input type="time" id="as-drop-start" class="form-control form-control-sm" value="15:30">
+                </div>
+                <div class="form-group mb-0">
+                    <label for="as-drop-interval" class="text-xs font-weight-bold mb-1">{{ __('Interval Between Drops (mins)') }}</label>
+                    <input type="number" id="as-drop-interval" class="form-control form-control-sm" value="5" min="1" max="60">
+                </div>
+            </div>
+            <div class="modal-footer py-2">
+                <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">{{ __('Cancel') }}</button>
+                <button type="button" class="btn btn-info btn-sm text-white" id="btn-apply-auto-schedule"><i class="fa fa-magic mr-1"></i>{{ __('Apply to All Stops') }}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal 4: Batch Add Existing Stops -->
+<div class="modal fade" id="batchAddModal" tabindex="-1" role="dialog" aria-labelledby="batchAddModalTitle">
+    <div class="modal-dialog modal-md" role="document">
+        <div class="modal-content">
+            <div class="modal-header py-2">
+                <h5 class="modal-title font-weight-bold text-sm" id="batchAddModalTitle"><i class="fa fa-list-ul text-primary mr-1"></i>{{ __('Batch Add Existing Pickup Points') }}</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="{{ __('Close') }}">&times;</button>
+            </div>
+            <div class="modal-body py-2">
+                <div class="form-group mb-2">
+                    <input type="text" id="batch-filter-input" class="form-control form-control-sm" placeholder="{{ __('Type to filter pickup points...') }}">
+                </div>
+                <div id="batch-stops-list" style="max-height: 280px; overflow-y: auto;" class="border rounded p-2">
+                    <!-- Populated via JS -->
+                </div>
+                <div class="d-flex justify-content-between align-items-center mt-2">
+                    <small class="text-muted"><span id="batch-selected-count">0</span> {{ __('selected') }}</small>
+                    <button type="button" class="btn btn-xs btn-outline-secondary" id="btn-batch-select-all">{{ __('Select All') }}</button>
+                </div>
+            </div>
+            <div class="modal-footer py-2">
+                <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">{{ __('Cancel') }}</button>
+                <button type="button" class="btn btn-primary btn-sm" id="btn-apply-batch-add"><i class="fa fa-plus mr-1"></i>{{ __('Add Selected Stops') }}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     (function () {
         var dataUrl = @json(route('gps.routes.data', ['id' => '__ID__']));
         var saveUrl = @json(route('gps.routes.save'));
+        var assignVehicleUrl = @json(url('gps/routes/__ID__/assign-vehicle'));
+        var unassignVehicleUrl = @json(url('gps/routes/__ID__/vehicles/__ASSIGN_ID__'));
         var routingUrl = @json(rtrim((string) config('gpstransport.map.routing_url'), '/'));
+        var allPickupPoints = @json($pickupPoints);
+
         var map, routeId = null, mode = 'stop';
         var stops = {};          // key -> stop
         var morning = [], afternoon = [];
         var markers = {}, circles = {};
         var waypoints = [], line = null, editingKey = null, seq = 0;
+        var searchTimeout = null;
 
         function esc(s) {
             return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
@@ -166,10 +339,23 @@
         }
         function newKey() { return 'k' + (++seq); }
 
+        function timeToMinutes(t) {
+            if (!t) return 0;
+            var parts = t.split(':');
+            return parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+        }
+        function minutesToTime(m) {
+            m = m % 1440;
+            var hrs = Math.floor(m / 60);
+            var mins = m % 60;
+            return ('0' + hrs).slice(-2) + ':' + ('0' + mins).slice(-2);
+        }
+
         document.addEventListener('DOMContentLoaded', function () {
             map = L.map('route-builder-map').setView([{{ (float) config('gpstransport.map.default_center_lat', 11.0168) }}, {{ (float) config('gpstransport.map.default_center_lng', 76.9558) }}], 13);
             L.tileLayer(@json(config('gpstransport.map.tile_url')), {attribution: @json(config('gpstransport.map.attribution')), maxZoom: 19}).addTo(map);
 
+            // Frictionless Map Click Workflow (Zero browser prompt dialogs)
             map.on('click', function (e) {
                 if (!routeId) { return; }
                 if (mode === 'path') {
@@ -177,9 +363,38 @@
                     drawLine();
                     return;
                 }
-                var name = prompt(@json(__('Name of the new stop')), @json(__('Stop')) + ' ' + (morning.length + 1));
-                if (!name) { return; }
-                addStop({name: name.substring(0, 191), latitude: e.latlng.lat, longitude: e.latlng.lng});
+
+                var lat = +e.latlng.lat.toFixed(7);
+                var lng = +e.latlng.lng.toFixed(7);
+                var defName = @json(__('Stop')) + ' ' + (morning.length + 1);
+
+                // Auto-calculate sequential time (+5 mins from previous stop)
+                var pTime = '07:30', dTime = '15:30';
+                if (morning.length > 0) {
+                    var prevKey = morning[morning.length - 1];
+                    var prevStop = stops[prevKey];
+                    if (prevStop && prevStop.pickup_time) {
+                        pTime = minutesToTime(timeToMinutes(prevStop.pickup_time) + 5);
+                    }
+                    if (prevStop && prevStop.drop_time) {
+                        dTime = minutesToTime(timeToMinutes(prevStop.drop_time) + 5);
+                    }
+                }
+
+                var key = addStop({
+                    name: defName,
+                    latitude: lat,
+                    longitude: lng,
+                    pickup_time: pTime,
+                    drop_time: dTime,
+                    silent: true
+                });
+
+                // Open quick-edit leaflet popup directly on the marker
+                openMarkerQuickPopup(key);
+
+                // Reverse geocode in background to provide intelligent place name
+                reverseGeocodeStop(key, lat, lng);
             });
 
             $('#route-select').on('change', function () { load(this.value); });
@@ -196,6 +411,24 @@
             $('#sm-save').on('click', applyModal);
             $('#btn-save-route').on('click', save);
             $(document).on('click', '[data-act]', onAction);
+
+            // Vehicle Assignment Events
+            $('#btn-manage-vehicle').on('click', openVehicleModal);
+            $('#btn-save-vehicle-assign').on('click', saveVehicleAssign);
+            $(document).on('click', '.btn-unassign-vehicle', unassignVehicle);
+
+            // Auto-Schedule Events
+            $('#btn-open-auto-schedule').on('click', function () { $('#autoScheduleModal').modal('show'); });
+            $('#btn-apply-auto-schedule').on('click', applyAutoSchedule);
+
+            // Batch Add Events
+            $('#btn-open-batch-add').on('click', openBatchAddModal);
+            $('#batch-filter-input').on('input', filterBatchStops);
+            $('#btn-batch-select-all').on('click', toggleBatchSelectAll);
+            $('#btn-apply-batch-add').on('click', applyBatchAdd);
+
+            // Map Location Search Events
+            initMapSearch();
         });
 
         function load(id) {
@@ -212,6 +445,9 @@
                 if (res.error) { alert(res.message); return; }
                 $('#start-landmark').val(res.route.start_landmark || '');
                 $('#end-landmark').val(res.route.end_landmark || '');
+
+                renderAssignedVehicles(res.assigned_vehicles || []);
+
                 var byAfternoon = [];
                 res.stops.forEach(function (s) {
                     var key = newKey();
@@ -230,6 +466,78 @@
             });
         }
 
+        function renderAssignedVehicles(list) {
+            var $c = $('#route-vehicle-info');
+            if (!list || !list.length) {
+                $c.html('<div class="d-flex align-items-center text-muted"><i class="fa fa-exclamation-circle text-warning mr-1"></i>{{ __('No vehicle assigned to this route.') }}</div>');
+                return;
+            }
+            var html = list.map(function(v) {
+                return '<div class="d-flex justify-content-between align-items-center py-1 border-bottom">' +
+                    '<div>' +
+                        '<div class="font-weight-bold text-dark"><i class="fa fa-bus text-success mr-1"></i>' + esc(v.vehicle_name) + ' <span class="badge badge-light border">(' + esc(v.vehicle_number) + ')</span></div>' +
+                        '<div class="text-muted"><i class="fa fa-user mr-1"></i>' + esc(v.driver_name) + (v.driver_phone && v.driver_phone !== '-' ? ' · ' + esc(v.driver_phone) : '') + '</div>' +
+                    '</div>' +
+                    '<div>' +
+                        '<button type="button" class="btn btn-xs btn-outline-danger btn-unassign-vehicle" data-id="' + v.id + '" title="{{ __('Remove Assignment') }}"><i class="fa fa-times"></i></button>' +
+                    '</div>' +
+                '</div>';
+            }).join('');
+            $c.html(html);
+        }
+
+        function openVehicleModal() {
+            if (!routeId) return;
+            $('#va-vehicle').val('');
+            $('#va-driver').val('');
+            $('#va-helper').val('');
+            $('#va-pickup-start').val('');
+            $('#va-drop-end').val('');
+            $('#vehicleAssignModal').modal('show');
+        }
+
+        function saveVehicleAssign() {
+            var vId = $('#va-vehicle').val();
+            if (!vId) { alert(@json(__('Please select a vehicle.'))); return; }
+            var payload = {
+                vehicle_id: vId,
+                driver_id: $('#va-driver').val() || null,
+                helper_id: $('#va-helper').val() || null,
+                pickup_trip_start_time: $('#va-pickup-start').val() || null,
+                drop_trip_end_time: $('#va-drop-end').val() || null,
+            };
+            var url = assignVehicleUrl.replace('__ID__', routeId);
+            var btn = $('#btn-save-vehicle-assign').prop('disabled', true);
+
+            $.ajax({
+                url: url, method: 'POST', contentType: 'application/json', data: JSON.stringify(payload),
+                headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}
+            }).done(function (res) {
+                $('#vehicleAssignModal').modal('hide');
+                if (typeof showSuccessToast === 'function') { showSuccessToast(res.message); } else { alert(res.message); }
+                load(routeId);
+            }).fail(function (xhr) {
+                var msg = (xhr.responseJSON && xhr.responseJSON.message) || @json(__('Could not assign vehicle.'));
+                if (typeof showErrorToast === 'function') { showErrorToast(msg); } else { alert(msg); }
+            }).always(function () { btn.prop('disabled', false); });
+        }
+
+        function unassignVehicle() {
+            var assignId = $(this).data('id');
+            if (!confirm(@json(__('Remove this vehicle assignment from the route?')))) return;
+            var url = unassignVehicleUrl.replace('__ID__', routeId).replace('__ASSIGN_ID__', assignId);
+            $.ajax({
+                url: url, method: 'DELETE',
+                headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}
+            }).done(function (res) {
+                if (typeof showSuccessToast === 'function') { showSuccessToast(res.message); } else { alert(res.message); }
+                load(routeId);
+            }).fail(function (xhr) {
+                var msg = (xhr.responseJSON && xhr.responseJSON.message) || @json(__('Could not remove vehicle assignment.'));
+                alert(msg);
+            });
+        }
+
         function addStop(data) {
             var key = newKey();
             stops[key] = $.extend({
@@ -240,7 +548,90 @@
             afternoon.unshift(key);
             placeMarker(key);
             render();
-            openModal(key);
+            if (!data.silent) {
+                openModal(key);
+            }
+            return key;
+        }
+
+        function openMarkerQuickPopup(key) {
+            var s = stops[key];
+            var m = markers[key];
+            if (!m) return;
+
+            var content = document.createElement('div');
+            content.className = 'stop-quick-popup-content';
+            content.innerHTML =
+                '<div class="d-flex justify-content-between align-items-center mb-1">' +
+                    '<span class="font-weight-bold text-xs text-primary"><i class="fa fa-map-marker mr-1"></i>' + @json(__('Quick Stop Edit')) + '</span>' +
+                '</div>' +
+                '<input type="text" class="form-control form-control-sm mb-1 q-name" value="' + esc(s.name) + '" placeholder="' + @json(__('Stop Name')) + '">' +
+                '<div class="form-row mb-2">' +
+                    '<div class="col-6"><label class="text-xs text-muted mb-0">' + @json(__('Morning')) + '</label><input type="time" class="form-control form-control-sm q-pickup" value="' + esc(s.pickup_time || '') + '"></div>' +
+                    '<div class="col-6"><label class="text-xs text-muted mb-0">' + @json(__('Afternoon')) + '</label><input type="time" class="form-control form-control-sm q-drop" value="' + esc(s.drop_time || '') + '"></div>' +
+                '</div>' +
+                '<div class="d-flex justify-content-between align-items-center">' +
+                    '<button type="button" class="btn btn-xs btn-outline-danger q-del" title="' + @json(__('Delete Stop')) + '"><i class="fa fa-trash"></i></button>' +
+                    '<div>' +
+                        '<button type="button" class="btn btn-xs btn-outline-secondary mr-1 q-adv" title="' + @json(__('Advanced Details')) + '"><i class="fa fa-sliders"></i> ' + @json(__('Details')) + '</button>' +
+                        '<button type="button" class="btn btn-xs btn-primary q-done"><i class="fa fa-check mr-1"></i>' + @json(__('Done')) + '</button>' +
+                    '</div>' +
+                '</div>';
+
+            var popup = L.popup({offset: [0, -14], closeButton: true, className: 'stop-quick-popup'})
+                .setLatLng([s.latitude, s.longitude])
+                .setContent(content)
+                .openOn(map);
+
+            var $c = $(content);
+            $c.find('.q-name').on('input change', function () {
+                s.name = $(this).val().trim() || s.name;
+                refreshMarker(key);
+                render();
+            });
+            $c.find('.q-pickup').on('change', function () {
+                s.pickup_time = $(this).val() || null;
+                render();
+            });
+            $c.find('.q-drop').on('change', function () {
+                s.drop_time = $(this).val() || null;
+                render();
+            });
+            $c.find('.q-done').on('click', function () {
+                map.closePopup();
+            });
+            $c.find('.q-del').on('click', function () {
+                map.closePopup();
+                map.removeLayer(markers[key]); map.removeLayer(circles[key]);
+                delete markers[key]; delete circles[key]; delete stops[key];
+                morning = morning.filter(function (k) { return k !== key; });
+                afternoon = afternoon.filter(function (k) { return k !== key; });
+                render();
+            });
+            $c.find('.q-adv').on('click', function () {
+                map.closePopup();
+                openModal(key);
+            });
+
+            setTimeout(function() {
+                $c.find('.q-name').focus().select();
+            }, 100);
+        }
+
+        function reverseGeocodeStop(key, lat, lng) {
+            var url = 'https://nominatim.openstreetmap.org/reverse?format=json&lat=' + lat + '&lon=' + lng + '&zoom=18&addressdetails=1';
+            $.getJSON(url).done(function(data) {
+                if (!stops[key]) return;
+                var addr = data.address || {};
+                var street = addr.road || addr.suburb || addr.neighbourhood || addr.amenity || addr.shop || data.name;
+                if (street && (stops[key].name.indexOf(@json(__('Stop'))) === 0 || stops[key].name.indexOf('Stop ') === 0)) {
+                    stops[key].name = street.substring(0, 191);
+                    stops[key].landmark = (addr.city || addr.town || addr.county || '').substring(0, 255);
+                    refreshMarker(key);
+                    render();
+                    $('.q-name').val(stops[key].name);
+                }
+            }).fail(function() {});
         }
 
         function addExisting() {
@@ -255,7 +646,162 @@
                 lat = c.lat; lng = c.lng;
                 alert(@json(__('This pickup point has no location yet. It was placed at the map centre: drag it to the right place.')));
             }
-            addStop({pickup_point_id: id, name: opt.text().trim(), latitude: lat, longitude: lng});
+            var key = addStop({pickup_point_id: id, name: opt.text().trim(), latitude: lat, longitude: lng, silent: true});
+            openMarkerQuickPopup(key);
+        }
+
+        function openBatchAddModal() {
+            if (!routeId) return;
+            var assignedIds = Object.keys(stops).map(function(k) { return stops[k].pickup_point_id; }).filter(Boolean);
+            var $list = $('#batch-stops-list').empty();
+
+            var available = allPickupPoints.filter(function(p) { return assignedIds.indexOf(p.id) === -1; });
+            if (!available.length) {
+                $list.html('<div class="text-center text-muted p-3 text-xs">{{ __('All existing pickup points are already added to this route!') }}</div>');
+                $('#btn-apply-batch-add').prop('disabled', true);
+                $('#batchAddModal').modal('show');
+                return;
+            }
+
+            $('#btn-apply-batch-add').prop('disabled', false);
+            available.forEach(function(p) {
+                var itemHtml = '<div class="form-check py-1 border-bottom batch-item" data-name="' + esc(p.name.toLowerCase()) + '">' +
+                    '<input class="form-check-input batch-chk" type="checkbox" value="' + p.id + '" id="bchk-' + p.id + '" data-lat="' + (p.latitude || '') + '" data-lng="' + (p.longitude || '') + '" data-name="' + esc(p.name) + '">' +
+                    '<label class="form-check-label text-xs font-weight-bold" for="bchk-' + p.id + '">' + esc(p.name) + '</label>' +
+                    (p.latitude ? '<small class="text-muted ml-2">(' + p.latitude + ', ' + p.longitude + ')</small>' : '<small class="text-warning ml-2">{{ __("No GPS coordinates") }}</small>') +
+                '</div>';
+                $list.append(itemHtml);
+            });
+
+            updateBatchCount();
+            $('#batchAddModal').modal('show');
+        }
+
+        function filterBatchStops() {
+            var q = $(this).val().toLowerCase().trim();
+            $('.batch-item').each(function() {
+                var name = $(this).data('name');
+                $(this).toggle(!q || name.indexOf(q) !== -1);
+            });
+        }
+
+        function toggleBatchSelectAll() {
+            var visibleChks = $('.batch-item:visible .batch-chk');
+            var allChecked = visibleChks.filter(':checked').length === visibleChks.length;
+            visibleChks.prop('checked', !allChecked);
+            updateBatchCount();
+        }
+
+        $(document).on('change', '.batch-chk', updateBatchCount);
+
+        function updateBatchCount() {
+            var count = $('.batch-chk:checked').length;
+            $('#batch-selected-count').text(count);
+        }
+
+        function applyBatchAdd() {
+            var selected = $('.batch-chk:checked');
+            if (!selected.length) { alert(@json(__('Please select at least one pickup point.'))); return; }
+
+            selected.each(function() {
+                var id = parseInt($(this).val(), 10);
+                var name = $(this).data('name');
+                var lat = parseFloat($(this).data('lat')), lng = parseFloat($(this).data('lng'));
+                if (isNaN(lat) || isNaN(lng)) {
+                    var c = map.getCenter();
+                    lat = c.lat; lng = c.lng;
+                }
+                addStop({pickup_point_id: id, name: name, latitude: lat, longitude: lng, silent: true});
+            });
+
+            $('#batchAddModal').modal('hide');
+            fit();
+        }
+
+        function applyAutoSchedule() {
+            var mStart = $('#as-morning-start').val() || '07:15';
+            var mInterval = parseInt($('#as-morning-interval').val(), 10) || 5;
+            var dStart = $('#as-drop-start').val() || '15:30';
+            var dInterval = parseInt($('#as-drop-interval').val(), 10) || 5;
+
+            var mBase = timeToMinutes(mStart);
+            morning.forEach(function (key, idx) {
+                stops[key].pickup_time = minutesToTime(mBase + (idx * mInterval));
+            });
+
+            var dBase = timeToMinutes(dStart);
+            afternoon.forEach(function (key, idx) {
+                stops[key].drop_time = minutesToTime(dBase + (idx * dInterval));
+            });
+
+            $('#autoScheduleModal').modal('hide');
+            render();
+            if (typeof showSuccessToast === 'function') {
+                showSuccessToast(@json(__('Timings calculated and applied to all stops!')));
+            }
+        }
+
+        function initMapSearch() {
+            $('#map-search-input').on('input', function() {
+                clearTimeout(searchTimeout);
+                var q = $(this).val().trim();
+                if (q.length < 3) {
+                    $('#map-search-results').hide().empty();
+                    return;
+                }
+                searchTimeout = setTimeout(function() {
+                    var url = 'https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(q) + '&limit=5';
+                    $.getJSON(url).done(function(results) {
+                        var $res = $('#map-search-results').empty();
+                        if (!results || !results.length) {
+                            $res.html('<div class="p-2 text-xs text-muted">{{ __("No places found") }}</div>').show();
+                            return;
+                        }
+                        results.forEach(function(item) {
+                            var title = item.display_name.split(',')[0];
+                            var $el = $('<div class="search-result-item">')
+                                .html('<strong><i class="fa fa-map-pin text-primary mr-1"></i>' + esc(title) + '</strong><br><small class="text-muted text-truncate d-block">' + esc(item.display_name) + '</small>')
+                                .data('lat', parseFloat(item.lat))
+                                .data('lng', parseFloat(item.lon))
+                                .data('name', title);
+                            $res.append($el);
+                        });
+                        $res.show();
+                    });
+                }, 350);
+            });
+
+            $(document).on('click', '.search-result-item', function() {
+                var lat = $(this).data('lat');
+                var lng = $(this).data('lng');
+                var name = $(this).data('name');
+                $('#map-search-results').hide().empty();
+                $('#map-search-input').val('');
+
+                if (!routeId) {
+                    alert(@json(__('Please select a route first.')));
+                    return;
+                }
+
+                map.flyTo([lat, lng], 15, {duration: 0.8});
+
+                var pTime = '07:30', dTime = '15:30';
+                if (morning.length > 0) {
+                    var prev = stops[morning[morning.length - 1]];
+                    if (prev && prev.pickup_time) pTime = minutesToTime(timeToMinutes(prev.pickup_time) + 5);
+                    if (prev && prev.drop_time) dTime = minutesToTime(timeToMinutes(prev.drop_time) + 5);
+                }
+
+                var key = addStop({
+                    name: name,
+                    latitude: lat,
+                    longitude: lng,
+                    pickup_time: pTime,
+                    drop_time: dTime,
+                    silent: true
+                });
+                openMarkerQuickPopup(key);
+            });
         }
 
         function placeMarker(key) {
@@ -268,7 +814,7 @@
                 s.longitude = +p.lng.toFixed(7);
                 circles[key].setLatLng(p);
             });
-            m.on('click', function () { openModal(key); });
+            m.on('click', function () { openMarkerQuickPopup(key); });
             markers[key] = m;
             circles[key] = L.circle([s.latitude, s.longitude], {radius: s.geofence_radius, color: '#3b82f6', fillColor: '#93c5fd', fillOpacity: 0.2, weight: 1.5}).addTo(map);
         }

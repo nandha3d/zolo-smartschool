@@ -1055,6 +1055,7 @@ Route::group(['middleware' => ['Role', 'checkSchoolStatus', 'status','SwitchData
     Route::resource('route-vehicle', RouteVehicleController::class)->only(['index', 'store', 'show', 'update', 'destroy']);
     Route::put("route-vehicle/{id}/restore", [RouteVehicleController::class, 'restore'])->name('route-vehicle.restore');
     Route::delete("route-vehicle/{id}/trash", [RouteVehicleController::class, 'trash'])->name('route-vehicle.trash');
+    Route::get("route-vehicle/route-timings/{route_id}", [RouteVehicleController::class, 'getRouteTimings'])->name('route-vehicle.route-timings');
     Route::get('relief-drivers', [AlternateDriverController::class, 'index'])->name('relief-drivers.index');
     Route::get('relief-drivers/list', [AlternateDriverController::class, 'list'])->name('relief-drivers.list');
     Route::post('relief-drivers', [AlternateDriverController::class, 'store'])->name('relief-drivers.store');

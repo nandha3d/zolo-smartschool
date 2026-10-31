@@ -6,10 +6,13 @@
 
 @section('content')
     <div class="content-wrapper">
-        <div class="page-header">
-            <h3 class="page-title">
+        <div class="page-header d-flex justify-content-between align-items-center">
+            <h3 class="page-title mb-0">
                 {{ __('manage_routes') }}
             </h3>
+            <a href="{{ route('gps.routes.index') }}" class="btn btn-primary btn-sm">
+                <i class="fa fa-map-marker mr-1"></i>{{ __('Open in Map Route Builder') }}
+            </a>
         </div>
         <div class="row">
             <div class="col-md-12 grid-margin">
@@ -47,6 +50,45 @@
                                         <option value="1">{{ __('Active') }}</option>
                                         <option value="0">{{ __('Inactive') }}</option>
                                     </select>
+                                </div>
+
+                                <!-- Assign Vehicle (Optional) -->
+                                <div class="col-md-12 mb-3">
+                                    <div class="card border rounded p-3" style="background:#f8fafc;">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <h6 class="font-weight-bold mb-0 text-primary"><i class="fa fa-bus mr-1"></i>{{ __('Assign Vehicle & Staff (Optional)') }}</h6>
+                                            <small class="text-muted">{{ __('Trip start/end times will automatically align with earliest and latest stops.') }}</small>
+                                        </div>
+                                        <div class="row">
+                                            <div class="form-group col-md-4 mb-2 mb-md-0">
+                                                <label class="text-xs text-muted mb-1">{{ __('Vehicle') }}</label>
+                                                <select name="vehicle_id" class="form-control form-control-sm">
+                                                    <option value="">{{ __('-- Select Vehicle --') }}</option>
+                                                    @foreach ($vehicles as $v)
+                                                        <option value="{{ $v->id }}">{{ $v->name }} {{ $v->vehicle_number ? '('.$v->vehicle_number.')' : '' }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="form-group col-md-4 mb-2 mb-md-0">
+                                                <label class="text-xs text-muted mb-1">{{ __('Driver') }}</label>
+                                                <select name="driver_id" class="form-control form-control-sm">
+                                                    <option value="">{{ __('-- Select Driver --') }}</option>
+                                                    @foreach ($drivers as $d)
+                                                        <option value="{{ $d->id }}">{{ $d->full_name }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="form-group col-md-4 mb-0">
+                                                <label class="text-xs text-muted mb-1">{{ __('Helper') }}</label>
+                                                <select name="helper_id" class="form-control form-control-sm">
+                                                    <option value="">{{ __('-- Select Helper --') }}</option>
+                                                    @foreach ($helpers as $h)
+                                                        <option value="{{ $h->id }}">{{ $h->full_name }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
 
 
@@ -133,6 +175,8 @@
                                         data-sortable="false">{{ __('status') }}</th>
                                     <th scope="col" data-field="pickup_points_count" data-sortable="false">
                                         {{ __('pickup_points') }}</th>
+                                    <th scope="col" data-field="assigned_vehicles" data-escape="false" data-sortable="false">
+                                        {{ __('Assigned Vehicle') }}</th>
                                     <th scope="col" data-field="created_at" data-sortable="true"
                                         data-visible="false">{{ __('created_at') }}</th>
                                     <th scope="col" data-field="updated_at" data-sortable="true"

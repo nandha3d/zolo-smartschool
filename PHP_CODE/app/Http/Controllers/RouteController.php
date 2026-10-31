@@ -4,15 +4,19 @@ namespace App\Http\Controllers;
 
 use App\Models\Route;
 use App\Models\PickupPoint;
+use App\Models\RoutePickupPoint;
+use App\Models\RouteVehicle;
 use App\Models\Shift;
+use App\Models\User;
+use App\Models\Vehicle;
 use App\Services\BootstrapTableService;
+use App\Services\CachingService;
 use App\Services\ResponseService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Throwable;
-use App\Services\CachingService;
-use App\Models\RoutePickupPoint;
 
 class RouteController extends Controller
 {
@@ -28,7 +32,15 @@ class RouteController extends Controller
         ResponseService::noAnyPermissionThenRedirect(['route-list', 'route-create']);
         $pickupPoints = PickupPoint::all()->where('status', 1);
         $shifts = Shift::owner()->where('status', 1)->get();
-        return view('routes.index', compact('pickupPoints', 'shifts'));
+        $vehicles = Vehicle::where('status', 1)->orderBy('name')->get();
+        $drivers = User::builder()
+            ->whereHas('roles', fn ($q) => $q->where('name', 'Driver'))
+            ->with('staff')->get();
+        $helpers = User::builder()
+            ->whereHas('roles', fn ($q) => $q->where('name', 'Helper'))
+            ->with('staff')->get();
+
+        return view('routes.index', compact('pickupPoints', 'shifts', 'vehicles', 'drivers', 'helpers'));
     }
 
     public function create()
@@ -91,6 +103,34 @@ class RouteController extends Controller
                 }
             }
 
+            // Assign vehicle if selected
+            if ($request->filled('vehicle_id')) {
+                $pickupTimes = collect($request->pickup_points)->pluck('pickup_time')->filter()->sort();
+                $dropTimes = collect($request->pickup_points)->pluck('drop_time')->filter()->sort();
+
+                $earliestPickup = $pickupTimes->first();
+                $latestPickup = $pickupTimes->last();
+                $earliestDrop = $dropTimes->first();
+                $latestDrop = $dropTimes->last();
+
+                $pStart = $earliestPickup ? Carbon::parse($earliestPickup)->subMinutes(10)->format('H:i') : '07:00';
+                $pEnd   = $latestPickup ? Carbon::parse($latestPickup)->addMinutes(10)->format('H:i') : '08:30';
+                $dStart = $earliestDrop ? Carbon::parse($earliestDrop)->subMinutes(10)->format('H:i') : '15:00';
+                $dEnd   = $latestDrop ? Carbon::parse($latestDrop)->addMinutes(10)->format('H:i') : '16:30';
+
+                RouteVehicle::create([
+                    'route_id'          => $route->id,
+                    'vehicle_id'        => $request->vehicle_id,
+                    'driver_id'         => $request->driver_id ?: null,
+                    'helper_id'         => $request->helper_id ?: null,
+                    'status'            => 1,
+                    'pickup_start_time' => $pStart,
+                    'pickup_end_time'   => $pEnd,
+                    'drop_start_time'   => $dStart,
+                    'drop_end_time'     => $dEnd,
+                ]);
+            }
+
             ResponseService::successResponse('Data Stored Successfully');
         } catch (Throwable $e) {
             ResponseService::logErrorResponse($e, "Route Controller -> Store Method");
@@ -109,7 +149,7 @@ class RouteController extends Controller
         $search = request('search');
 
         $schoolSettings = $this->cache->getSchoolSettings();
-        $sql = Route::with(['routePickupPoints.pickupPoint', 'shift']);
+        $sql = Route::with(['routePickupPoints.pickupPoint', 'shift', 'routeVehicle.vehicle', 'routeVehicle.driver']);
 
         if ($search) {
             $sql->where(function ($query) use ($search) {
@@ -135,12 +175,24 @@ class RouteController extends Controller
             $operate .= BootstrapTableService::menuDeleteButton('delete', route('routes.destroy', $row->id));
             $operate .= BootstrapTableService::menuButton('change_order', route('routes.change-order', $row->id));
 
+            $assignedVehicles = $row->routeVehicle->filter(fn($rv) => $rv->vehicle)->map(function ($rv) {
+                $str = '<strong>' . htmlspecialchars($rv->vehicle->name) . '</strong>';
+                if ($rv->vehicle->vehicle_number) {
+                    $str .= ' (' . htmlspecialchars($rv->vehicle->vehicle_number) . ')';
+                }
+                if ($rv->driver) {
+                    $str .= '<br><small class="text-muted"><i class="fa fa-user mr-1"></i>' . htmlspecialchars($rv->driver->full_name) . '</small>';
+                }
+                return $str;
+            })->values();
+
             $tempRow = $row->toArray();
             $tempRow['no'] = $no++;
             $tempRow['status'] = $row->status ? 1 : 0;
             $tempRow['operate'] = BootstrapTableService::menuItem($operate);
             $tempRow['pickup_points_count'] = $row->routePickupPoints->count();
             $tempRow['shift_name'] = $row->shift ? $row->shift->name : '-';
+            $tempRow['assigned_vehicles'] = $assignedVehicles->isNotEmpty() ? $assignedVehicles->implode('<hr class="my-1">') : '<span class="badge badge-light border text-muted">Unassigned</span>';
             $tempRow['created_at'] = $row->created_at->format($schoolSettings['date_format'] . ' ' . $schoolSettings['time_format']);
             $tempRow['updated_at'] = $row->updated_at->format($schoolSettings['date_format'] . ' ' . $schoolSettings['time_format']);
             $rows[] = $tempRow;
@@ -153,10 +205,19 @@ class RouteController extends Controller
     public function edit($id)
     {
         ResponseService::noAnyPermissionThenRedirect(['route-edit']);
-        $route = Route::with(['routePickupPoints.pickupPoint'])->findOrFail($id);
+        $route = Route::with(['routePickupPoints.pickupPoint', 'routeVehicle.vehicle'])->findOrFail($id);
         $pickupPoints = PickupPoint::all();
         $shifts = Shift::owner()->where('status', 1)->get();
-        return view('routes.edit', compact('route', 'pickupPoints', 'shifts'));
+        $vehicles = Vehicle::where('status', 1)->orderBy('name')->get();
+        $drivers = User::builder()
+            ->whereHas('roles', fn ($q) => $q->where('name', 'Driver'))
+            ->with('staff')->get();
+        $helpers = User::builder()
+            ->whereHas('roles', fn ($q) => $q->where('name', 'Helper'))
+            ->with('staff')->get();
+        $assignedRouteVehicle = $route->routeVehicle()->latest()->first();
+
+        return view('routes.edit', compact('route', 'pickupPoints', 'shifts', 'vehicles', 'drivers', 'helpers', 'assignedRouteVehicle'));
     }
 
     public function update(Request $request, $id)
@@ -224,6 +285,35 @@ class RouteController extends Controller
                 RoutePickupPoint::where('route_id', $route->id)
                     ->whereNotIn('pickup_point_id', $currentIds)
                     ->delete();
+            }
+
+            // Assign or update vehicle if selected
+            if ($request->filled('vehicle_id')) {
+                $pickupTimes = collect($request->pickup_points)->pluck('pickup_time')->filter()->sort();
+                $dropTimes = collect($request->pickup_points)->pluck('drop_time')->filter()->sort();
+
+                $earliestPickup = $pickupTimes->first();
+                $latestPickup = $pickupTimes->last();
+                $earliestDrop = $dropTimes->first();
+                $latestDrop = $dropTimes->last();
+
+                $pStart = $earliestPickup ? Carbon::parse($earliestPickup)->subMinutes(10)->format('H:i') : '07:00';
+                $pEnd   = $latestPickup ? Carbon::parse($latestPickup)->addMinutes(10)->format('H:i') : '08:30';
+                $dStart = $earliestDrop ? Carbon::parse($earliestDrop)->subMinutes(10)->format('H:i') : '15:00';
+                $dEnd   = $latestDrop ? Carbon::parse($latestDrop)->addMinutes(10)->format('H:i') : '16:30';
+
+                RouteVehicle::updateOrCreate(
+                    ['route_id' => $route->id, 'vehicle_id' => $request->vehicle_id],
+                    [
+                        'driver_id'         => $request->driver_id ?: null,
+                        'helper_id'         => $request->helper_id ?: null,
+                        'status'            => 1,
+                        'pickup_start_time' => $pStart,
+                        'pickup_end_time'   => $pEnd,
+                        'drop_start_time'   => $dStart,
+                        'drop_end_time'     => $dEnd,
+                    ]
+                );
             }
 
             ResponseService::successResponse('Data Updated Successfully');
