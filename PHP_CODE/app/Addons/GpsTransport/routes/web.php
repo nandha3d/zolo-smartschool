@@ -40,6 +40,7 @@ Route::middleware([
     Route::get('routes', [GpsRouteController::class, 'index'])->name('gps.routes.index');
     Route::get('routes/{id}/data', [GpsRouteController::class, 'getRouteData'])->name('gps.routes.data');
     Route::post('routes/save-geometry', [GpsRouteController::class, 'saveGeometry'])->name('gps.routes.save-geometry');
+    Route::post('routes/save', [GpsRouteController::class, 'saveRoute'])->name('gps.routes.save');
 
     // 4. Trip Management
     Route::get('trips', [GpsTripController::class, 'index'])->name('gps.trips.index');
@@ -59,6 +60,8 @@ Route::middleware([
     // 7. Safety Alerts
     Route::get('alerts', [GpsAlertController::class, 'index'])->name('gps.alerts.index');
     Route::post('alerts/{id}/resolve', [GpsAlertController::class, 'resolve'])->name('gps.alerts.resolve');
+    Route::get('alerts/live', [GpsAlertController::class, 'live'])->name('gps.alerts.live');
+    Route::post('alerts/{id}/acknowledge', [GpsAlertController::class, 'acknowledge'])->name('gps.alerts.acknowledge');
 
     // 8. GPS Module Settings
     Route::get('settings', [GpsSettingController::class, 'index'])->name('gps.settings.index');

@@ -25,6 +25,8 @@ class SchoolGpsApiController extends Controller
     public function fleetLive(Request $request): JsonResponse
     {
         ResponseService::noFeatureThenSendJson(GpsTransportServiceProvider::FEATURE);
+        // Staff only: this returns every vehicle's position plus driver names and phones.
+        ResponseService::noAnyPermissionThenSendJson(['vehicles-list', 'route-list', 'RouteVehicle-list']);
 
         $routeId = $request->get('route_id');
         $query = VehicleCurrentState::with(['vehicle', 'trip.route', 'trip.driver', 'nextStop']);
@@ -84,8 +86,9 @@ class SchoolGpsApiController extends Controller
     public function tripTelemetry($tripId): JsonResponse
     {
         ResponseService::noFeatureThenSendJson(GpsTransportServiceProvider::FEATURE);
+        ResponseService::noAnyPermissionThenSendJson(['vehicles-list', 'route-list', 'RouteVehicle-list']);
 
-        $trip = GpsTrip::with([
+        $trip =GpsTrip::with([
             'vehicle',
             'driver',
             'route.routePickupPoints.pickupPoint',

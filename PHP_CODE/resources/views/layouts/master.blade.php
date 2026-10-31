@@ -60,6 +60,11 @@
             .replace(/Y/g, "yyyy");
     </script>
     @include('layouts.footer_js')
+    @if (Auth::check() && Auth::user()->school_id && Route::has('gps.alerts.live')
+        && Auth::user()->canany(['vehicles-list', 'route-list', 'RouteVehicle-list'])
+        && \App\Services\FeaturesService::hasFeature(\App\Addons\GpsTransport\GpsTransportServiceProvider::FEATURE))
+        @include('gpstransport::partials.speed-alert')
+    @endif
     @yield('js')
     @yield('script')
 </body>

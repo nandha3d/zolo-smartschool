@@ -2116,6 +2116,8 @@ window.vehicleEvents = {
         $('#edit_vehicle_name').val(row.name);
         $('#edit_vehicle_number').val(row.vehicle_number);
         $('#edit_capacity').val(row.capacity);
+        $('#edit_speed_limit_kmh').val(row.speed_limit_kmh || '');
+        $('#edit_speed_alert_cooldown_minutes').val(row.speed_alert_cooldown_minutes || 3);
         let statusValue = row.status === 'Active' ? '1' : '0';
         $('#edit_status').val(statusValue);
     }

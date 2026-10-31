@@ -48,7 +48,7 @@ class SliderController extends Controller
         }
 
         try {
-            $this->sliders->create($request->except('_token'));
+            $this->sliders->create($request->only(['image', 'link', 'type']));
             ResponseService::successResponse('Data Stored Successfully');
         } catch (Throwable $e) {
             ResponseService::logErrorResponse($e, "Sliders Controller -> Store Method");
@@ -113,7 +113,7 @@ class SliderController extends Controller
         }
 
         try {
-            $this->sliders->update($id, $request->except('_token', 'edit_id'));
+            $this->sliders->update($id, $request->only(['image', 'link', 'type']));
             ResponseService::successResponse('Data Updated Successfully');
         } catch (Throwable $e) {
             ResponseService::logErrorResponse($e, "Sliders Controller -> Update Method");

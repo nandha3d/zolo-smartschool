@@ -1313,10 +1313,7 @@ class TrasportationApiController extends Controller
 
             $user_id = Auth::user()->id;
             if (Auth::user()->hasRole('Driver') || Auth::user()->hasRole('Helper')) {
-                $routeVehicle = RouteVehicle::where(function ($q) use ($user_id) {
-                    $q->where('driver_id', $user_id)
-                        ->orWhere('helper_id', $user_id);
-                })
+                $routeVehicle = RouteVehicle::operatedBy($user_id)
                     ->whereHas('route', function ($q) use ($request) {
                         $q->where('shift_id', $request->shift_id);
                     })
@@ -1497,10 +1494,7 @@ class TrasportationApiController extends Controller
             $user_id = Auth::user()->id;
             $today = Carbon::now();
             $user = User::where('id', Auth::user()->id)->first();
-            $routeVehicles = RouteVehicle::with(['vehicle', 'route', 'shift', 'route.routePickupPoints', 'route.routePickupPoints.pickupPoint'])->where(function ($q) use ($user_id) {
-                $q->where('driver_id', $user_id)
-                    ->orWhere('helper_id', $user_id);
-            })->where('status', 1)->get();
+            $routeVehicles = RouteVehicle::with(['vehicle', 'route', 'shift', 'route.routePickupPoints', 'route.routePickupPoints.pickupPoint'])->operatedBy($user_id)->where('status', 1)->get();
 
             $routeVehicleHistories = RouteVehicleHistory::with(['vehicle', 'route', 'route.routePickupPoints', 'route.routePickupPoints.pickupPoint', 'shift'])->where(function ($q) use ($user_id) {
                 $q->where('driver_id', $user_id)
@@ -1728,10 +1722,7 @@ class TrasportationApiController extends Controller
 
             $user_id = Auth::user()->id;
 
-            $routeVehicles = RouteVehicle::with(['vehicle', 'route', 'route.shift'])->where(function ($q) use ($user_id) {
-                $q->where('driver_id', $user_id)
-                    ->orWhere('helper_id', $user_id);
-            })->where('status', 1)->get();
+            $routeVehicles = RouteVehicle::with(['vehicle', 'route', 'route.shift'])->operatedBy($user_id)->where('status', 1)->get();
 
             $data = [];
 
@@ -1794,10 +1785,9 @@ class TrasportationApiController extends Controller
             $user_id = Auth::user()->id;
             $today = Carbon::now();
 
-            $routeVehicles = RouteVehicle::with(['vehicle', 'shift', 'route'])->where(function ($q) use ($user_id) {
-                $q->where('driver_id', $user_id)
-                    ->orWhere('helper_id', $user_id);
-            })->where('status', 1)
+            // Run-aware: a pickup-only relief driver may start the pickup, and the primary
+            // driver keeps the drop.
+            $routeVehicles = RouteVehicle::with(['vehicle', 'shift', 'route'])->operatedBy($user_id, null, $request->pickup_drop)->where('status', 1)
                 ->whereHas('route', function ($q) use ($request) {
                     $q->where('shift_id', $request->shift_id);
                 })
@@ -1841,7 +1831,7 @@ class TrasportationApiController extends Controller
                             'route_id' => $routeVehicles->route_id,
                             'vehicle_id' => $routeVehicles->vehicle_id,
                             'shift_id' => $routeVehicles->route->shift_id,
-                            'driver_id' => $routeVehicles->driver_id,
+                            'driver_id' => $routeVehicles->effectiveDriverId(null, 'pickup'),
                             'helper_id' => $routeVehicles->helper_id,
                             'date' => date("Y-m-d"),
                             'type' => $request->pickup_drop,
@@ -1857,7 +1847,7 @@ class TrasportationApiController extends Controller
                             'route_id' => $routeVehicles->route_id,
                             'vehicle_id' => $routeVehicles->vehicle_id,
                             'shift_id' => $routeVehicles->route->shift_id,
-                            'driver_id' => $routeVehicles->driver_id,
+                            'driver_id' => $routeVehicles->effectiveDriverId(null, 'drop'),
                             'helper_id' => $routeVehicles->helper_id,
                             'date' => date("Y-m-d"),
                             'type' => $request->pickup_drop,
@@ -1876,14 +1866,15 @@ class TrasportationApiController extends Controller
                     return ResponseService::successResponse("Trip Started", $trip_id);
                 } else {
                     $trip = RouteVehicleHistory::with(['route', 'route.routePickupPoints', 'route.routePickupPoints.pickupPoint'])->where('id', $request->trip_id)->first();
+                    // Only the trip of the vehicle this user operates can be ended by them.
+                    if (!$trip || (int) $trip->route_id !== (int) $routeVehicles->route_id || (int) $trip->vehicle_id !== (int) $routeVehicles->vehicle_id) {
+                        return ResponseService::errorResponse("Trip not found");
+                    }
                     $users = TransportationPayment::with(['user', 'user.roles', 'pickupPoint', 'shift'])
-                        ->where('route_vehicle_id', $trip->route->routeVehicle->first()->id)
+                        ->where('route_vehicle_id', $routeVehicles->id)
                         ->where('shift_id', $trip->shift_id)
                         ->where('expiry_date', '>', $today)
                         ->get();
-                    if (!$trip) {
-                        return ResponseService::errorResponse("Trip not found");
-                    }
                     if ($trip->type == 'drop') {
                         $last_pickup_point = $trip->route->routePickupPoints
                             ->filter(fn($p) => $users->contains('pickup_point_id', $p->pickup_point_id))
@@ -2172,10 +2163,7 @@ class TrasportationApiController extends Controller
             })->toArray();
 
             if (!$request->filled('trip_id')) {
-                $routeVehicles = RouteVehicle::with(['vehicle', 'route', 'route.shift', 'route.routePickupPoints', 'route.routePickupPoints.pickupPoint'])->where(function ($q) use ($user_id) {
-                    $q->where('driver_id', $user_id)
-                        ->orWhere('helper_id', $user_id);
-                })->where('status', 1);
+                $routeVehicles = RouteVehicle::with(['vehicle', 'route', 'route.shift', 'route.routePickupPoints', 'route.routePickupPoints.pickupPoint'])->operatedBy($user_id)->where('status', 1);
                 if ($request->has('route_id') && $request->route_id) {
                     $routeVehicles->where('route_id', $request->route_id);
                 }

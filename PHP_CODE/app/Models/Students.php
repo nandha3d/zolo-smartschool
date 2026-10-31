@@ -22,6 +22,7 @@ class Students extends Model
         'class_section_id',
         'admission_no',
         'roll_number',
+        'roll_number_label',
         'admission_date',
         'guardian_id',
         'school_id',

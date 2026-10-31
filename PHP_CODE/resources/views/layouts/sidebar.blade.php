@@ -577,6 +577,18 @@
             </li>
         @endif
 
+        @if (Auth::user()->school_id)
+            @canany(['staff-attendance-list', 'staff-attendance-create'])
+                <li class="nav-item">
+                    <a href="{{ route('teacher-attendance.index') }}" class="nav-link"
+                        data-access="@hasFeatureAccess('Staff Attendance Management')">
+                        <i class="fa fa-user-circle menu-icon"></i>
+                        <span class="menu-title">{{ __('Teacher attendance') }}</span>
+                    </a>
+                </li>
+            @endcanany
+        @endif
+
         {{-- Staff Attendance --}}
         {{-- @canany(['staff-attendance-list', 'staff-attendance-create', 'staff-attendance-edit',
             'staff-attendance-delete'])
@@ -967,6 +979,10 @@
                             <li class="nav-item">
                                 <a href="{{ route('route-vehicle.index') }}" class="nav-link"
                                     data-access="@hasFeatureAccess('Transportation Module')"> {{ __('manage_route_vehicles') }}</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('relief-drivers.index') }}" class="nav-link"
+                                    data-access="@hasFeatureAccess('Transportation Module')"> {{ __('Relief drivers') }}</a>
                             </li>
                         @endcan
                         @can('driver-helper-list')

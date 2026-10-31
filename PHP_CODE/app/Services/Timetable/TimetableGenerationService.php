@@ -46,6 +46,29 @@ class TimetableGenerationService
         $this->validationService = $validationService;
         $this->scoringService = $scoringService;
         $this->planningService = $planningService;
+        // Kept short so a web request finishes; large schools can raise these in .env.
+        $this->maxSearchNodes = (int) config('timetable.max_search_nodes', $this->maxSearchNodes);
+        $this->maxExecutionSeconds = (int) config('timetable.max_seconds', $this->maxExecutionSeconds);
+    }
+
+    /**
+     * Case- and spacing-insensitive comparison for free-text fields like block and type.
+     */
+    private function sameText(?string $a, ?string $b): bool
+    {
+        $norm = static fn ($v) => preg_replace('/\s+/', ' ', mb_strtolower(trim((string) $v)));
+        return $norm($a) === $norm($b);
+    }
+
+    /**
+     * A resource's name with its block removed, so "Physics Lab - Block A" and
+     * "Physics Lab (Block B)" both reduce to "physics lab".
+     */
+    private function resourceKey(?string $name, ?string $block): string
+    {
+        $words = static fn ($v) => preg_split('/[^\p{L}\p{N}]+/u', mb_strtolower((string) $v), -1, PREG_SPLIT_NO_EMPTY);
+        $drop = array_merge($words($block), ['block']);
+        return implode(' ', array_diff($words($name), $drop));
     }
 
     /**
@@ -451,15 +474,22 @@ class TimetableGenerationService
             $assignedResId = $req->resource_id;
             if ($prioritizeSameBlock && $assignedResId && !empty($classBlock)) {
                 $res = $schoolResources->get($assignedResId);
-                if ($res && $res->block !== $classBlock) {
-                    $sameBlockRes = $schoolResources->first(fn($r) => $r->is_active && $r->type === $res->type && $r->block === $classBlock);
+                if ($res && !$this->sameText($res->block, $classBlock)) {
+                    // Swap only to the same kind of room in the class's block: type alone is free
+                    // text ("Lab"), so the names must also match once the block is taken out,
+                    // e.g. "Physics Lab - Block A" <-> "Physics Lab - Block B".
+                    $resKey = $this->resourceKey($res->name, $res->block);
+                    $sameBlockRes = $schoolResources->first(fn($r) => $r->is_active
+                        && $this->sameText($r->type, $res->type)
+                        && $this->sameText($r->block, $classBlock)
+                        && $this->resourceKey($r->name, $r->block) === $resKey);
                     if ($sameBlockRes) {
                         $assignedResId = $sameBlockRes->id;
                     }
                 }
             }
             $targetRes = $assignedResId ? $schoolResources->get($assignedResId) : null;
-            $resourceMatchesBlock = ($targetRes && !empty($classBlock) && $targetRes->block === $classBlock);
+            $resourceMatchesBlock = ($targetRes && !empty($classBlock) && $this->sameText($targetRes->block, $classBlock));
 
             $allowConsecutive = (bool)$req->allow_consecutive;
             $reqConsecutive = $allowConsecutive ? ((int)($req->required_consecutive_periods ?? 2)) : 1;

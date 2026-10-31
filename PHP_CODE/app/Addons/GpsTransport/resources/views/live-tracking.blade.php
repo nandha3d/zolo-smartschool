@@ -88,6 +88,8 @@
     .badge-stopped { background-color: #3b82f6; color: #fff; }
     .badge-offline { background-color: #64748b; color: #fff; }
     .badge-emergency { background-color: #ef4444; color: #fff; }
+    .badge-overspeed { background-color: #dc2626; color: #fff; animation: gps-blink 1s steps(2, start) infinite; }
+    @keyframes gps-blink { to { visibility: hidden; } }
 </style>
 
 <div class="content-wrapper p-3">
@@ -131,6 +133,7 @@
                         <option value="STOPPED">{{ __('Stopped') }}</option>
                         <option value="OFFLINE">{{ __('Offline') }}</option>
                         <option value="EMERGENCY">{{ __('Emergency') }}</option>
+                        <option value="OVERSPEED">{{ __('Overspeeding') }}</option>
                     </select>
                 </div>
             </div>
@@ -210,10 +213,11 @@
             if (status === 'STOPPED') color = '#3b82f6'; // Blue
             if (status === 'OFFLINE') color = '#64748b'; // Grey
             if (status === 'EMERGENCY' || status === 'BREAKDOWN') color = '#ef4444'; // Red
+            if (status === 'OVERSPEED') color = '#dc2626'; // Red, ringed below
 
             return L.divIcon({
                 className: 'custom-bus-marker',
-                html: '<div style="background:' + color + '; width:34px; height:34px; border-radius:50%; border:2px solid #ffffff; display:flex; align-items:center; justify-content:center; color:#ffffff; box-shadow:0 3px 10px rgba(0,0,0,0.35); transform:rotate(' + (heading || 0) + 'deg);"><i class="fa fa-bus" style="font-size:15px;"></i></div>',
+                html: '<div style="background:' + color + '; width:34px; height:34px; border-radius:50%; border:2px solid #ffffff; display:flex; align-items:center; justify-content:center; color:#ffffff; box-shadow:' + (status === 'OVERSPEED' ? '0 0 0 6px rgba(220,38,38,0.45)' : '0 3px 10px rgba(0,0,0,0.35)') + '; transform:rotate(' + (heading || 0) + 'deg);"><i class="fa fa-bus" style="font-size:15px;"></i></div>',
                 iconSize: [34, 34],
                 iconAnchor: [17, 17]
             });
@@ -231,6 +235,12 @@
                     renderFleetList();
                     updateMapMarkers();
                 });
+        }
+
+        function esc(s) {
+            return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+                return {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c];
+            });
         }
 
         function renderFleetList() {
@@ -261,15 +271,16 @@
                 if (v.status === 'STOPPED') badgeClass = 'badge-stopped';
                 if (v.status === 'OFFLINE') badgeClass = 'badge-offline';
                 if (v.status === 'EMERGENCY' || v.status === 'BREAKDOWN') badgeClass = 'badge-emergency';
+                if (v.status === 'OVERSPEED') badgeClass = 'badge-overspeed';
 
                 card.innerHTML = 
                     '<div class="d-flex justify-content-between align-items-center mb-1">' +
-                        '<strong class="text-dark">' + v.vehicle_number + '</strong>' +
+                        '<strong class="text-dark">' + esc(v.vehicle_number) + '</strong>' +
                         '<span class="badge ' + badgeClass + ' text-xs">' + v.status + '</span>' +
                     '</div>' +
-                    '<div class="text-xs text-muted mb-1"><i class="fa fa-route mr-1"></i>' + v.route_name + '</div>' +
+                    '<div class="text-xs text-muted mb-1"><i class="fa fa-route mr-1"></i>' + esc(v.route_name) + '</div>' +
                     '<div class="d-flex justify-content-between align-items-center text-xs text-muted">' +
-                        '<span><i class="fa fa-tachometer-alt mr-1"></i>' + v.speed + ' km/h</span>' +
+                        '<span><i class="fa fa-tachometer-alt mr-1"></i>' + v.speed + ' / ' + v.speed_limit + ' km/h</span>' +
                         '<span><i class="fa fa-clock mr-1"></i>' + v.last_seen + '</span>' +
                     '</div>';
 

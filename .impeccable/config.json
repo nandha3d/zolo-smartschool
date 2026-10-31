@@ -1,0 +1,14 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "overused-font",
+        "value": "inter",
+        "createdAt": "2026-10-30T07:55:59.133Z",
+        "reason": "Project design system already uses Inter (layouts/include.blade.php loaded it from Google Fonts before this change); this file only self-hosts the existing font to remove the Google request"
+      }
+    ]
+  }
+}

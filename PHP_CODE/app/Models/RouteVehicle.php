@@ -59,4 +59,45 @@ class RouteVehicle extends Model
     {
         return $this->belongsTo(PickupPoint::class, 'last_pickup_point_id');
     }
+
+    public function alternateDrivers()
+    {
+        return $this->hasMany(RouteVehicleAlternateDriver::class);
+    }
+
+    /**
+     * Route vehicles the user may operate on $date: as helper, as the primary driver when
+     * no relief driver has taken the run over, or as a rostered relief driver.
+     * $run is 'pickup', 'drop' or null (either run).
+     */
+    public function scopeOperatedBy($query, int $userId, $date = null, ?string $run = null)
+    {
+        return $query->where(function ($q) use ($userId, $date, $run) {
+            $q->where('helper_id', $userId)
+                ->orWhere(function ($primary) use ($userId, $date, $run) {
+                    $primary->where('driver_id', $userId)
+                        ->whereDoesntHave('alternateDrivers', function ($sub) use ($date, $run) {
+                            $sub->inForce($date, $run);
+                            // With no run given, a pickup-only or drop-only relief still
+                            // leaves the primary driver the other run.
+                            if ($run === null) {
+                                $sub->where('shift_type', RouteVehicleAlternateDriver::SHIFT_ALL);
+                            }
+                        });
+                })
+                ->orWhereHas('alternateDrivers', function ($sub) use ($userId, $date, $run) {
+                    $sub->inForce($date, $run)->where('alternate_driver_id', $userId);
+                });
+        });
+    }
+
+    /**
+     * Who drives this vehicle on $date for the run: the relief driver if one is rostered,
+     * otherwise the primary driver.
+     */
+    public function effectiveDriverId($date = null, ?string $run = null): ?int
+    {
+        $relief = $this->alternateDrivers()->inForce($date, $run)->latest('id')->value('alternate_driver_id');
+        return $relief ? (int) $relief : ($this->driver_id ? (int) $this->driver_id : null);
+    }
 }

@@ -36,7 +36,7 @@ class PickupPointController extends Controller
         }
 
         try {
-            PickupPoint::create($request->except('_token'));
+            PickupPoint::create($request->only(['name', 'latitude', 'longitude', 'status']));
             ResponseService::successResponse('Data Stored Successfully');
         } catch (Throwable $e) {
             ResponseService::logErrorResponse($e, "PickupPoint Controller -> Store Method");
@@ -109,7 +109,7 @@ class PickupPointController extends Controller
 
         try {
             $pickupPoint = PickupPoint::findOrFail($id);
-            $pickupPoint->update($request->except('_token'));
+            $pickupPoint->update($request->only(['name', 'latitude', 'longitude', 'status']));
             ResponseService::successResponse('Data Updated Successfully');
         } catch (Throwable $e) {
             ResponseService::logErrorResponse($e, "PickupPoint Controller -> Update Method");

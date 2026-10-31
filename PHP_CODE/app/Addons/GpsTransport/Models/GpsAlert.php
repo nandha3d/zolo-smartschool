@@ -27,15 +27,42 @@ class GpsAlert extends Model
         'is_resolved',
         'resolved_at',
         'resolved_by',
+        'driver_id',
+        'route_id',
+        'speed_limit',
+        'peak_speed',
+        'duration_seconds',
+        'acknowledged_by',
+        'acknowledged_at',
+        'admin_remarks',
     ];
 
     protected $casts = [
-        'latitude'    => 'float',
-        'longitude'   => 'float',
-        'speed'       => 'float',
-        'is_resolved' => 'boolean',
-        'resolved_at' => 'datetime',
+        'latitude'         => 'float',
+        'longitude'        => 'float',
+        'speed'            => 'float',
+        'speed_limit'      => 'float',
+        'peak_speed'       => 'float',
+        'duration_seconds' => 'integer',
+        'is_resolved'      => 'boolean',
+        'resolved_at'      => 'datetime',
+        'acknowledged_at'  => 'datetime',
     ];
+
+    public function driver()
+    {
+        return $this->belongsTo(User::class, 'driver_id')->withTrashed();
+    }
+
+    public function route()
+    {
+        return $this->belongsTo(\App\Models\Route::class, 'route_id');
+    }
+
+    public function acknowledger()
+    {
+        return $this->belongsTo(User::class, 'acknowledged_by');
+    }
 
     public function trip()
     {

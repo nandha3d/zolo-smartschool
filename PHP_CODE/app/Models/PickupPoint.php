@@ -14,11 +14,17 @@ class PickupPoint extends Model
         'name',
         'latitude',
         'longitude',
+        'geofence_radius',
+        'halt_duration_minutes',
+        'landmark',
+        'contact_person',
+        'contact_phone',
         'status',
     ];
 
     protected $casts = [
         'status' => 'integer',
+        'halt_duration_minutes' => 'integer',
     ];
 
     /**

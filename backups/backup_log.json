@@ -1,67 +1,58 @@
 ﻿[
     {
-        "value":  [
-                      {
-                          "value":  [
-                                        {
-                                            "value":  [
-                                                          "@{value=System.Object[]; Count=2}",
-                                                          "@{timestamp=2026-10-24 10:25:08; branch=main; commit=5c6bbe5; description=Automated session backup; snapshot=; git_bundle=}"
-                                                      ],
-                                            "Count":  2
-                                        },
-                                        {
-                                            "timestamp":  "2026-10-24 10:32:21",
-                                            "branch":  "main",
-                                            "commit":  "ada3a11",
-                                            "description":  "Automated session backup",
-                                            "snapshot":  {
-                                                             "file":  "zolo_snapshot_20261024_103221_ada3a11.zip",
-                                                             "size_bytes":  27989123,
-                                                             "size_mb":  26.69
-                                                         },
-                                            "git_bundle":  {
-                                                               "file":  "zolo_git_20261024_103221_ada3a11.bundle",
-                                                               "size_bytes":  34891865,
-                                                               "size_mb":  33.28
-                                                           }
-                                        }
-                                    ],
-                          "Count":  2
-                      },
-                      {
-                          "timestamp":  "2026-10-24 10:46:28",
-                          "branch":  "main",
-                          "commit":  "47a8861",
-                          "description":  "Automated session backup",
-                          "snapshot":  {
-                                           "file":  "zolo_snapshot_20261024_104628_47a8861.zip",
-                                           "size_bytes":  27990692,
-                                           "size_mb":  26.69
-                                       },
-                          "git_bundle":  {
-                                             "file":  "zolo_git_20261024_104628_47a8861.bundle",
-                                             "size_bytes":  34901033,
-                                             "size_mb":  33.28
-                                         }
-                      }
-                  ],
-        "Count":  2
+        "timestamp": "2026-10-24 10:25:08",
+        "branch": "main",
+        "commit": "5c6bbe5",
+        "description": "Automated session backup",
+        "snapshot": null,
+        "git_bundle": null
     },
     {
-        "timestamp":  "2026-10-24 11:52:27",
-        "branch":  "main",
-        "commit":  "4c33ef9",
-        "description":  "Automated session backup",
-        "snapshot":  {
-                         "file":  "zolo_snapshot_20261024_115227_4c33ef9.zip",
-                         "size_bytes":  27991541,
-                         "size_mb":  26.69
-                     },
-        "git_bundle":  {
-                           "file":  "zolo_git_20261024_115227_4c33ef9.bundle",
-                           "size_bytes":  34905023,
-                           "size_mb":  33.29
-                       }
+        "timestamp": "2026-10-24 10:32:21",
+        "branch": "main",
+        "commit": "ada3a11",
+        "description": "Automated session backup",
+        "snapshot": {
+            "file": "zolo_snapshot_20261024_103221_ada3a11.zip",
+            "size_bytes": 27989123,
+            "size_mb": 26.69
+        },
+        "git_bundle": {
+            "file": "zolo_git_20261024_103221_ada3a11.bundle",
+            "size_bytes": 34891865,
+            "size_mb": 33.28
+        }
+    },
+    {
+        "timestamp": "2026-10-24 10:46:28",
+        "branch": "main",
+        "commit": "47a8861",
+        "description": "Automated session backup",
+        "snapshot": {
+            "file": "zolo_snapshot_20261024_104628_47a8861.zip",
+            "size_bytes": 27990692,
+            "size_mb": 26.69
+        },
+        "git_bundle": {
+            "file": "zolo_git_20261024_104628_47a8861.bundle",
+            "size_bytes": 34901033,
+            "size_mb": 33.28
+        }
+    },
+    {
+        "timestamp": "2026-10-24 11:52:27",
+        "branch": "main",
+        "commit": "4c33ef9",
+        "description": "Automated session backup",
+        "snapshot": {
+            "file": "zolo_snapshot_20261024_115227_4c33ef9.zip",
+            "size_bytes": 27991541,
+            "size_mb": 26.69
+        },
+        "git_bundle": {
+            "file": "zolo_git_20261024_115227_4c33ef9.bundle",
+            "size_bytes": 34905023,
+            "size_mb": 33.29
+        }
     }
 ]

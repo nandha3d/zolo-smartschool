@@ -36,6 +36,8 @@ class VehicleController extends Controller
             'name' => 'required|string|max:255',
             'vehicle_number' => 'required|string|max:100|unique:vehicles,vehicle_number',
             'capacity' => 'required|numeric|min:1',
+            'speed_limit_kmh' => 'nullable|numeric|min:10|max:150',
+            'speed_alert_cooldown_minutes' => 'nullable|integer|min:1|max:60',
             'status' => 'required|in:0,1',
         ]);
 
@@ -50,6 +52,8 @@ class VehicleController extends Controller
                 'name' => $request->name,
                 'vehicle_number' => $request->vehicle_number,
                 'capacity' => $request->capacity,
+                'speed_limit_kmh' => $request->speed_limit_kmh ?: null,
+                'speed_alert_cooldown_minutes' => $request->speed_alert_cooldown_minutes ?: 3,
                 'status' => $request->status ?? 1
             ];
 
@@ -78,6 +82,8 @@ class VehicleController extends Controller
             'edit_vehicle_name' => 'required|string|max:255',
             'edit_vehicle_number' => 'required|string|max:100|unique:vehicles,vehicle_number,' . $id,
             'edit_capacity' => 'required|integer|min:1',
+            'edit_speed_limit_kmh' => 'nullable|numeric|min:10|max:150',
+            'edit_speed_alert_cooldown_minutes' => 'nullable|integer|min:1|max:60',
             'edit_status' => 'required|in:0,1',
         ]);
 
@@ -112,6 +118,8 @@ class VehicleController extends Controller
                 'name' => $request->edit_vehicle_name,
                 'vehicle_number' => $request->edit_vehicle_number,
                 'capacity' => $request->edit_capacity,
+                'speed_limit_kmh' => $request->edit_speed_limit_kmh ?: null,
+                'speed_alert_cooldown_minutes' => $request->edit_speed_alert_cooldown_minutes ?: 3,
                 'status' => $request->edit_status,
             ];
 

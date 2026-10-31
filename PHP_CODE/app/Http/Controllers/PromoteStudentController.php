@@ -100,13 +100,15 @@ class PromoteStudentController extends Controller {
                     $studentsData[] = array(
                         'id' => $user->student->id,
                         'roll_number' => (int)$key + 1,
+                        // the old label belongs to the previous class
+                        'roll_number_label' => null,
                         'class_section_id' => $request->new_class_section_id,
                         'session_year_id'  => $request->session_year_id,
                     );
                 }
 
                 // Upsert Student Data
-                $this->student->upsert($studentsData,['id'],['roll_number','class_section_id','session_year_id']);
+                $this->student->upsert($studentsData,['id'],['roll_number','roll_number_label','class_section_id','session_year_id']);
             }
 
             if (!empty($failStudentsIds)) {
@@ -230,14 +232,16 @@ class PromoteStudentController extends Controller {
             // $studentIds = json_decode($request->student_ids);
             $studentIds = explode(",",$request->student_ids);
             $roll_number_db = $this->student->builder()->select(DB::raw('max(roll_number)'))->where('class_section_id', $request->new_class_section_id)->first();
-            $roll_number_db = $roll_number_db['max(roll_number)'];
+            $roll_number_db = (int)$roll_number_db['max(roll_number)'];
 
             $updateStudent = array();
             foreach ($studentIds as $id) {
+                // each transferred student gets the next free number, not the same one
                 $updateStudent[] = array(
                     'id' => $id,
                     'class_section_id' => $request->new_class_section_id,
-                    'roll_number' => (int)$roll_number_db + 1,
+                    'roll_number' => ++$roll_number_db,
+                    'roll_number_label' => null,
                 );
             }
 
@@ -251,7 +255,7 @@ class PromoteStudentController extends Controller {
                 }
             }
 
-            $this->student->upsert($updateStudent,['id'],['class_section_id','roll_number']);
+            $this->student->upsert($updateStudent,['id'],['class_section_id','roll_number','roll_number_label']);
             DB::commit();
             ResponseService::successResponse("Data Updated Successfully");
         } catch (Throwable $e) {

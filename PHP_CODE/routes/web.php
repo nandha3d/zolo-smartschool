@@ -79,6 +79,9 @@ use App\Http\Controllers\DiaryController;
 use App\Http\Controllers\VehicleController;
 use App\Http\Controllers\DriverHelperController;
 use App\Http\Controllers\RouteVehicleController;
+use App\Http\Controllers\AlternateDriverController;
+use App\Http\Controllers\TeacherAttendanceController;
+use App\Http\Controllers\PeriodAttendanceController;
 use App\Http\Controllers\TransportationRequestController;
 use App\Http\Controllers\TransportationExpenseController;
 use App\Models\PaymentTransaction;
@@ -584,6 +587,12 @@ Route::group(['middleware' => ['Role', 'checkSchoolStatus', 'status','SwitchData
         // TODO : Improve this
         Route::group(['prefix' => 'attendance'], static function () {
             Route::get('view-attendance', [AttendanceController::class, 'view'])->name("attendance.view");
+            Route::get('period-matrix', [PeriodAttendanceController::class, 'matrix'])->name('attendance.period-matrix');
+            Route::get('period/slot', [PeriodAttendanceController::class, 'slot'])->name('period-attendance.slot');
+            Route::get('period/mark', [PeriodAttendanceController::class, 'mark'])->name('period-attendance.mark');
+            Route::post('period', [PeriodAttendanceController::class, 'store'])->name('period-attendance.store');
+            Route::get('period/students', [PeriodAttendanceController::class, 'students'])->name('period-attendance.students');
+            Route::post('period/gate-pass', [PeriodAttendanceController::class, 'gatePass'])->name('period-attendance.gate-pass');
             Route::get('student-attendance-list', [AttendanceController::class, 'attendance_show'])->name('attendance.list.show');
             Route::get('getAttendanceData', [AttendanceController::class, 'getAttendanceData']);
 
@@ -606,6 +615,16 @@ Route::group(['middleware' => ['Role', 'checkSchoolStatus', 'status','SwitchData
         });
 
         Route::resource('staff-attendance', StaffAttendanceController::class)->only(['index', 'store', 'show']);
+
+        /*** Teacher attendance & proxy cover ***/
+        Route::group(['prefix' => 'teacher-attendance'], static function () {
+            Route::get('/', [TeacherAttendanceController::class, 'index'])->name('teacher-attendance.index');
+            Route::get('data', [TeacherAttendanceController::class, 'data'])->name('teacher-attendance.data');
+            Route::post('/', [TeacherAttendanceController::class, 'store'])->name('teacher-attendance.store');
+            Route::get('proxy-plan', [TeacherAttendanceController::class, 'proxyPlan'])->name('teacher-attendance.proxy-plan');
+            Route::post('proxy', [TeacherAttendanceController::class, 'assignProxy'])->name('teacher-attendance.proxy.assign');
+            Route::post('proxy/remove', [TeacherAttendanceController::class, 'removeProxy'])->name('teacher-attendance.proxy.remove');
+        });
 
         /*** Lesson ***/
         Route::group(['prefix' => 'lesson'], static function () {
@@ -1036,6 +1055,10 @@ Route::group(['middleware' => ['Role', 'checkSchoolStatus', 'status','SwitchData
     Route::resource('route-vehicle', RouteVehicleController::class)->only(['index', 'store', 'show', 'update', 'destroy']);
     Route::put("route-vehicle/{id}/restore", [RouteVehicleController::class, 'restore'])->name('route-vehicle.restore');
     Route::delete("route-vehicle/{id}/trash", [RouteVehicleController::class, 'trash'])->name('route-vehicle.trash');
+    Route::get('relief-drivers', [AlternateDriverController::class, 'index'])->name('relief-drivers.index');
+    Route::get('relief-drivers/list', [AlternateDriverController::class, 'list'])->name('relief-drivers.list');
+    Route::post('relief-drivers', [AlternateDriverController::class, 'store'])->name('relief-drivers.store');
+    Route::post('relief-drivers/{id}/cancel', [AlternateDriverController::class, 'cancel'])->name('relief-drivers.cancel');
 
     Route::prefix('transportation-requests')->name('transportation-requests.')->group(function () {
         Route::get('cancel/{id}', [TransportationRequestController::class, 'cancelTransportationService'])->name('cancel');

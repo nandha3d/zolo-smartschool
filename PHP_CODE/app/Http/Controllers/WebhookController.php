@@ -306,7 +306,7 @@ class WebhookController extends Controller
         try {
             // Parse webhook data
             $data = json_decode($webhookBody);
-            Log::info("Razorpay Webhook Data:", ['data' => $data]);
+            Log::info("Razorpay Webhook Data:", ['event' => $data->event ?? null]);
 
             if (!$data || !isset($data->payload->payment->entity)) {
                 throw new \Exception('Invalid webhook payload structure');
@@ -400,7 +400,7 @@ class WebhookController extends Controller
         Log::info(PHP_EOL . "----------------------------------------------------------------------------------------------------------------------");
         try {
             $data = json_decode($webhookBody, false, 512, JSON_THROW_ON_ERROR);
-            Log::info("Paystack Webhook : ", [$data]);
+            Log::info("Paystack Webhook : ", ['event' => $data->event ?? null, 'reference' => $data->data->reference ?? null]);
 
             // Get metadata from the webhook payload
             $metadata = $data->data->metadata;
@@ -422,22 +422,15 @@ class WebhookController extends Controller
             $webhookSecret = $paymentConfiguration['secret_key'];
 
             // Verify webhook signature
-            $expectedSignature = $_SERVER['HTTP_X_PAYSTACK_SIGNATURE'];
-            $calculatedSignature = hash_hmac('sha512', $webhookBody, $webhookSecret);
-
-            $paymentTransactionData = PaymentTransaction::where('order_id', $data->data->reference)->first();
-            if ($expectedSignature !== $calculatedSignature) {
-
-                // send notification
-                \Log::info("Failed Notification in Paystack");
-                $user = User::where('id', $metadata->parent_id)->first();
-                \Log::info("User ID : ", [$user]);
-                $body = 'Amount :- ' . $paymentTransactionData->amount;
-                $type = 'payment';
-                send_notification([$user->id], 'Fees Payment Failed', $body, $type, ['is_payment_success' => 'false']);
-                \Log::info("send_notification", [$user->id]);
+            // A bad signature means the body is not from Paystack: reject it without
+            // notifying anyone, since parent_id in a forged body is attacker-chosen.
+            $expectedSignature = (string) ($_SERVER['HTTP_X_PAYSTACK_SIGNATURE'] ?? '');
+            $calculatedSignature = hash_hmac('sha512', $webhookBody, (string) $webhookSecret);
+            if ($expectedSignature === '' || empty($webhookSecret) || !hash_equals($calculatedSignature, $expectedSignature)) {
                 throw new SignatureVerificationException('Invalid signature');
             }
+
+            $paymentTransactionData = PaymentTransaction::where('order_id', $data->data->reference)->first();
 
             // Get the payment transaction dat
 
@@ -695,15 +688,15 @@ class WebhookController extends Controller
             DB::setDefaultConnection('school');
 
             // You can find your endpoint's secret in your webhook settings
-            $paymentConfiguration = PaymentConfiguration::select(['secret_key', 'api_key'])->where('payment_method', 'flutterwave')->where('school_id', $school_id ?? null)->first();
+            $paymentConfiguration = PaymentConfiguration::select(['secret_key', 'api_key', 'webhook_secret_key'])->where('payment_method', 'flutterwave')->where('school_id', $school_id ?? null)->first();
 
-
-            $webhookSecret = $paymentConfiguration['secret_key'];
-            $webhookPublic = $paymentConfiguration['api_key'];
-
-
-            $api = new Api($webhookPublic, $webhookSecret);
-
+            // Flutterwave sends the dashboard "secret hash" in verif-hash. Check it before
+            // the body is trusted; otherwise a forged charge.completed marks fees paid.
+            $webhookSecret = (string) ($paymentConfiguration->webhook_secret_key ?? '');
+            $receivedHash = (string) ($_SERVER['HTTP_VERIF_HASH'] ?? '');
+            if ($webhookSecret === '' || $receivedHash === '' || !hash_equals($webhookSecret, $receivedHash)) {
+                throw new SignatureVerificationException('Flutterwave verif-hash mismatch');
+            }
 
             //get the current today's date
             $current_date = date('Y-m-d');
@@ -712,18 +705,18 @@ class WebhookController extends Controller
 
                 Log::info('Payment completed');
 
-                //checks the signature
-                $expectedSignature = hash_hmac("SHA256", $webhookBody, $webhookSecret);
-
-                $api->utility->verifyWebhookSignature($webhookBody, $expectedSignature, $webhookSecret);
                 $paymentTransactionData = PaymentTransaction::where('order_id', $data->data->tx_ref)->first();
 
                 if ($paymentTransactionData == null) {
                     Log::error("Flutterwave Webhook : Payment Transaction id not found");
+                    http_response_code(200);
+                    return;
                 }
 
-                if ($paymentTransactionData->status == "succeed") {
+                if ($paymentTransactionData->payment_status == "succeed") {
                     Log::info("Flutterwave Webhook : Transaction Already Succeed");
+                    http_response_code(200);
+                    return;
                 }
                 $fees = Fee::where('id', $data->meta_data->fees_id)->with(['fees_class_type', 'fees_class_type.fees_type'])->firstOrFail();
 
@@ -857,12 +850,15 @@ class WebhookController extends Controller
                 \Log::info("send_notification", [$user->id]);
                 http_response_code(200);
             } elseif (isset($data->event) && $data->event == 'charge.failed') {
-                $paymentTransactionData = PaymentTransaction::find($data->data->id);
+                // data.id is Flutterwave's own id, not ours; match on tx_ref like charge.completed.
+                $paymentTransactionData = PaymentTransaction::where('order_id', $data->data->tx_ref ?? null)->first();
                 if (!$paymentTransactionData) {
                     Log::error("Flutterwave Webhook : Payment Transaction id not found --->");
+                    http_response_code(200);
+                    return;
                 }
 
-                PaymentTransaction::find($data->data->id)->update(['payment_status' => "failed"]);
+                $paymentTransactionData->update(['payment_status' => "failed"]);
                 if ($data->meta_data->fees_type == "transportation_fee") {
                     TransportationPayment::where('payment_transaction_id', $paymentTransactionData->id)
                         ->update([

@@ -90,8 +90,13 @@ $logEntries = @()
 if (Test-Path $logFile) {
     try {
         $raw = Get-Content -Path $logFile -Raw
-        if ($raw) { $logEntries = @(ConvertFrom-Json $raw) }
-    } catch { }
+        # Windows PowerShell 5.1 emits a parsed JSON array as ONE object; unroll it, or
+        # every run nests the previous log one level deeper until Depth truncates it.
+        if ($raw) { $logEntries = @($raw | ConvertFrom-Json | ForEach-Object { $_ }) }
+    } catch {
+        Write-Host "      Existing backup log is unreadable; starting a new one" -ForegroundColor DarkYellow
+        Copy-Item -Path $logFile -Destination ($logFile + ".corrupt_" + $timestamp) -Force
+    }
 }
 
 $newEntry = [PSCustomObject]@{
@@ -112,7 +117,8 @@ $newEntry = [PSCustomObject]@{
 }
 
 $logEntries += $newEntry
-$logEntries | ConvertTo-Json -Depth 5 | Set-Content -Path $logFile -Encoding UTF8
+# -InputObject keeps a one-entry log as a JSON array instead of a bare object.
+ConvertTo-Json -InputObject @($logEntries) -Depth 5 | Set-Content -Path $logFile -Encoding UTF8
 
 Write-Host "==================================================" -ForegroundColor Cyan
 Write-Host " Backup Complete!" -ForegroundColor Green

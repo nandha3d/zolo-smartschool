@@ -88,12 +88,12 @@
                                 </div>
                                 {{-- <div class="form-group p-1">
                                     <label>{{ __('note') }}</label>
-                                    <input type="text" name="note" value="{!! htmlspecialchars_decode($onlineExamQuestion->note) !!}" class="form-control">
+                                    <input type="text" name="note" value="{{ htmlspecialchars_decode($onlineExamQuestion->note) }}" class="form-control">
                                 </div> --}}
                                 <div class="row">
                                     <div class="form-group col-md-6 p-1">
                                         <label>{{ __('note') }}</label>
-                                    <input type="text" name="note" value="{!! htmlspecialchars_decode($onlineExamQuestion->note) !!}" class="form-control">
+                                    <input type="text" name="note" value="{{ htmlspecialchars_decode($onlineExamQuestion->note) }}" class="form-control">
                                     </div>
                                     <div class="form-group col-md-6 p-1">
                                         <label>Difficulty <span class="text-danger">*</span></label><br>

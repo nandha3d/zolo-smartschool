@@ -31,7 +31,7 @@ class MediumController extends Controller
             'name' => ['required', new uniqueForSchool('mediums', 'name')]
         ]);
         try {
-            $this->medium->create($request->except('_token'));
+            $this->medium->create($request->only(['name']));
             ResponseService::successResponse('Data Stored Successfully');
         } catch (Throwable $e) {
             ResponseService::logErrorResponse($e);
@@ -52,7 +52,7 @@ class MediumController extends Controller
             'name' => ['required', new uniqueForSchool('mediums', 'name', $id)]
         ]);
         try {
-            $this->medium->update($id, $request->except(['_token', 'id']));
+            $this->medium->update($id, $request->only(['name']));
             $response = ['error' => false, 'message' => trans('Data Updated Successfully'),];
         } catch (Throwable $e) {
             ResponseService::logErrorResponse($e, "Medium Controller -> Update method");
