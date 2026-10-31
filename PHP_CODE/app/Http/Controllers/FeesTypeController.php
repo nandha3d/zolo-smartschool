@@ -7,6 +7,7 @@ use App\Services\BootstrapTableService;
 use App\Services\ResponseService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use Throwable;
 
 class FeesTypeController extends Controller
@@ -29,9 +30,13 @@ class FeesTypeController extends Controller
     {
         ResponseService::noFeatureThenSendJson('Fees Management');
         ResponseService::noPermissionThenSendJson('fees-type-create');
+        $validator = Validator::make($request->all(), ['name' => 'required|string|max:191', 'description' => 'nullable|string|max:1000']);
+        if ($validator->fails()) {
+            ResponseService::validationError($validator->errors()->first());
+        }
         try {
             DB::beginTransaction();
-            $feesType = $this->feesType->create($request->except('_token'));
+            $feesType = $this->feesType->create($request->only(['name', 'description']));
             DB::commit();
             ResponseService::successResponse('Data Stored Successfully');
         } catch (Throwable $e) {
@@ -99,6 +104,10 @@ class FeesTypeController extends Controller
     {
         ResponseService::noFeatureThenSendJson('Fees Management');
         ResponseService::noPermissionThenSendJson('fees-type-edit');
+        $validator = Validator::make($request->all(), ['edit_name' => 'required|string|max:191', 'edit_description' => 'nullable|string|max:1000']);
+        if ($validator->fails()) {
+            ResponseService::validationError($validator->errors()->first());
+        }
         try {
             $this->feesType->update($id, [
                 'name' => $request->edit_name,

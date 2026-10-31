@@ -1992,7 +1992,7 @@
         doc.open();
         doc.write('<!DOCTYPE html>');
         doc.write('<html><head><title>' + printTitle + '<\/title>');
-        doc.write('<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">');
+        doc.write('<link rel="stylesheet" href="{{ asset('assets/vendor/bootstrap4.6/bootstrap.min.css') }}">');
         doc.write('<style>body{font-family:Inter,sans-serif;padding:20px;}.single-matrix-table{width:100%;border-collapse:separate;border-spacing:4px;}.single-matrix-table th,.single-matrix-table td{border:1px solid #ccc;padding:6px;text-align:center;}.modern-slot-card{border:1px solid #ddd;padding:6px;border-radius:6px;}.slot-subject-pill{font-weight:bold;color:#fff;padding:2px 6px;border-radius:4px;}<\/style>');
         doc.write('<\/head><body>');
         doc.write('<h4>' + printTitle + '<\/h4>');

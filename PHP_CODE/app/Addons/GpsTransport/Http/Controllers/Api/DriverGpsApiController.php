@@ -14,6 +14,7 @@ use App\Addons\GpsTransport\Services\GpsNotificationService;
 use App\Addons\GpsTransport\Services\LocationGateway;
 use App\Addons\GpsTransport\Services\TrackingEngine;
 use App\Http\Controllers\Controller;
+use App\Models\RouteVehicle;
 use App\Services\ResponseService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -66,11 +67,12 @@ class DriverGpsApiController extends Controller
                 'tripStops.stop',
                 'studentAttendances.student.user',
             ])
-            ->where(function ($q) use ($driver) {
-                $q->where('driver_id', $driver->id)->orWhereNull('driver_id');
-            })
             ->whereIn('status', ['SCHEDULED', 'READY', 'ACTIVE', 'PAUSED'])
             ->get()
+            ->filter(fn ($trip) => $trip->status === 'ACTIVE'
+                ? (int) $trip->driver_id === (int) $driver->id
+                : $this->mayDrive($trip, (int) $driver->id))
+            ->values()
             ->map(function ($trip) {
                 return [
                     'trip_id'          => $trip->id,
@@ -135,8 +137,9 @@ class DriverGpsApiController extends Controller
             $trip = GpsTrip::findOrFail($request->trip_id);
             $driver = Auth::user();
 
-            // Only an unassigned trip or the driver's own, and only one active trip per driver.
-            if ($trip->driver_id && (int) $trip->driver_id !== (int) $driver->id) {
+            // Only an unassigned trip, the driver's own, or one they are rostered to relieve;
+            // and only one active trip per driver.
+            if (!$this->mayDrive($trip, (int) $driver->id)) {
                 return response()->json(['error' => true, 'message' => 'This trip is assigned to another driver.'], 403);
             }
             if (!in_array($trip->status, ['SCHEDULED', 'READY', 'PAUSED'], true)) {
@@ -539,5 +542,28 @@ class DriverGpsApiController extends Controller
     private function ownTrip(int $tripId): ?GpsTrip
     {
         return GpsTrip::where('id', $tripId)->where('driver_id', Auth::id())->first();
+    }
+
+    /**
+     * May this driver run the trip today? A relief driver rostered on the trip's route
+     * vehicle takes it over (and the primary driver is locked out); otherwise the trip's
+     * own driver, or anyone for an unassigned trip.
+     */
+    private function mayDrive(GpsTrip $trip, int $userId): bool
+    {
+        $run = match ($trip->trip_type) {
+            'MORNING' => 'pickup',
+            'EVENING' => 'drop',
+            default   => null,
+        };
+        $routeVehicle = RouteVehicle::where('route_id', $trip->route_id)->where('vehicle_id', $trip->vehicle_id)
+            ->where('status', 1)->first();
+        if ($routeVehicle) {
+            $relief = $routeVehicle->alternateDrivers()->inForce(Carbon::today(), $run)->latest('id')->value('alternate_driver_id');
+            if ($relief) {
+                return (int) $relief === $userId;
+            }
+        }
+        return !$trip->driver_id || (int) $trip->driver_id === $userId;
     }
 }

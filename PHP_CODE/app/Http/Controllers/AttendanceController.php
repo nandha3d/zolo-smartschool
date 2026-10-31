@@ -227,9 +227,10 @@ class AttendanceController extends Controller
 
     public function attendance_show(Request $request)
     {
-        ResponseService::noPermissionThenSendJson('attendance-list');
-        ResponseService::noFeatureThenRedirect('Attendance Management');
-        ResponseService::noAnyPermissionThenRedirect(['class-teacher', 'attendance-list']);
+        // Class teachers reach View Attendance with only `class-teacher`, so requiring
+        // attendance-list first left their table empty.
+        ResponseService::noFeatureThenSendJson('Attendance Management');
+        ResponseService::noAnyPermissionThenSendJson(['class-teacher', 'attendance-list']);
 
         $offset = request('offset', 0);
         $limit = request('limit');
@@ -244,6 +245,10 @@ class AttendanceController extends Controller
         $validator = Validator::make($request->all(), ['class_section_id' => 'required', 'date' => 'required',]);
         if ($validator->fails()) {
             ResponseService::errorResponse($validator->errors()->first());
+        }
+        // A class teacher only sees their own classes (the same list the page offers).
+        if (!$this->classSection->builder()->ClassTeacher()->where('id', $class_section_id)->exists()) {
+            ResponseService::errorResponse("You Don't have enough permissions");
         }
 
         $sessionYear = $this->cache->getDefaultSessionYear();

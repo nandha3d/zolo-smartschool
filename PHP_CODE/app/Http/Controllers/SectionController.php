@@ -37,7 +37,7 @@ class SectionController extends Controller
         }
         try {
 
-            $this->section->create($request->except('_token'));
+            $this->section->create($request->only(['name']));
             ResponseService::successResponse('Data Stored Successfully');
 
         } catch (Throwable $e) {
@@ -55,7 +55,7 @@ class SectionController extends Controller
             ResponseService::errorResponse($validator->errors()->first());
         }
         try {
-            $this->section->update($id, $request->except('_token'));
+            $this->section->update($id, $request->only(['name']));
             ResponseService::successResponse('Data Updated Successfully');
         } catch (Throwable $e) {
             ResponseService::logErrorResponse($e);

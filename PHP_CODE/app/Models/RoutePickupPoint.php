@@ -14,12 +14,42 @@ class RoutePickupPoint extends Model
         'pickup_point_id',
         'pickup_time',
         'drop_time',
-        'order'
+        'order',
+        'morning_order',
+        'afternoon_order',
+        'is_active',
     ];
 
     protected $casts = [
-        'order' => 'integer'
+        'order' => 'integer',
+        'morning_order' => 'integer',
+        'afternoon_order' => 'integer',
+        'is_active' => 'boolean',
     ];
+
+    /**
+     * Active stops of a route in the order the bus visits them: the morning (pickup) order,
+     * or the afternoon (drop) order, which defaults to the morning route in reverse.
+     * Stops saved by the older route form only have `order`, so that is the fallback.
+     */
+    public static function forTrip(int $routeId, string $tripType, bool $includeInactive = false)
+    {
+        $stops = static::with('pickupPoint')
+            ->where('route_id', $routeId)
+            ->when(!$includeInactive, fn ($q) => $q->where(fn ($q2) => $q2->where('is_active', true)->orWhereNull('is_active')))
+            ->get();
+
+        $morning = $stops->sortBy(fn ($s) => [$s->morning_order ?? $s->order, $s->id])->values();
+        if (strtoupper($tripType) !== 'EVENING') {
+            return $morning;
+        }
+
+        $reversed = $morning->reverse()->values();
+        return $stops->sortBy(function ($s) use ($reversed) {
+            $fallback = $reversed->search(fn ($r) => $r->id === $s->id) + 1;
+            return [$s->afternoon_order ?? $fallback, $s->id];
+        })->values();
+    }
 
     /**
      * Get the route that owns this route pickup point.

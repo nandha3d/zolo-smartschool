@@ -60,5 +60,10 @@ return [
         // are for light use only; point this at your own tile server for production.
         'tile_url' => env('GPS_MAP_TILE_URL', 'https://tile.openstreetmap.org/{z}/{x}/{y}.png'),
         'attribution' => env('GPS_MAP_ATTRIBUTION', '© OpenStreetMap contributors'),
+        // OSRM-compatible routing server used by the route builder's "Snap to roads"
+        // (e.g. https://osrm.example.com). Empty = the button is hidden and the route
+        // line joins stops directly. Point it at a server you run: the browser sends
+        // the stop coordinates to it.
+        'routing_url' => env('GPS_ROUTING_URL', ''),
     ],
 ];

@@ -41,6 +41,18 @@
                                 </div>
 
                                 <div class="form-group col-md-4">
+                                    <label for="speed_limit_kmh">{{ __('Speed limit (km/h)') }}</label>
+                                    <input type="number" name="speed_limit_kmh" id="speed_limit_kmh" class="form-control"
+                                        min="10" max="150" step="1" placeholder="{{ __('School default') }} ({{ (int) config('gpstransport.defaults.speed_limit_kmh', 45) }})">
+                                </div>
+
+                                <div class="form-group col-md-4">
+                                    <label for="speed_alert_cooldown_minutes">{{ __('Repeat overspeed alert after (minutes)') }}</label>
+                                    <input type="number" name="speed_alert_cooldown_minutes" id="speed_alert_cooldown_minutes" class="form-control"
+                                        min="1" max="60" value="3">
+                                </div>
+
+                                <div class="form-group col-md-4">
                                     <label for="status">{{ __('status') }} <span class="text-danger">*</span></label>
                                     <select name="status" id="status" class="form-control" required>
                                         <option value="1">{{ __('active') }}</option>
@@ -83,6 +95,7 @@
                                     <th scope="col" data-field="name">{{ __('name') }}</th>
                                     <th scope="col" data-field="vehicle_number">{{__('vehicle_number')}}</th>
                                     <th scope="col" data-field="capacity">{{__('vehicle_capacity')}}</th>
+                                    <th scope="col" data-field="speed_limit_kmh">{{ __('Speed limit (km/h)') }}</th>
                                     <th scope="col" data-field="status">
                                         {{ __('status') }}
                                     </th>
@@ -129,6 +142,18 @@
                                             class="text-danger">*</span></label>
                                     <input type="number" min="1" name="edit_capacity" id="edit_capacity"
                                         class="form-control" placeholder="{{ __('vehicle_capacity') }}" required>
+                                </div>
+
+                                <div class="form-group col-md-6">
+                                    <label for="edit_speed_limit_kmh">{{ __('Speed limit (km/h)') }}</label>
+                                    <input type="number" min="10" max="150" step="1" name="edit_speed_limit_kmh" id="edit_speed_limit_kmh"
+                                        class="form-control" placeholder="{{ __('School default') }} ({{ (int) config('gpstransport.defaults.speed_limit_kmh', 45) }})">
+                                </div>
+
+                                <div class="form-group col-md-6">
+                                    <label for="edit_speed_alert_cooldown_minutes">{{ __('Repeat alert after (min)') }}</label>
+                                    <input type="number" min="1" max="60" name="edit_speed_alert_cooldown_minutes" id="edit_speed_alert_cooldown_minutes"
+                                        class="form-control">
                                 </div>
 
                                 <div class="form-group col-md-12">

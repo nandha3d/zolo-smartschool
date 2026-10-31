@@ -584,18 +584,106 @@ class TimetableController extends Controller
     public function teacherShow($teacherID)
     {
         ResponseService::noFeatureThenRedirect('Timetable Management');
+        // Teachers open their own timetable from the sidebar; anyone else's needs timetable-list.
+        if ((int) $teacherID !== (int) Auth::id()) {
+            ResponseService::noPermissionThenRedirect('timetable-list');
+        }
         $teacher = $this->user->findById($teacherID, ['id', 'first_name', 'last_name']);
         $timetables = $this->timetable->builder()->whereHas('subject_teacher', function ($q) use ($teacherID) {
             $q->where('teacher_id', $teacherID);
-        })->with('subject:id,name,bg_color', 'class_section.class', 'class_section.section', 'class_section.medium')->get();
+        })->with('subject:id,name,bg_color', 'class_section.class', 'class_section.section', 'class_section.medium', 'period', 'resource:id,name')
+            ->CurrentSemesterData()->get();
 
-        // Get Timetable Settings Data
-        $timetableSettingsData = $this->schoolSettings->getBulkData([
-            'timetable_start_time',
-            'timetable_end_time',
-            'timetable_duration'
-        ]);
-        return view('timetable.teacher.view', compact('timetables', 'teacher', 'timetableSettingsData'));
+        $grid = $this->teacherGrid($timetables);
+
+        // Proxy periods this teacher covers this week (date-specific, so outside the grid).
+        $weekStart = Carbon::now()->startOfWeek();
+        $proxyCover = \App\Models\ProxyTeacherAssignment::with(['timetable', 'classSection.class', 'classSection.section', 'classSection.medium', 'subject', 'absentTeacher'])
+            ->where('proxy_teacher_id', $teacherID)
+            ->whereBetween('date', [$weekStart->toDateString(), $weekStart->copy()->addDays(6)->toDateString()])
+            ->orderBy('date')->get();
+
+        return view('timetable.teacher.view', compact('teacher', 'grid', 'proxyCover'));
+    }
+
+    /**
+     * Period-by-day grid for the teacher timetable. Rows are the school's bell periods
+     * (breaks included) when set up, otherwise the distinct lesson times with the gaps
+     * between them shown as breaks. Every lesson sits in the row(s) it overlaps, so cards
+     * line up with the bell times instead of drifting on a fixed-slot calendar.
+     */
+    private function teacherGrid($timetables): array
+    {
+        $days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        if ($timetables->contains('day', 'Sunday')) {
+            $days[] = 'Sunday';
+        }
+
+        $hm = fn ($t) => substr((string) $t, 0, 5);
+        $periods = TimetablePeriod::owner()->where('is_active', true)->orderBy('start_time')->get()
+            ->unique(fn ($p) => $p->start_time . '-' . $p->end_time);
+
+        if ($periods->isNotEmpty()) {
+            $rows = $periods->map(fn ($p) => [
+                'label'   => $p->name ?: ($p->is_instructional ? 'Period ' . $p->period_number : 'Break'),
+                'start'   => $hm($p->start_time),
+                'end'     => $hm($p->end_time),
+                'is_break'=> !$p->is_instructional,
+                'period_id' => $p->id,
+            ])->values()->all();
+        } else {
+            $ranges = $timetables->where('type', 'Lecture')
+                ->map(fn ($t) => [$hm($t->start_time), $hm($t->end_time)])
+                ->unique(fn ($r) => $r[0] . '-' . $r[1])
+                ->sortBy(fn ($r) => $r[0])->values();
+            $rows = [];
+            $n = 0;
+            foreach ($ranges as $r) {
+                $last = end($rows);
+                if ($last && $last['end'] < $r[0]) {
+                    $rows[] = ['label' => 'Break', 'start' => $last['end'], 'end' => $r[0], 'is_break' => true, 'period_id' => null];
+                }
+                // Overlapping ranges from different classes share one row.
+                if ($last && !$last['is_break'] && $r[0] < $last['end']) {
+                    $rows[count($rows) - 1]['end'] = max($last['end'], $r[1]);
+                    continue;
+                }
+                $rows[] = ['label' => 'Period ' . (++$n), 'start' => $r[0], 'end' => $r[1], 'is_break' => false, 'period_id' => null];
+            }
+        }
+
+        $place = function ($lessons, array $rows) use ($hm) {
+            $cells = [];
+            $unplaced = collect();
+            foreach ($lessons as $t) {
+                $placed = false;
+                foreach ($rows as $i => $row) {
+                    $match = $hm($t->start_time) < $row['end'] && $hm($t->end_time) > $row['start'];
+                    if ($match && !$row['is_break']) {
+                        $cells[$i][$t->day][] = $t;
+                        $placed = true;
+                    }
+                }
+                if (!$placed) {
+                    $unplaced->push($t);
+                }
+            }
+            return [$cells, $unplaced];
+        };
+
+        $lessons = $timetables->where('type', 'Lecture');
+        [$cells, $unplaced] = $place($lessons, $rows);
+        // A lesson outside every bell period (e.g. made before the periods were set up)
+        // still gets a row of its own rather than disappearing.
+        if ($unplaced->isNotEmpty()) {
+            foreach ($unplaced->map(fn ($t) => [$hm($t->start_time), $hm($t->end_time)])->unique(fn ($r) => $r[0] . '-' . $r[1]) as $r) {
+                $rows[] = ['label' => $r[0], 'start' => $r[0], 'end' => $r[1], 'is_break' => false, 'period_id' => null];
+            }
+            usort($rows, fn ($a, $b) => [$a['start'], $a['end']] <=> [$b['start'], $b['end']]);
+            [$cells] = $place($lessons, $rows);
+        }
+
+        return ['days' => $days, 'rows' => $rows, 'cells' => $cells];
     }
 
     public function updateTimetableSettings(Request $request)
@@ -1899,81 +1987,10 @@ class TimetableController extends Controller
             'date'       => 'required|date',
         ]);
 
-        $schoolId = Auth::user()->school_id;
-        $absentId = (int) $request->teacher_id;
+        // Same rules as the teacher attendance cockpit (free, present, not unavailable).
         $date = Carbon::parse($request->date);
         $day = $date->format('l');
-
-        $dayLessons = $this->timetable->builder()
-            ->where('type', 'Lecture')
-            ->where('day', $day)
-            ->with(['subject:id,name', 'subject_teacher:id,teacher_id', 'class_section.class', 'class_section.section', 'class_section.medium'])
-            ->CurrentSemesterData()
-            ->orderBy('start_time')
-            ->get();
-
-        $absentLessons = $dayLessons->filter(fn($t) => (int) $t->subject_teacher?->teacher_id === $absentId)->values();
-
-        $onLeave = Leave::where('school_id', $schoolId)
-            ->where('status', 1)
-            ->whereHas('leave_detail', fn($q) => $q->whereDate('date', $date->toDateString()))
-            ->pluck('user_id')
-            ->all();
-
-        $teachers = $this->user->builder()->role('Teacher')
-            ->where('id', '!=', $absentId)
-            ->whereNotIn('id', $onLeave)
-            ->get(['id', 'first_name', 'last_name']);
-
-        $assignments = SubjectTeacher::whereIn('teacher_id', $teachers->pluck('id'))
-            ->get(['teacher_id', 'subject_id', 'class_section_id'])
-            ->groupBy('teacher_id');
-
-        $unavailable = TeacherAvailability::where('school_id', $schoolId)
-            ->where('day', $day)
-            ->where('status', 'unavailable')
-            ->get(['teacher_id', 'period_id'])
-            ->groupBy('teacher_id')
-            ->map(fn($g) => $g->pluck('period_id')->flip()->all());
-
-        $busyByTeacher = $dayLessons->groupBy(fn($t) => $t->subject_teacher?->teacher_id);
-
-        $result = $absentLessons->map(function ($lesson) use ($teachers, $assignments, $unavailable, $busyByTeacher) {
-            $candidates = [];
-            foreach ($teachers as $teacher) {
-                $busy = $busyByTeacher->get($teacher->id, collect());
-                $clash = $busy->first(fn($b) => $b->start_time < $lesson->end_time && $b->end_time > $lesson->start_time);
-                if ($clash || ($lesson->period_id && isset($unavailable[$teacher->id][$lesson->period_id]))) {
-                    continue;
-                }
-
-                $teaches = $assignments->get($teacher->id, collect());
-                $sameSubject = $teaches->contains('subject_id', $lesson->subject_id);
-                $sameClass = $teaches->contains('class_section_id', $lesson->class_section_id);
-                $reasons = [];
-                if ($sameSubject) $reasons[] = 'teaches ' . ($lesson->subject?->name ?? 'this subject');
-                if ($sameClass) $reasons[] = 'already teaches this class';
-                $reasons[] = $busy->count() . ' lessons that day';
-
-                $candidates[] = [
-                    'teacher_id'   => $teacher->id,
-                    'name'         => trim($teacher->first_name . ' ' . $teacher->last_name),
-                    'score'        => ($sameSubject ? 20 : 0) + ($sameClass ? 10 : 0) - $busy->count(),
-                    'lessons_that_day' => $busy->count(),
-                    'reasons'      => $reasons,
-                ];
-            }
-            usort($candidates, fn($a, $b) => [$b['score'], $a['name']] <=> [$a['score'], $b['name']]);
-
-            return [
-                'timetable_id' => $lesson->id,
-                'class_name'   => $lesson->class_section?->full_name,
-                'subject_name' => $lesson->subject?->name,
-                'start_time'   => $lesson->start_time,
-                'end_time'     => $lesson->end_time,
-                'candidates'   => array_slice($candidates, 0, 5),
-            ];
-        })->values();
+        $result = app(\App\Services\Timetable\TeacherScheduleService::class)->proxyPlan((int) $request->teacher_id, $date);
 
         return response()->json([
             'error'   => false,

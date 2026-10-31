@@ -1,11 +1,8 @@
 @php
     $lang = Session::get('language');
 @endphp
-{{-- Inter Font System (Weights 300, 400, 500, 600, 700, 800) --}}
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-{{-- Self-hosted fonts & icon packs --}}
+{{-- Self-hosted fonts & icon packs (Inter is served locally: no Google Fonts request) --}}
+<link rel="stylesheet" href="{{ asset('/assets/fonts/inter/inter.css') }}">
 <link rel="stylesheet" href="{{ asset('/assets/fonts/material-symbols/material-symbols-sharp.css') }}">
 <link rel="stylesheet" href="{{ asset('/assets/fonts/zolo/zolo-fonts.css') }}">
 <link rel="stylesheet" href="{{ asset('/assets/css/materialdesignicons.min.css') }}">

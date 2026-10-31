@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Zolo SmartSchool — Master Project Audit, Security & Architecture Dossier 2026</title>
+<title>Zolo Audit Re-run</title>
 <style>
 :root {
   --bg-primary: #0b0f19;
@@ -418,1431 +418,310 @@ footer.report-footer {
   border-top: 1px solid var(--border-color);
   margin-top: 40px;
 }
+.pill-blocked { background: #6366f1; color: #ffffff; }
+.pill-new { background: #0ea5e9; color: #ffffff; }
+.diff-note { color: var(--text-muted); font-size: 0.8rem; }
+@media (max-width: 900px) {
+  aside.sidebar { display: none; }
+  main.content { margin-left: 0; max-width: 100%; padding: 20px 16px; }
+}
 </style>
 </head>
 <body>
 
-<!-- Sidebar Navigation -->
 <aside class="sidebar">
   <div class="sidebar-brand">
     <h2>⚡ ZOLO ERP AUDIT</h2>
-    <p>Comprehensive System Dossier 2026</p>
+    <p>Re-run · 30 Oct 2026</p>
   </div>
   <ul class="nav-menu">
-    <li class="nav-item"><a href="#executive-summary" class="nav-link active"><span>📊</span> 1. Executive Summary <span class="nav-badge badge-info">Overview</span></a></li>
-    <li class="nav-item"><a href="#tracking-network-audit" class="nav-link"><span>🌐</span> 2. Tracking & Outbound Audit <span class="nav-badge badge-danger">9 Leaks</span></a></li>
-    <li class="nav-item"><a href="#licensing-provenance" class="nav-link"><span>📜</span> 3. Licensing & Provenance <span class="nav-badge badge-success">Animazon</span></a></li>
-    <li class="nav-item"><a href="#security-vulnerabilities" class="nav-link"><span>🛡️</span> 4. Security & Vulnerabilities <span class="nav-badge badge-danger">7 Open</span></a></li>
-    <li class="nav-item"><a href="#feature-audit-done-todo" class="nav-link"><span>📋</span> 5. Features: Done vs To-Do <span class="nav-badge badge-warning">15 Modules</span></a></li>
-    <li class="nav-item"><a href="#timetable-intelligent-matrix" class="nav-link"><span>⏰</span> 6. Intelligent Timetable Matrix <span class="nav-badge badge-info">Multi-Std</span></a></li>
-    <li class="nav-item"><a href="#hostel-management-blueprint" class="nav-link"><span>🏨</span> 7. Hostel Management Module <span class="nav-badge badge-danger">Missing</span></a></li>
-    <li class="nav-item"><a href="#canteen-management-blueprint" class="nav-link"><span>🍽️</span> 8. Canteen & RFID Wallet <span class="nav-badge badge-danger">Missing</span></a></li>
-    <li class="nav-item"><a href="#library-management-blueprint" class="nav-link"><span>📚</span> 9. Library Management (LMS) <span class="nav-badge badge-danger">Missing</span></a></li>
-    <li class="nav-item"><a href="#addon-ecosystem" class="nav-link"><span>🧩</span> 10. Addon Ecosystem & Roadmap <span class="nav-badge badge-purple">8 Tools</span></a></li>
-    <li class="nav-item"><a href="#action-plan" class="nav-link"><span>🚀</span> 11. Prioritized Action Plan <span class="nav-badge badge-success">Next Steps</span></a></li>
+    <li class="nav-item"><a href="#executive-summary" class="nav-link active"><span>📊</span> 1. Summary of the re-run <span class="nav-badge badge-info">Rev 2</span></a></li>
+    <li class="nav-item"><a href="#tracking-network-audit" class="nav-link"><span>🌐</span> 2. Outbound &amp; privacy <span class="nav-badge badge-success">8/9 closed</span></a></li>
+    <li class="nav-item"><a href="#licensing-provenance" class="nav-link"><span>📜</span> 3. Licensing &amp; provenance <span class="nav-badge badge-warning">Corrected</span></a></li>
+    <li class="nav-item"><a href="#security-vulnerabilities" class="nav-link"><span>🛡️</span> 4. Security <span class="nav-badge badge-success">6/7 closed</span></a></li>
+    <li class="nav-item"><a href="#new-findings" class="nav-link"><span>🔎</span> 5. Found &amp; fixed in this run <span class="nav-badge badge-info">15</span></a></li>
+    <li class="nav-item"><a href="#feature-audit-done-todo" class="nav-link"><span>📋</span> 6. Features: done vs to-do</a></li>
+    <li class="nav-item"><a href="#transport-attendance-timetable" class="nav-link"><span>🚌</span> 7. Transport, attendance &amp; timetable spec <span class="nav-badge badge-success">7/7</span></a></li>
+    <li class="nav-item"><a href="#verification" class="nav-link"><span>✅</span> 8. How this was verified</a></li>
+    <li class="nav-item"><a href="#action-plan" class="nav-link"><span>🚀</span> 9. Still open &amp; next steps <span class="nav-badge badge-warning">Open</span></a></li>
   </ul>
 </aside>
 
-<!-- Main Body -->
 <main class="content">
 
   <header class="top-header">
     <div class="header-title">
-      <h1>Zolo SmartSchool — Master Project Audit & Technical Architecture Dossier</h1>
-      <p>Comprehensive in-and-out analysis across 1,480+ source files, backend services, mobile apps, database schemas, and missing institutional modules.</p>
+      <h1>Zolo SmartSchool — Audit re-run</h1>
+      <p>Every finding from the October 2026 dossier re-checked against the current code, with the fixes made in this pass and the transport / attendance / timetable specification implemented.</p>
     </div>
     <div class="header-meta">
       <div class="meta-chip">Target: <strong>nandha3d/zolo-smartschool</strong></div>
-      <div class="meta-chip">Licensing: <strong>Animazon Enterprise</strong></div>
-      <div class="meta-chip">Date: <strong>October 2026</strong></div>
-      <div class="meta-chip">Audit Mode: <strong>Deep Static Analysis</strong></div>
+      <div class="meta-chip">Branch: <strong>feat/transport-attendance-timetable</strong></div>
+      <div class="meta-chip">Date: <strong>30 Oct 2026</strong></div>
+      <div class="meta-chip">Mode: <strong>Static review + live run on MariaDB 11.4</strong></div>
     </div>
   </header>
 
-  <!-- Interactive Search -->
   <div class="search-container">
     <span class="search-icon">🔍</span>
-    <input type="text" id="auditSearchInput" class="search-input" placeholder="Search any finding, file path, vulnerability, module, or database column..." onkeyup="filterAuditItems()">
+    <input type="text" id="auditSearchInput" class="search-input" placeholder="Search any finding, file path or module..." onkeyup="filterAuditItems()">
   </div>
 
-  <!-- KPI Grid -->
   <div class="kpi-grid">
     <div class="kpi-card blue">
-      <div class="kpi-label">Total Codebase Files</div>
-      <div class="kpi-value">1,480+</div>
-      <div class="kpi-subtext">Laravel Backend & 2 Flutter Apps</div>
+      <div class="kpi-label">Tracked files</div>
+      <div class="kpi-value">4,357</div>
+      <div class="kpi-subtext">+21 new in this pass · ~98k lines of PHP in app/</div>
     </div>
     <div class="kpi-card purple">
-      <div class="kpi-label">Eloquent Models</div>
-      <div class="kpi-value">123</div>
-      <div class="kpi-subtext">Core + Timetable V2 + Addons</div>
+      <div class="kpi-label">Models / controllers</div>
+      <div class="kpi-value">181 / 119</div>
+      <div class="kpi-subtext">Core + Timetable V2 + 5 addons (was 123 / 90)</div>
     </div>
     <div class="kpi-card emerald">
-      <div class="kpi-label">Controllers & APIs</div>
-      <div class="kpi-value">90</div>
-      <div class="kpi-subtext">75 Web, 6 Mobile API, 9 Sub-controllers</div>
+      <div class="kpi-label">Original findings closed</div>
+      <div class="kpi-value">14 / 16</div>
+      <div class="kpi-subtext">8 of 9 privacy leaks, 6 of 7 security items</div>
     </div>
     <div class="kpi-card amber">
-      <div class="kpi-label">External Domains Found</div>
-      <div class="kpi-value">114</div>
-      <div class="kpi-subtext">9 Live Leaks / CDNs in Source Code</div>
-    </div>
-    <div class="kpi-card rose">
-      <div class="kpi-label">Critical Security Gaps</div>
-      <div class="kpi-value">7</div>
-      <div class="kpi-subtext">Sanctum, Strict Mode, DB Restore SQL, Key Plaintext</div>
+      <div class="kpi-label">New issues found &amp; fixed</div>
+      <div class="kpi-value">15</div>
+      <div class="kpi-subtext">Including one privacy regression (Google Fonts)</div>
     </div>
     <div class="kpi-card indigo">
-      <div class="kpi-label">Missing Modules</div>
-      <div class="kpi-value">3 Core</div>
-      <div class="kpi-subtext">Hostel, Canteen & Library Unimplemented</div>
+      <div class="kpi-label">Spec modules delivered</div>
+      <div class="kpi-value">7 / 7</div>
+      <div class="kpi-subtext">Transport, attendance &amp; timetable spec v2.0</div>
+    </div>
+    <div class="kpi-card rose">
+      <div class="kpi-label">Automated tests</div>
+      <div class="kpi-value">4 files</div>
+      <div class="kpi-subtext">Still no CI; checks below were scripted by hand</div>
     </div>
   </div>
 
-  <!-- =========================================================
-       SECTION 1: EXECUTIVE SUMMARY
-       ========================================================= -->
+  <!-- 1 -->
   <section id="executive-summary" class="audit-section">
     <div class="section-header">
-      <h2><span>📊</span> 1. Executive Summary & System Health Scorecard</h2>
-      <span class="section-tag badge-info">Strategic Overview</span>
+      <h2><span>📊</span> 1. Summary of the re-run</h2>
+      <span class="section-tag badge-info">What changed since the first report</span>
     </div>
 
-    <p style="margin-bottom: 16px; color: var(--text-secondary); font-size: 1rem;">
-      This exhaustive audit of <strong>Zolo SmartSchool</strong> was performed through deep static analysis across all layers of the codebase: 
-      Laravel 10 backend (<code class="inline-code">PHP_CODE/</code>), two Flutter mobile client applications (<code class="inline-code">App code/</code>), 
-      44 database migrations, 123 Eloquent models, 90 web/API controllers, and peripheral modules.
-    </p>
-
     <div class="alert-card alert-info">
-      <strong style="color: #38bdf8; font-size: 1.05rem;">Executive Verdict:</strong>
-      <p style="margin-top: 6px;">
-        Zolo SmartSchool possesses a solid, highly sophisticated multi-tenant SaaS foundation with advanced multi-school isolation, comprehensive role-based access control, automated fee workflows, and an architecturally sound deterministic Timetable V2 constraint solver. 
-        However, the system has <strong>three critical categories of work required</strong>:
-        (1) <em>Privacy & Detachment:</em> Multiple active browser-side leaks (Google Fonts, MathJax on CDNJS, Leaflet on unpkg, and demo URLs in RTL CSS) remain despite earlier audit claims of zero-outbound contact;
-        (2) <em>Security Hardening:</em> Indefinite Sanctum token lifetimes, disabled MySQL strict mode, plaintext payment credentials, and arbitrary SQL execution in backup restoration pose immediate production risks;
-        (3) <em>Functional Gaps:</em> While the Timetable V2 backend solver exists, it lacks a unified school-wide multi-class generator UI and global teacher matrix; furthermore, <strong>Hostel Management</strong> and <strong>Canteen/Cafeteria POS</strong> are 100% unimplemented.
+      <strong style="color:#38bdf8;font-size:1.05rem;">Verdict</strong>
+      <p style="margin-top:6px;">
+        Most of what the first dossier asked for is now in the code: Hostel, Canteen and Library exist as addons, the school-wide timetable generator and teacher matrix exist, Sanctum tokens expire, payment secrets are encrypted, and backup restore only accepts signed archives.
+        This re-run found one privacy regression (the new Inter font was loaded from Google again) and several authorization gaps in recently added endpoints; all of them are fixed below.
+        Two original items stay open for reasons outside the code: push notifications need the school's own Firebase project, and MySQL strict mode stays opt-in until hundreds of NOT NULL columns get defaults.
+        The first report's licensing grade (“A+, all clean”) was too strong and is corrected in section 3.
       </p>
     </div>
 
-    <h3 style="font-size: 1.15rem; margin: 24px 0 12px 0; color: #ffffff;">System Maturity Scorecard</h3>
+    <h3 style="font-size:1.15rem;margin:24px 0 12px;color:#fff;">Scorecard, then and now</h3>
     <div class="table-wrapper">
       <table class="audit-table">
-        <thead>
-          <tr>
-            <th>Domain / Pillar</th>
-            <th>Maturity</th>
-            <th>Audit Grade</th>
-            <th>Current Status & Observations</th>
-          </tr>
-        </thead>
+        <thead><tr><th>Area</th><th>First report</th><th>Now</th><th>Notes</th></tr></thead>
         <tbody>
-          <tr>
-            <td><strong>Licensing & Provenance</strong></td>
-            <td><span class="pill pill-implemented">Enterprise</span></td>
-            <td><strong style="color: #10b981;">A+</strong></td>
-            <td>Animazon Enterprise License active (<code class="inline-code">ANIMAZON_LICENSE=true</code>). All platform features unlocked permanently. Zero warez/nulling/purchase-code phone-home.</td>
-          </tr>
-          <tr>
-            <td><strong>Privacy & Zero-Tracking</strong></td>
-            <td><span class="pill pill-partial">Attention Needed</span></td>
-            <td><strong style="color: #f59e0b;">B-</strong></td>
-            <td>Most core assets are detached, but 9 active leakages remain (Google Fonts in layout, MathJax in exam questions, Leaflet in GPS addon, demo URLs in RTL CSS).</td>
-          </tr>
-          <tr>
-            <td><strong>Core Security Architecture</strong></td>
-            <td><span class="pill pill-critical">Vulnerable</span></td>
-            <td><strong style="color: #f43f5e;">C+</strong></td>
-            <td>Robust Spatie RBAC & CSRF, but Sanctum tokens never expire, MySQL strict mode is off, payment API keys are plaintext in DB, and DB restore runs raw unvalidated SQL.</td>
-          </tr>
-          <tr>
-            <td><strong>Timetable Engine</strong></td>
-            <td><span class="pill pill-partial">V2 Backend Ready</span></td>
-            <td><strong style="color: #38bdf8;">B</strong></td>
-            <td>Deterministic solver and rich database schema implemented. Missing: unified school-wide batch generator UI, master cross-class teacher matrix, and drag-and-drop collision detection.</td>
-          </tr>
-          <tr>
-            <td><strong>Hostel Management</strong></td>
-            <td><span class="pill pill-missing">Unimplemented</span></td>
-            <td><strong style="color: #f43f5e;">F (0%)</strong></td>
-            <td>No tables, models, controllers, or views exist. Full module design specified in Section 7.</td>
-          </tr>
-          <tr>
-            <td><strong>Canteen & Cafeteria</strong></td>
-            <td><span class="pill pill-missing">Unimplemented</span></td>
-            <td><strong style="color: #f43f5e;">F (0%)</strong></td>
-            <td>No tables, models, controllers, or views exist. Full POS & digital wallet design specified in Section 8.</td>
-          </tr>
-          <tr>
-            <td><strong>Library Management (LMS)</strong></td>
-            <td><span class="pill pill-missing">Unimplemented</span></td>
-            <td><strong style="color: #f43f5e;">F (0%)</strong></td>
-            <td>No tables, models, controllers, or views exist. Full book catalog, RFID issue/return & e-book design specified in Section 9.</td>
-          </tr>
-          <tr>
-            <td><strong>Transport & GPS Addon</strong></td>
-            <td><span class="pill pill-partial">Backend Only</span></td>
-            <td><strong style="color: #f59e0b;">B-</strong></td>
-            <td>Backend tracking engine, geofencing, and replay are built. Driver phone background GPS app and parent Flutter tracking screen remain incomplete.</td>
-          </tr>
-          <tr>
-            <td><strong>Core Academic ERP</strong></td>
-            <td><span class="pill pill-implemented">Complete</span></td>
-            <td><strong style="color: #10b981;">A</strong></td>
-            <td>Admissions, Fees, Exams, Grades, Payroll, Attendance, Lessons, Homework, and Web CMS are fully functional and production-ready.</td>
-          </tr>
+          <tr><td><strong>Privacy &amp; outbound calls</strong></td><td>B-</td><td><strong style="color:#10b981;">A-</strong></td><td>All browser-side CDN and font calls removed. reCAPTCHA (only when a key is configured), payment checkout scripts and the map tile server are the remaining, deliberate outbound calls.</td></tr>
+          <tr><td><strong>Security</strong></td><td>C+</td><td><strong style="color:#10b981;">B+</strong></td><td>Token expiry, encrypted secrets, signed + transactional restore, no XML uploads, CORS locked to APP_URL, webhook signatures verified. Open: strict mode opt-in, per-method authorization with few FormRequests.</td></tr>
+          <tr><td><strong>Licensing &amp; provenance</strong></td><td>A+</td><td><strong style="color:#f59e0b;">Unverified</strong></td><td>No phone-home or purchase-code checks remain, but the code descends from eSchool SaaS; the licence itself cannot be confirmed from the repository.</td></tr>
+          <tr><td><strong>Timetable</strong></td><td>B</td><td><strong style="color:#10b981;">A-</strong></td><td>Batch generator, teacher matrix and drag/drop exist. Teacher timetable now renders on the bell-period grid (no drift), with a period action menu and proxy cover.</td></tr>
+          <tr><td><strong>Attendance</strong></td><td>A (daily only)</td><td><strong style="color:#10b981;">A</strong></td><td>Period-wise marking and matrix, teacher attendance with leave codes, proxy assignment. View Attendance filter bug fixed.</td></tr>
+          <tr><td><strong>Transport &amp; GPS</strong></td><td>B-</td><td><strong style="color:#10b981;">A-</strong></td><td>Per-vehicle speed limits with admin siren popup, map route builder with morning/afternoon stop orders, relief driver roster honoured by both driver APIs.</td></tr>
+          <tr><td><strong>Hostel / Canteen / Library</strong></td><td>F (0%)</td><td><strong style="color:#10b981;">Built</strong></td><td>Delivered as addons (<code class="inline-code">app/Addons/Hostel|Canteen|Library</code>) with tenant migrations. Online wallet top-up through a gateway is still not built.</td></tr>
+          <tr><td><strong>Engineering hygiene</strong></td><td>—</td><td><strong style="color:#f43f5e;">C</strong></td><td>4 test files, no CI, tests point at one developer's database. Biggest remaining risk to ship quality.</td></tr>
         </tbody>
       </table>
     </div>
   </section>
 
-  <!-- =========================================================
-       SECTION 2: TRACKING & OUTBOUND NETWORK AUDIT
-       ========================================================= -->
+  <!-- 2 -->
   <section id="tracking-network-audit" class="audit-section">
     <div class="section-header">
-      <h2><span>🌐</span> 2. Exhaustive Outbound Network, Tracking & Privacy Audit</h2>
-      <span class="section-tag badge-danger">9 Discovered Leaks</span>
+      <h2><span>🌐</span> 2. Outbound network &amp; privacy, re-checked</h2>
+      <span class="section-tag badge-success">8 of 9 closed</span>
     </div>
-
-    <p style="margin-bottom: 16px; color: var(--text-secondary);">
-      A forensic static scan across all 1,480+ project files analyzed every URL, script, stylesheet, API call, and font inclusion. 
-      While the earlier <em>September 2026 Security Audit</em> claimed that all third-party browser-side requests were eliminated, our deep scan uncovered 
-      <strong>9 active external contact points</strong> that leak user IPs, student telemetry, or create third-party dependencies.
-    </p>
-
-    <h3 style="font-size: 1.15rem; margin: 24px 0 12px 0; color: #f43f5e;">⚠️ Active Browser-Side Leaks & Supply-Chain Exposures</h3>
-    
     <div class="table-wrapper">
       <table class="audit-table">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Type</th>
-            <th>External Host / Resource</th>
-            <th>Source File & Line</th>
-            <th>Risk & Impact Description</th>
-          </tr>
-        </thead>
+        <thead><tr><th>ID</th><th>Finding</th><th>Status</th><th>Evidence now</th></tr></thead>
         <tbody>
-          <tr>
-            <td><span class="pill pill-critical">L-01</span></td>
-            <td><span class="pill pill-critical">CDN Leak</span></td>
-            <td><code class="inline-code">fonts.googleapis.com</code><br><code class="inline-code">fonts.gstatic.com</code></td>
-            <td><code class="inline-code">PHP_CODE/resources/views/layouts/include.blade.php:5-7</code></td>
-            <td><strong>Loaded on every single admin page.</strong> Fetches <em>Instrument Sans</em>, <em>Figtree</em>, and <em>Material Symbols Sharp</em> from Google CDN. Leaks administrator IP addresses to Google on every page view. (Local <code class="inline-code">zolo-fonts.css</code> is already loaded on line 8!).</td>
-          </tr>
-          <tr>
-            <td><span class="pill pill-critical">L-02</span></td>
-            <td><span class="pill pill-critical">Hidden CDN</span></td>
-            <td><code class="inline-code">cdnjs.cloudflare.com</code></td>
-            <td><code class="inline-code">PHP_CODE/app/Http/Controllers/OnlineExamController.php:754</code><br><code class="inline-code">PHP_CODE/public/assets/js/custom/function.js:150,157,164,177</code><br><code class="inline-code">PHP_CODE/resources/views/online_exam/edit_class_questions.blade.php:158</code></td>
-            <td><strong>Injected into AJAX responses for online exam questions.</strong> Dynamically loads <code class="inline-code">MathJax.js</code> from Cloudflare CDN for CKEditor formula rendering. Completely unmentioned in previous audits. Fails offline.</td>
-          </tr>
-          <tr>
-            <td><span class="pill pill-high">L-03</span></td>
-            <td><span class="pill pill-high">CDN Leak</span></td>
-            <td><code class="inline-code">unpkg.com</code></td>
-            <td><code class="inline-code">PHP_CODE/app/Addons/GpsTransport/resources/views/dashboard.blade.php:8-9</code><br><code class="inline-code">live-tracking.blade.php:8-9</code><br><code class="inline-code">route-builder.blade.php:8-9</code><br><code class="inline-code">trip-replay.blade.php:8-9</code></td>
-            <td>Loads <code class="inline-code">leaflet@1.9.4/dist/leaflet.css</code> and <code class="inline-code">leaflet.js</code> from <code class="inline-code">unpkg.com</code> on all GPS transport tracking screens. Subject to third-party CDN downtime or supply-chain compromise.</td>
-          </tr>
-          <tr>
-            <td><span class="pill pill-high">L-04</span></td>
-            <td><span class="pill pill-high">Third-Party URL</span></td>
-            <td><code class="inline-code">www.bootstrapdash.com</code></td>
-            <td><code class="inline-code">PHP_CODE/public/assets/css/rtl.min.css:16658, 16664, 17724, 48507</code></td>
-            <td>Hardcoded CSS URLs point directly to the vendor's demo site: <code class="inline-code">https://www.bootstrapdash.com/demo/purple/jquery/template/assets/fonts/Ubuntu/Ubuntu-Light.eot</code> and <code class="inline-code">weather.svg</code>. Triggers external requests whenever an RTL language (Arabic/Urdu) is selected!</td>
-          </tr>
-          <tr>
-            <td><span class="pill pill-medium">L-05</span></td>
-            <td><span class="pill pill-medium">Font Import</span></td>
-            <td><code class="inline-code">fonts.googleapis.com</code></td>
-            <td><code class="inline-code">PHP_CODE/public/assets/css/certificate.css:1</code><br><code class="inline-code">PHP_CODE/public/assets/css/comman.css:1</code><br><code class="inline-code">PHP_CODE/public/assets/home_page/css/style.css:1</code><br><code class="inline-code">PHP_CODE/public/assets/school/css/style.css:1</code></td>
-            <td>CSS <code class="inline-code">@import url(...)</code> loads Google Fonts: <em>Pinyon Script</em> (for certificates), <em>Lato</em> (homepage), and <em>Ubuntu</em> (school website). Causes browser-side telemetry upon rendering certificates or public pages.</td>
-          </tr>
-          <tr>
-            <td><span class="pill pill-medium">L-06</span></td>
-            <td><span class="pill pill-medium">Tracking Script</span></td>
-            <td><code class="inline-code">ka-f.fontawesome.com</code><br><code class="inline-code">kit.fontawesome.com</code></td>
-            <td><code class="inline-code">PHP_CODE/public/assets/home_page/js/1d2a297b20.js:1</code></td>
-            <td>Contains FontAwesome Kit config with vendor token <code class="inline-code">1d2a297b20</code> pointing to <code class="inline-code">ka-f.fontawesome.com</code>. While the Blade link was removed, the JS file remains in the web root and will phone-home if called.</td>
-          </tr>
-          <tr>
-            <td><span class="pill pill-critical">L-07</span></td>
-            <td><span class="pill pill-critical">Data Privacy</span></td>
-            <td><code class="inline-code">curl_logger_dio_interceptor</code></td>
-            <td><code class="inline-code">App code/e-school-saas-student-parent/e-school-saas/pubspec.yaml:75</code><br><code class="inline-code">App code/eschool-saas-staff/eschool-saas-staff/pubspec.yaml:69</code></td>
-            <td><strong>Production Mobile Security Risk:</strong> Both student and staff Flutter apps retain this debug interceptor. It logs full raw HTTP requests—including Sanctum Bearer Auth tokens, passwords, and student profiles—into the device's system log (Logcat/Syslog).</td>
-          </tr>
-          <tr>
-            <td><span class="pill pill-medium">L-08</span></td>
-            <td><span class="pill pill-medium">Debug Dependency</span></td>
-            <td><code class="inline-code">device_preview</code></td>
-            <td><code class="inline-code">App code/eschool-saas-staff/eschool-saas-staff/pubspec.yaml:69</code><br><code class="inline-code">lib/app/app.dart:23</code></td>
-            <td>Development tool included as a production dependency in the staff Flutter app. Risk of accidentally rendering virtual device frames in release builds.</td>
-          </tr>
-          <tr>
-            <td><span class="pill pill-low">L-09</span></td>
-            <td><span class="pill pill-low">Stubbed Feature</span></td>
-            <td><code class="inline-code">pushMessaging.dart</code></td>
-            <td><code class="inline-code">App code/e-school-saas-student-parent/e-school-saas/lib/utils/pushMessaging.dart:1-15</code></td>
-            <td>Firebase push notifications in the Flutter student-parent app are completely stubbed out with a mock no-op class. Real push notifications cannot be received until real packages are wired.</td>
-          </tr>
+          <tr><td>L-01</td><td>Google Fonts on every admin page</td><td><span class="pill pill-fixed">Fixed (regressed, fixed again)</span></td><td>The Inter design-system commit re-added <code class="inline-code">fonts.googleapis.com</code> in <code class="inline-code">layouts/include.blade.php</code>. Inter is now self-hosted in <code class="inline-code">public/assets/fonts/inter/</code> (variable woff2, OFL licence alongside). Dashboard HTML contains 0 Google font references.</td></tr>
+          <tr><td>L-02</td><td>MathJax from cdnjs</td><td><span class="pill pill-fixed">Fixed</span></td><td>Served from <code class="inline-code">public/assets/vendor/mathjax</code>; no cdnjs/jsdelivr/unpkg references in views, addons or custom JS.</td></tr>
+          <tr><td>L-03</td><td>Leaflet from unpkg</td><td><span class="pill pill-fixed">Fixed</span></td><td>All four GPS views load <code class="inline-code">assets/vendor/leaflet</code>.</td></tr>
+          <tr><td>L-04</td><td>bootstrapdash.com URLs in rtl.min.css</td><td><span class="pill pill-fixed">Fixed</span></td><td>0 occurrences.</td></tr>
+          <tr><td>L-05</td><td>Google Fonts <code class="inline-code">@import</code> in 4 stylesheets</td><td><span class="pill pill-fixed">Fixed</span></td><td>All four now import local copies (pinyon-script, lato, ubuntu).</td></tr>
+          <tr><td>L-06</td><td>FontAwesome kit file with vendor token</td><td><span class="pill pill-fixed">Fixed</span></td><td><code class="inline-code">home_page/js/1d2a297b20.js</code> deleted.</td></tr>
+          <tr><td>L-07</td><td><code class="inline-code">curl_logger_dio_interceptor</code> logging tokens</td><td><span class="pill pill-fixed">Fixed</span></td><td>Not in either pubspec.yaml.</td></tr>
+          <tr><td>L-08</td><td><code class="inline-code">device_preview</code> in staff app</td><td><span class="pill pill-fixed">Fixed</span></td><td>Not in pubspec or app.dart.</td></tr>
+          <tr><td>L-09</td><td>Firebase push stubbed in the apps</td><td><span class="pill pill-blocked">Blocked</span></td><td>Intentional no-op until the school creates its own Firebase project (the shipped config belonged to the original vendor). Steps are in <code class="inline-code">lib/utils/pushMessaging.dart</code>. Overspeed and relief-driver alerts reach admins and parents only through the web popup until then.</td></tr>
+          <tr><td>New</td><td>Timetable print loaded Bootstrap from stackpath CDN</td><td><span class="pill pill-fixed">Fixed now</span></td><td><code class="inline-code">timetable/index.blade.php</code> print iframe uses the local Bootstrap copy.</td></tr>
+          <tr><td>New</td><td>School website contact page always loaded reCAPTCHA</td><td><span class="pill pill-fixed">Fixed now</span></td><td>Now only when the school has set a site key (the public home page already did this). Unquoted <code class="inline-code">data-sitekey</code> attribute also quoted.</td></tr>
         </tbody>
       </table>
     </div>
-
-    <h3 style="font-size: 1.15rem; margin: 24px 0 12px 0; color: #ffffff;">Legitimate Configured Server-Side External APIs</h3>
-    <p style="color: var(--text-secondary); margin-bottom: 12px;">
-      These server-side integrations make outbound HTTPS calls <strong>only when explicitly configured by the school administrator</strong> and only during transactions:
-    </p>
-    <div class="table-wrapper">
-      <table class="audit-table">
-        <thead>
-          <tr>
-            <th>Service / Integration</th>
-            <th>Endpoints Contacted</th>
-            <th>Trigger Condition</th>
-            <th>Privacy Assessment</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><strong>Stripe Payments</strong></td>
-            <td><code class="inline-code">https://api.stripe.com/v1/checkout/sessions</code></td>
-            <td>Only when Stripe gateway is active on subscription/fee payment.</td>
-            <td>Safe. PCI-DSS compliant server-to-server transaction.</td>
-          </tr>
-          <tr>
-            <td><strong>Razorpay Payments</strong></td>
-            <td><code class="inline-code">https://checkout.razorpay.com/v1/checkout.js</code><br><code class="inline-code">https://api.razorpay.com/v1</code></td>
-            <td>Only on payment checkout screen and payment verification.</td>
-            <td>Safe. Requires school/superadmin API keys.</td>
-          </tr>
-          <tr>
-            <td><strong>Paystack Payments</strong></td>
-            <td><code class="inline-code">https://api.paystack.co/transaction/initialize</code><br><code class="inline-code">https://api.paystack.co/transaction/verify/...</code></td>
-            <td>Only when Paystack gateway is active.</td>
-            <td>Safe. Server-side TLS call.</td>
-          </tr>
-          <tr>
-            <td><strong>Flutterwave Payments</strong></td>
-            <td><code class="inline-code">https://api.flutterwave.com/v3/payments</code><br><code class="inline-code">https://api.flutterwave.com/v3/transactions/.../verify</code></td>
-            <td>Only when Flutterwave gateway is active.</td>
-            <td>Safe. Server-side TLS call.</td>
-          </tr>
-          <tr>
-            <td><strong>Firebase Cloud Messaging</strong></td>
-            <td><code class="inline-code">https://fcm.googleapis.com/v1/projects/{project_id}/messages:send</code></td>
-            <td>When push announcements or fee alerts are dispatched.</td>
-            <td>Safe. Authenticated via Google Service Account JSON.</td>
-          </tr>
-          <tr>
-            <td><strong>Google reCAPTCHA</strong></td>
-            <td><code class="inline-code">https://www.google.com/recaptcha/api.js</code></td>
-            <td>Public homepage contact form (gated on <code class="inline-code">services.recaptcha.key</code>).</td>
-            <td>Safe. Removed from login screen; only fires when key configured.</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="alert-card alert-success">
-      <strong style="color: #10b981;">Step-by-Step Remediation Plan to Achieve 100% Zero-Outbound Detachment:</strong>
-      <ol style="margin-top: 8px; margin-left: 20px; font-size: 0.9rem; line-height: 1.7;">
-        <li>Remove lines 5-7 from <code class="inline-code">PHP_CODE/resources/views/layouts/include.blade.php</code> (self-hosted fonts are already loaded on line 8).</li>
-        <li>Download <code class="inline-code">MathJax.js</code> locally to <code class="inline-code">public/assets/vendor/mathjax/</code> and update <code class="inline-code">OnlineExamController.php:754</code> and <code class="inline-code">function.js</code>.</li>
-        <li>Download Leaflet 1.9.4 locally to <code class="inline-code">public/assets/vendor/leaflet/</code> and replace the <code class="inline-code">unpkg.com</code> links in the 4 GPS Blade files.</li>
-        <li>Replace the <code class="inline-code">bootstrapdash.com</code> URLs in <code class="inline-code">rtl.min.css</code> with local relative asset paths.</li>
-        <li>Download <em>Pinyon Script</em> and <em>Ubuntu</em> woff2 font files locally to <code class="inline-code">public/assets/fonts/</code> and remove the <code class="inline-code">@import</code> lines.</li>
-        <li>Delete the obsolete <code class="inline-code">public/assets/home_page/js/1d2a297b20.js</code> file.</li>
-        <li>Remove <code class="inline-code">curl_logger_dio_interceptor</code> and <code class="inline-code">device_preview</code> from both Flutter <code class="inline-code">pubspec.yaml</code> files prior to release builds.</li>
-      </ol>
-    </div>
+    <div class="alert-card alert-info">Deliberate outbound calls that remain: payment gateway checkout (Razorpay/Stripe/Paystack/Flutterwave) when enabled, reCAPTCHA when configured, FCM when configured, and the map tile server (<code class="inline-code">GPS_MAP_TILE_URL</code>, public OSM by default; point it at your own for production). The new route builder's “Snap to roads” button only appears when <code class="inline-code">GPS_ROUTING_URL</code> is set, and sends stop coordinates to that server.</div>
   </section>
 
-  <!-- =========================================================
-       SECTION 3: LICENSING & PROVENANCE
-       ========================================================= -->
+  <!-- 3 -->
   <section id="licensing-provenance" class="audit-section">
     <div class="section-header">
-      <h2><span>📜</span> 3. Licensing, Provenance & Code Integrity</h2>
-      <span class="section-tag badge-success">Animazon Enterprise</span>
+      <h2><span>📜</span> 3. Licensing &amp; provenance — corrected</h2>
+      <span class="section-tag badge-warning">Grade withdrawn</span>
     </div>
-
-    <p style="margin-bottom: 16px; color: var(--text-secondary);">
-      The user explicitly requested: <em>"if it is animazon licensing, then leave it. and check what are all done and what needs to be done"</em>. 
-      Our scan inspected every license mechanism, vendor header, and activation routine across the repository.
-    </p>
-
-    <div class="alert-card alert-success">
-      <strong style="color: #10b981; font-size: 1.05rem;">Licensing Audit Conclusion: Clean & Autonomous</strong>
-      <p style="margin-top: 6px;">
-        Zolo SmartSchool operates under a completely autonomous <strong>Animazon Unlimited Enterprise License</strong>. 
-        There are <strong>zero Envato / CodeCanyon purchase-code verification routines</strong>, zero external activation servers, 
-        zero cracked/warez/nulled scripts, and zero obfuscated execution payloads. The software runs completely offline and requires no phone-home.
-      </p>
+    <div class="alert-card alert-warning">
+      <strong>Correction to the first report.</strong>
+      <p style="margin-top:6px;">The first report graded licensing “A+, zero warez, clean”. That conclusion was based only on <code class="inline-code">ANIMAZON_LICENSE=true</code> and the composer package name, and it should not be shown to customers or investors as written.</p>
     </div>
-
-    <h3 style="font-size: 1.15rem; margin: 24px 0 12px 0; color: #ffffff;">How Animazon Enterprise Licensing is Structured in Code</h3>
-    <p style="color: var(--text-secondary); margin-bottom: 12px;">
-      The enterprise licensing engine is implemented in <code class="inline-code">PHP_CODE/app/Services/FeaturesService.php</code>:
-    </p>
-
-    <pre class="code-block"><code>// PHP_CODE/app/Services/FeaturesService.php (Lines 16-32)
-/**
- * Check if Animazon Licensing System is active (default true).
- * Under the Animazon enterprise license, all features across the platform are permanently unlocked.
- */
-public static function isAnimazonLicenseActive(): bool {
-    return config('app.animazon_license', true);
-}
-
-public static function hasFeature(string $feature): bool {
-    // Under Animazon Licensing System, all features are fully available
-    if (self::isAnimazonLicenseActive()) {
-        return true;
-    }
-    // Fallback tenant package check...
-}</code></pre>
-
     <div class="table-wrapper">
       <table class="audit-table">
-        <thead>
-          <tr>
-            <th>Configuration / File</th>
-            <th>Defined Value</th>
-            <th>Operational Effect</th>
-          </tr>
-        </thead>
+        <thead><tr><th>Check</th><th>Result</th></tr></thead>
         <tbody>
-          <tr>
-            <td><code class="inline-code">PHP_CODE/.env</code> (Line 63)</td>
-            <td><code class="inline-code">ANIMAZON_LICENSE=true</code></td>
-            <td>Master environment switch enabling full enterprise feature suite.</td>
-          </tr>
-          <tr>
-            <td><code class="inline-code">PHP_CODE/config/app.php</code> (Lines 233-234)</td>
-            <td><code class="inline-code">'animazon_license' => env('ANIMAZON_LICENSE', true)</code><br><code class="inline-code">'license_type' => 'Animazon Unlimited Enterprise'</code></td>
-            <td>Guarantees that even if <code class="inline-code">.env</code> is missing the key, the license defaults to <strong>true</strong>.</td>
-          </tr>
-          <tr>
-            <td><code class="inline-code">PHP_CODE/composer.json</code> (Lines 2-6)</td>
-            <td><code class="inline-code">"name": "animazon/zolo-smart-school"</code><br><code class="inline-code">"license": "proprietary"</code></td>
-            <td>Proper proprietary packaging under Animazon namespace.</td>
-          </tr>
-          <tr>
-            <td><code class="inline-code">NOTICE.md</code></td>
-            <td>Animazon ownership notices retained</td>
-            <td>Protects open-source attribution headers (Laravel, Spatie, dompdf) as required by Apache 2.0 / MIT licenses.</td>
-          </tr>
+          <tr><td>Origin of the code</td><td>Descends from the eSchool SaaS product: 13 central migrations are named <code class="inline-code">version1_x_0</code>, and both Flutter apps are still in <code class="inline-code">e-school-saas</code> / <code class="inline-code">eschool-saas-staff</code> folders.</td></tr>
+          <tr><td>Purchase-code / phone-home</td><td>None left. The <code class="inline-code">APPSECRET</code> and <code class="inline-code">install.purchase-code</code> remnants seen earlier are gone.</td></tr>
+          <tr><td>Licence ownership</td><td><strong>Cannot be confirmed from the repository.</strong> If a licence was bought, keep the receipt and check that its tier allows running it as a multi-school SaaS and presenting it as proprietary.</td></tr>
+          <tr><td><code class="inline-code">ANIMAZON_LICENSE</code> side effect</td><td><code class="inline-code">FeaturesService::hasFeature()</code> returns true for every feature while this flag is on (the default). That means package and addon gating is switched off for every school, so the addon upsell model does not work until it is set to false. Left unchanged: it is a business decision.</td></tr>
         </tbody>
       </table>
     </div>
-
-    <h3 style="font-size: 1.15rem; margin: 24px 0 12px 0; color: #ffffff;">Third-Party Library Attribution Integrity</h3>
-    <p style="color: var(--text-secondary); margin-bottom: 12px;">
-      The repository incorporates industry-standard open-source components inside <code class="inline-code">vendor/</code> and <code class="inline-code">public/assets/</code>. 
-      Their copyright notices are intact:
-    </p>
-    <ul style="margin-left: 24px; color: var(--text-secondary); font-size: 0.9rem; line-height: 1.7;">
-      <li><strong>Laravel Framework 10.x:</strong> MIT License (Taylor Otwell).</li>
-      <li><strong>Spatie Laravel Permission:</strong> MIT License (Spatie).</li>
-      <li><strong>dompdf / PDFlib:</strong> LGPL-2.1 License (dompdf contributors).</li>
-      <li><strong>Bootstrap 5 & jQuery:</strong> MIT License.</li>
-      <li><strong>Leaflet Maps 1.9.4:</strong> BSD-2-Clause License (Volodymyr Agafonkin).</li>
-    </ul>
-    <p style="margin-top: 10px; font-size: 0.85rem; color: var(--text-muted);">
-      <em>Recommendation: Leave Animazon licensing configuration exactly as it is; it is compliant, non-intrusive, and permanent.</em>
-    </p>
   </section>
 
-  <!-- =========================================================
-       SECTION 4: SECURITY & VULNERABILITIES
-       ========================================================= -->
+  <!-- 4 -->
   <section id="security-vulnerabilities" class="audit-section">
     <div class="section-header">
-      <h2><span>🛡️</span> 4. Security Implementations & Vulnerability Audit</h2>
-      <span class="section-tag badge-danger">7 Open Vulnerabilities</span>
+      <h2><span>🛡️</span> 4. Security findings, re-checked</h2>
+      <span class="section-tag badge-success">6 of 7 closed</span>
     </div>
-
-    <p style="margin-bottom: 16px; color: var(--text-secondary);">
-      A rigorous security analysis was conducted covering authentication, session handling, database query hygiene, input validation, 
-      mass-assignment, file uploads, and multi-tenant credential isolation.
-    </p>
-
-    <h3 style="font-size: 1.15rem; margin: 24px 0 12px 0; color: #10b981;">✅ Verified Security Implementations (What is Done)</h3>
     <div class="table-wrapper">
       <table class="audit-table">
-        <thead>
-          <tr>
-            <th>Security Mechanism</th>
-            <th>Implementation Location</th>
-            <th>Current Status</th>
-            <th>Verification Details</th>
-          </tr>
-        </thead>
+        <thead><tr><th>#</th><th>Finding</th><th>Status</th><th>Evidence now</th></tr></thead>
         <tbody>
-          <tr>
-            <td><strong>CSRF Protection</strong></td>
-            <td><code class="inline-code">App\Http\Middleware\VerifyCsrfToken</code></td>
-            <td><span class="pill pill-implemented">Active</span></td>
-            <td>All web routes require CSRF tokens. Exclusions are strictly limited to payment webhook callbacks (<code class="inline-code">webhook/*</code>).</td>
-          </tr>
-          <tr>
-            <td><strong>Login Rate Limiting</strong></td>
-            <td><code class="inline-code">App\Http\Controllers\Auth\LoginController</code></td>
-            <td><span class="pill pill-implemented">Fixed</span></td>
-            <td>Throttling is active: <code class="inline-code">$maxAttempts = 5</code>, <code class="inline-code">$decayMinutes = 15</code>. Protects against brute-force password guessing.</td>
-          </tr>
-          <tr>
-            <td><strong>Two-Factor Auth (2FA)</strong></td>
-            <td><code class="inline-code">CheckTwoFactorAuthenticated.php</code></td>
-            <td><span class="pill pill-implemented">Fixed</span></td>
-            <td>Uses cryptographically secure <code class="inline-code">random_int()</code> (replacing weak <code class="inline-code">rand()</code>), and corrected expiry check logic.</td>
-          </tr>
-          <tr>
-            <td><strong>Cron Endpoint Secret</strong></td>
-            <td><code class="inline-code">App\Http\Middleware\VerifyCronSecret</code></td>
-            <td><span class="pill pill-implemented">Fixed</span></td>
-            <td>Guards <code class="inline-code">/api/fees-due-notification</code> via constant-time <code class="inline-code">hash_equals()</code> on <code class="inline-code">CRON_SECRET</code>. Fails closed (404).</td>
-          </tr>
-          <tr>
-            <td><strong>Unauthenticated Routes Removed</strong></td>
-            <td><code class="inline-code">routes/web.php</code></td>
-            <td><span class="pill pill-implemented">Fixed</span></td>
-            <td>13 dangerous maintenance routes (<code class="inline-code">/migrate-rollback</code>, <code class="inline-code">/demo-tokens</code>, <code class="inline-code">/dummy-seeder</code>) have been completely eliminated.</td>
-          </tr>
-          <tr>
-            <td><strong>Tenant Storage Isolation</strong></td>
-            <td><code class="inline-code">App\Services\UploadService</code></td>
-            <td><span class="pill pill-implemented">Active</span></td>
-            <td>Uploads are prefixed with <code class="inline-code">{school_id}/folder/</code>, ensuring tenant data separation on the storage disk.</td>
-          </tr>
+          <tr><td>1</td><td>Sanctum tokens never expire</td><td><span class="pill pill-fixed">Fixed</span></td><td><code class="inline-code">config/sanctum.php</code>: 30 days by default; <code class="inline-code">tokens:prune-expired</code> runs daily across all school databases.</td></tr>
+          <tr><td>2</td><td>MySQL strict mode off</td><td><span class="pill pill-partial">Opt-in</span></td><td><code class="inline-code">DB_STRICT</code> switch exists, default off: turning it on breaks real inserts (hundreds of NOT NULL columns without defaults, e.g. <code class="inline-code">subjects.image</code>). Needs a schema pass before it can default on.</td></tr>
+          <tr><td>3</td><td>Payment secrets in plaintext</td><td><span class="pill pill-fixed">Fixed</span></td><td><code class="inline-code">secret_key</code> and <code class="inline-code">webhook_secret_key</code> use the <code class="inline-code">encrypted</code> cast, existing rows migrated. <code class="inline-code">api_key</code> stays plain on purpose (it is the publishable half).</td></tr>
+          <tr><td>4</td><td>Backup restore runs arbitrary SQL</td><td><span class="pill pill-fixed">Fixed</span></td><td>HMAC-signed archives only, statement allow-list (CREATE TABLE IF NOT EXISTS / INSERT), protected tables. <strong>This pass:</strong> rows are swapped inside one transaction with DELETE instead of TRUNCATE, so a failed restore rolls back instead of leaving empty tables; media is replaced only after the database commit.</td></tr>
+          <tr><td>5</td><td>XML uploads (XXE)</td><td><span class="pill pill-fixed">Fixed</span></td><td><code class="inline-code">xml</code> not in <code class="inline-code">UploadService::ALLOWED_EXTENSIONS</code> or any upload rule.</td></tr>
+          <tr><td>6</td><td>CORS defaults to *</td><td><span class="pill pill-fixed">Fixed</span></td><td>Defaults to <code class="inline-code">APP_URL</code>.</td></tr>
+          <tr><td>7</td><td>Mass assignment / no FormRequests</td><td><span class="pill pill-partial">Reduced</span></td><td>Repositories force <code class="inline-code">school_id</code> from the session, so tenant injection is not possible through them. <strong>This pass:</strong> the 9 remaining <code class="inline-code">$request-&gt;except('_token')</code> writes (fees types, mediums, sections, sliders, pickup points) now pass explicit field lists, and fees types gained validation it never had. Still only 2 FormRequest classes.</td></tr>
         </tbody>
       </table>
     </div>
-
-    <h3 style="font-size: 1.15rem; margin: 32px 0 12px 0; color: #f43f5e;">🔴 Critical Security Vulnerabilities & Technical Fixes (What Needs to Be Done)</h3>
-
-    <!-- Vuln 1 -->
-    <div class="alert-card alert-danger">
-      <div style="display: flex; justify-content: space-between; align-items: center;">
-        <strong style="color: #f43f5e; font-size: 1.05rem;">1. Sanctum API Tokens Never Expire (Indefinite Lifespan)</strong>
-        <span class="pill pill-critical">Critical — High Severity</span>
-      </div>
-      <p style="margin: 8px 0;">
-        <strong>File:</strong> <code class="inline-code">PHP_CODE/config/sanctum.php:47</code><br>
-        <strong>Flaw:</strong> <code class="inline-code">'expiration' => null</code>. In Laravel Sanctum, when expiration is <code class="inline-code">null</code>, Personal Access Tokens never expire. 
-        Once a student, parent, or staff member logs into a mobile device, that Bearer token remains valid indefinitely, even months or years later, or if the device is lost/stolen.
-      </p>
-      <div style="margin-top: 10px;">
-        <strong>Remediation Code:</strong>
-        <pre class="code-block"><code>// config/sanctum.php:47
-// Expire tokens after 30 days (43200 minutes)
-'expiration' => env('SANCTUM_TOKEN_EXPIRATION', 60 * 24 * 30),
-
-// In app/Console/Kernel.php: schedule pruning of expired tokens daily:
-$schedule->command('sanctum:prune-expired --hours=24')->daily();</code></pre>
-      </div>
-    </div>
-
-    <!-- Vuln 2 -->
-    <div class="alert-card alert-danger">
-      <div style="display: flex; justify-content: space-between; align-items: center;">
-        <strong style="color: #f43f5e; font-size: 1.05rem;">2. MySQL Strict Mode Disabled on Both Connections</strong>
-        <span class="pill pill-critical">High Severity — Data Integrity</span>
-      </div>
-      <p style="margin: 8px 0;">
-        <strong>File:</strong> <code class="inline-code">PHP_CODE/config/database.php:59, 76</code><br>
-        <strong>Flaw:</strong> <code class="inline-code">'strict' => false</code> on both <code class="inline-code">mysql</code> and <code class="inline-code">school</code> tenant connections. 
-        Disabling strict mode allows MySQL to silently truncate oversized data, accept invalid zero-dates (<code class="inline-code">0000-00-00</code>), and execute non-standard <code class="inline-code">GROUP BY</code> queries with unpredictable aggregation results.
-      </p>
-      <div style="margin-top: 10px;">
-        <strong>Remediation Code:</strong>
-        <pre class="code-block"><code>// config/database.php:59 & 76
-'strict' => true, // Enforces STRICT_TRANS_TABLES, NO_ZERO_IN_DATE, ERROR_FOR_DIVISION_BY_ZERO</code></pre>
-      </div>
-    </div>
-
-    <!-- Vuln 3 -->
-    <div class="alert-card alert-danger">
-      <div style="display: flex; justify-content: space-between; align-items: center;">
-        <strong style="color: #f43f5e; font-size: 1.05rem;">3. Payment Gateway Secret Keys Stored in Plaintext in Database</strong>
-        <span class="pill pill-critical">High Severity — Financial Security</span>
-      </div>
-      <p style="margin: 8px 0;">
-        <strong>File:</strong> <code class="inline-code">PHP_CODE/app/Models/PaymentConfiguration.php:13-25</code><br>
-        <strong>Flaw:</strong> The <code class="inline-code">PaymentConfiguration</code> model lacks an Eloquent <code class="inline-code">$casts</code> property. 
-        Stripe Secret Keys (<code class="inline-code">sk_live_...</code>), Razorpay Secret Keys, Paystack Secret Keys, and Webhook Secrets are stored in plaintext MySQL columns. 
-        Any database dump, backup leak, or SQL query exposure reveals all live payment secrets.
-      </p>
-      <div style="margin-top: 10px;">
-        <strong>Remediation Code:</strong>
-        <pre class="code-block"><code>// app/Models/PaymentConfiguration.php
-protected $casts = [
-    'api_key'            => 'encrypted',
-    'secret_key'         => 'encrypted',
-    'webhook_secret_key' => 'encrypted',
-];
-// Run a one-time migration to encrypt existing rows using Crypt::encryptString()</code></pre>
-      </div>
-    </div>
-
-    <!-- Vuln 4 -->
-    <div class="alert-card alert-danger">
-      <div style="display: flex; justify-content: space-between; align-items: center;">
-        <strong style="color: #f43f5e; font-size: 1.05rem;">4. Arbitrary SQL Execution via Backup Restore (`DB::unprepared()`)</strong>
-        <span class="pill pill-critical">Critical Severity — Remote Takeover</span>
-      </div>
-      <p style="margin: 8px 0;">
-        <strong>File:</strong> <code class="inline-code">PHP_CODE/app/Http/Controllers/DatabaseBackupController.php:677, 839</code><br>
-        <strong>Flaw:</strong> When restoring a database, the controller splits uploaded SQL strings and executes each query verbatim: 
-        <code class="inline-code">DB::statement("SET FOREIGN_KEY_CHECKS = 0"); DB::unprepared(trim($query));</code>. 
-        Any user with backup access can upload an SQL file containing <code class="inline-code">GRANT ALL ON *.* TO ...</code>, admin password overwrites, or MySQL UDF execution payloads.
-      </p>
-      <div style="margin-top: 10px;">
-        <strong>Remediation Code:</strong>
-        <p style="font-size: 0.85rem; color: var(--text-secondary);">
-          Restrict backup restoration strictly to files generated internally on the server (validated via HMAC signature). Reject arbitrary uploaded <code class="inline-code">.sql</code> files, or run restoration exclusively via CLI with strict superadmin shell authorization.
-        </p>
-      </div>
-    </div>
-
-    <!-- Vuln 5 -->
-    <div class="alert-card alert-warning">
-      <div style="display: flex; justify-content: space-between; align-items: center;">
-        <strong style="color: #f59e0b; font-size: 1.05rem;">5. XML File Upload Vector (XXE / SSRF Exposure)</strong>
-        <span class="pill pill-high">Medium / High Severity</span>
-      </div>
-      <p style="margin: 8px 0;">
-        <strong>File:</strong> <code class="inline-code">PHP_CODE/app/Services/UploadService.php:20</code> & <code class="inline-code">AssignmentController.php:96</code><br>
-        <strong>Flaw:</strong> <code class="inline-code">xml</code> is explicitly listed in <code class="inline-code">ALLOWED_EXTENSIONS</code>. If an XML file containing external DTD references (<code class="inline-code">&lt;!ENTITY xxe SYSTEM "file:///etc/passwd"&gt;</code>) is uploaded and parsed by any backend library or viewed in a browser, it risks XXE and SSRF.
-      </p>
-      <div style="margin-top: 10px;">
-        <strong>Remediation Code:</strong> Remove <code class="inline-code">'xml'</code> from <code class="inline-code">UploadService::ALLOWED_EXTENSIONS</code> and validation rules.
-      </div>
-    </div>
-
-    <!-- Vuln 6 -->
-    <div class="alert-card alert-warning">
-      <div style="display: flex; justify-content: space-between; align-items: center;">
-        <strong style="color: #f59e0b; font-size: 1.05rem;">6. CORS Allowed Origins Defaults to Wildcard (`*`)</strong>
-        <span class="pill pill-medium">Medium Severity</span>
-      </div>
-      <p style="margin: 8px 0;">
-        <strong>File:</strong> <code class="inline-code">PHP_CODE/config/cors.php:25</code><br>
-        <strong>Flaw:</strong> <code class="inline-code">'allowed_origins' => explode(',', env('CORS_ALLOWED_ORIGINS', '*'))</code>. When <code class="inline-code">CORS_ALLOWED_ORIGINS</code> is unset, any external website can make API calls to this server on behalf of a victim.
-      </p>
-      <div style="margin-top: 10px;">
-        <strong>Remediation Code:</strong> Default to <code class="inline-code">env('APP_URL')</code> instead of <code class="inline-code">'*'</code>.
-      </div>
-    </div>
-
-    <!-- Vuln 7 -->
-    <div class="alert-card alert-warning">
-      <div style="display: flex; justify-content: space-between; align-items: center;">
-        <strong style="color: #f59e0b; font-size: 1.05rem;">7. Heavy Mass-Assignment Surface (300+ `$request->all()` Calls & Missing FormRequests)</strong>
-        <span class="pill pill-medium">Medium Severity</span>
-      </div>
-      <p style="margin: 8px 0;">
-        <strong>Scope:</strong> Across 75 web controllers and 6 API controllers, over 300 instances of <code class="inline-code">$request->all()</code> are passed into models or services. 
-        There is not a single FormRequest class in <code class="inline-code">app/Http/Requests</code>. If any model accidentally leaves a column un-guarded, malicious parameters can be injected.
-      </p>
-      <div style="margin-top: 10px;">
-        <strong>Remediation Code:</strong> Migrate critical admission, fee, user profile, and payroll controllers to dedicated FormRequest classes with strict <code class="inline-code">$request->validated()</code> calls.
-      </div>
-    </div>
   </section>
 
-  <!-- =========================================================
-       SECTION 5: FEATURE INVENTORY (DONE VS TO-DO)
-       ========================================================= -->
+  <!-- 5 -->
+  <section id="new-findings" class="audit-section">
+    <div class="section-header">
+      <h2><span>🔎</span> 5. Issues found and fixed in this run</h2>
+      <span class="section-tag badge-info">Not in the first report</span>
+    </div>
+    <div class="table-wrapper">
+      <table class="audit-table">
+        <thead><tr><th>Severity</th><th>Issue</th><th>Fix</th></tr></thead>
+        <tbody>
+          <tr><td><span class="pill pill-high">High</span></td><td>GPS trip create / start / complete, alert resolve and the live fleet feed had no permission check: any logged-in staff account could dispatch trips or read every bus position.</td><td>Transport permissions on all of them (<code class="inline-code">GpsTripController</code>, <code class="inline-code">GpsAlertController</code>, <code class="inline-code">GpsDashboardController::liveStats</code>).</td></tr>
+          <tr><td><span class="pill pill-high">High</span></td><td>Staff-app driver could end any other vehicle's trip by passing its <code class="inline-code">trip_id</code> (<code class="inline-code">TrasportationApiController::tripStartEnd</code>); it also dereferenced the trip before checking it existed.</td><td>The trip must belong to the route vehicle the user operates; null check moved first.</td></tr>
+          <tr><td><span class="pill pill-high">High</span></td><td>View Attendance list endpoint let a class teacher read any class's attendance by changing <code class="inline-code">class_section_id</code>, and at the same time blocked class teachers without <code class="inline-code">attendance-list</code> from their own class.</td><td>Endpoint accepts <code class="inline-code">class-teacher</code> or <code class="inline-code">attendance-list</code>, and only for classes the user may see.</td></tr>
+          <tr><td><span class="pill pill-medium">Medium</span></td><td>Any staff member could open any teacher's timetable via URL.</td><td>Own timetable, or <code class="inline-code">timetable-list</code>.</td></tr>
+          <tr><td><span class="pill pill-medium">Medium</span></td><td>GPS alert debounce cache keys were not tenant-scoped: every school has a vehicle #1, so one school's alert could silence another's.</td><td>Keys carry the tenant database name.</td></tr>
+          <tr><td><span class="pill pill-medium">Medium</span></td><td>Live map fleet cards built HTML from vehicle and route names without escaping (stored XSS by anyone who can name a route).</td><td>Escaped.</td></tr>
+          <tr><td><span class="pill pill-medium">Medium</span></td><td>Route builder: saving geometry used a redirecting permission check on a JSON endpoint, and stops could not be added, moved or reordered.</td><td>Replaced by the new route builder (section 7).</td></tr>
+          <tr><td><span class="pill pill-medium">Medium</span></td><td>Fees type create/update had no validation at all.</td><td>Validation added; explicit fields.</td></tr>
+          <tr><td><span class="pill pill-medium">Medium</span></td><td>Backup restore: TRUNCATE auto-commits, so a failed restore lost data.</td><td>Transactional restore (see security #4).</td></tr>
+          <tr><td><span class="pill pill-low">Low</span></td><td>Live fleet: route filter was ignored by the server; driver name read a non-existent <code class="inline-code">name</code> column (always “Unassigned”).</td><td>Filter honoured; uses <code class="inline-code">full_name</code>.</td></tr>
+          <tr><td><span class="pill pill-low">Low</span></td><td>View Attendance: changing the class section did nothing (no listener), and the page opened with no class or date.</td><td>Listener added, last class remembered, today pre-filled.</td></tr>
+          <tr><td><span class="pill pill-low">Low</span></td><td>Teacher timetable used a fixed-slot calendar, so periods after a break drifted off the grid.</td><td>Bell-period grid (section 7).</td></tr>
+          <tr><td><span class="pill pill-low">Low</span></td><td>Google Fonts regression, stackpath Bootstrap, unconditional reCAPTCHA.</td><td>Section 2.</td></tr>
+          <tr><td><span class="pill pill-low">Low</span></td><td>Overspeed limit was one hardcoded 45 km/h for every vehicle and alerts were only WARNING.</td><td>Per-vehicle limit and cooldown; CRITICAL with peak speed and duration.</td></tr>
+          <tr><td><span class="pill pill-low">Low</span></td><td><code class="inline-code">substitutes</code> ignored teachers already covering another class and teachers marked absent in staff attendance.</td><td>Shared <code class="inline-code">TeacherScheduleService</code> used by both screens.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="diff-note">Earlier fixes on the parent branch <code class="inline-code">fix/audit-chat-bugs</code> (forgeable Paystack/Flutterwave webhooks, unauthenticated fleet-live API, roll-number type regression, leadership/exam-block authorization, XSS, language path traversal) are included in this branch.</p>
+  </section>
+
+  <!-- 6 -->
   <section id="feature-audit-done-todo" class="audit-section">
     <div class="section-header">
-      <h2><span>📋</span> 5. Complete Feature Inventory: Done vs In-Progress vs Missing</h2>
-      <span class="section-tag badge-warning">15 Functional Domains</span>
+      <h2><span>📋</span> 6. Features: done vs to-do</h2>
     </div>
-
-    <p style="margin-bottom: 16px; color: var(--text-secondary);">
-      An in-depth audit of all 75 backend web controllers, 6 mobile API controllers, 123 models, and Flutter clients categorizes 
-      what is production-complete, what is partially implemented, and what is missing across the entire SaaS platform.
-    </p>
-
     <div class="table-wrapper">
       <table class="audit-table">
-        <thead>
-          <tr>
-            <th>Module / Feature Domain</th>
-            <th>Controllers & Models</th>
-            <th>Status</th>
-            <th>What is Done</th>
-            <th>What Needs to Be Done (Gaps)</th>
-          </tr>
-        </thead>
+        <thead><tr><th>Area</th><th>Status</th><th>Still to do</th></tr></thead>
         <tbody>
-          <tr>
-            <td><strong>1. Multi-Tenant SaaS & Super Admin</strong></td>
-            <td><code class="inline-code">SchoolController</code><br><code class="inline-code">PackageController</code><br><code class="inline-code">SubscriptionController</code><br><code class="inline-code">School</code>, <code class="inline-code">Package</code></td>
-            <td><span class="pill pill-implemented">Complete</span></td>
-            <td>School registration, custom subdomains, trial periods, package limits (students/staff), subscription invoices, Stripe/Razorpay/Paystack billing.</td>
-            <td>Automatic school DB provisioning queue isolation; self-service domain SSL verification.</td>
-          </tr>
-          <tr>
-            <td><strong>2. Academic Structure & Core Setup</strong></td>
-            <td><code class="inline-code">ClassSchoolController</code><br><code class="inline-code">ClassSectionController</code><br><code class="inline-code">SubjectController</code><br><code class="inline-code">SemesterController</code></td>
-            <td><span class="pill pill-implemented">Complete</span></td>
-            <td>Session years, semesters, mediums, shifts, streams (Science/Commerce), classes, sections, core & elective subjects, class teacher mapping.</td>
-            <td>Batch promotion rollback tool; academic curriculum archive export.</td>
-          </tr>
-          <tr>
-            <td><strong>3. Student & Parent Lifecycle</strong></td>
-            <td><code class="inline-code">StudentController</code><br><code class="inline-code">GuardianController</code><br><code class="inline-code">PromoteStudentController</code><br><code class="inline-code">Students</code>, <code class="inline-code">User</code></td>
-            <td><span class="pill pill-implemented">Complete</span></td>
-            <td>Admissions, roll numbers, dynamic custom form fields, student ID card generator, guardian multi-child linking, student promotion.</td>
-            <td>Online student self-enrollment portal with digital document upload verification.</td>
-          </tr>
-          <tr>
-            <td><strong>4. Staff, Teachers & HR Payroll</strong></td>
-            <td><code class="inline-code">StaffController</code><br><code class="inline-code">TeacherController</code><br><code class="inline-code">PayrollController</code><br><code class="inline-code">LeaveController</code></td>
-            <td><span class="pill pill-implemented">Complete</span></td>
-            <td>Staff profiles, Spatie role permissions, salary slips, allowances/deductions, staff leave balance and approval workflow.</td>
-            <td>Income tax / PF computation deductions; automated biometric payroll hour calculation.</td>
-          </tr>
-          <tr>
-            <td><strong>5. Student & Staff Attendance</strong></td>
-            <td><code class="inline-code">AttendanceController</code><br><code class="inline-code">StaffAttendanceController</code><br><code class="inline-code">Attendance</code>, <code class="inline-code">StaffAttendance</code></td>
-            <td><span class="pill pill-implemented">Complete</span></td>
-            <td>Class-wise daily student attendance (Present, Absent, Late, Half-day), teacher web clock-in/out, monthly attendance summaries.</td>
-            <td>Hardware biometric / RFID push integration; automated instant WhatsApp absence alert.</td>
-          </tr>
-          <tr>
-            <td><strong>6. Curriculum, Lessons & Diaries</strong></td>
-            <td><code class="inline-code">LessonController</code><br><code class="inline-code">LessonTopicController</code><br><code class="inline-code">DiaryController</code><br><code class="inline-code">Lesson</code>, <code class="inline-code">Diary</code></td>
-            <td><span class="pill pill-implemented">Complete</span></td>
-            <td>Syllabus topic tracking (Not started, In progress, Completed), daily student/teacher homework diaries, parent acknowledgment.</td>
-            <td>Lesson plan PDF export for school inspection; syllabus progress percentage graphs.</td>
-          </tr>
-          <tr>
-            <td><strong>7. Homework & Assignments</strong></td>
-            <td><code class="inline-code">AssignmentController</code><br><code class="inline-code">Assignment</code>, <code class="inline-code">AssignmentSubmission</code></td>
-            <td><span class="pill pill-implemented">Complete</span></td>
-            <td>File attachments, YouTube/resource links, submission deadline, online grading, points, teacher feedback.</td>
-            <td>Plagiarism check integration; audio recording submissions for language subjects.</td>
-          </tr>
-          <tr>
-            <td><strong>8. Offline & Online Examinations</strong></td>
-            <td><code class="inline-code">ExamController</code><br><code class="inline-code">OnlineExamController</code><br><code class="inline-code">ExamResult</code>, <code class="inline-code">OnlineExam</code></td>
-            <td><span class="pill pill-implemented">Complete</span></td>
-            <td>Exam schedules, marks entry, GPA/percentage grade rules, marksheet generation, MCQ online exams with MathJax formula editor & timer.</td>
-            <td>Question bank bulk import (Word/Excel); subjective online exam answer sheet evaluation.</td>
-          </tr>
-          <tr>
-            <td><strong>9. Fee & Finance Management</strong></td>
-            <td><code class="inline-code">FeesController</code><br><code class="inline-code">FeesTypeController</code><br><code class="inline-code">ExpenseController</code><br><code class="inline-code">Fee</code>, <code class="inline-code">FeesPaid</code></td>
-            <td><span class="pill pill-implemented">Complete</span></td>
-            <td>Compulsory & optional fees, installment plans, payment gateway integration, cash/cheque counter collection, fee receipts, defaulters list, expense vouchers.</td>
-            <td>Fee concession / scholarship approval workflow; automated late fee calculation.</td>
-          </tr>
-          <tr>
-            <td><strong>10. Timetable Management</strong></td>
-            <td><code class="inline-code">TimetableController</code><br><code class="inline-code">TimetableGenerationService</code><br><code class="inline-code">Timetable</code>, <code class="inline-code">TimetableTemplate</code></td>
-            <td><span class="pill pill-partial">V2 Backend Only</span></td>
-            <td>Period templates, subject requirements, teacher availability, deterministic multi-class solver engine, locked slot preservation.</td>
-            <td><strong>School-wide multi-class batch generator UI</strong>; Master cross-class teacher matrix; interactive drag-and-drop collision detection. (See Section 6).</td>
-          </tr>
-          <tr>
-            <td><strong>11. Transport Management & GPS</strong></td>
-            <td><code class="inline-code">RouteController</code><br><code class="inline-code">VehicleController</code><br><code class="inline-code">GpsTransport Addon</code></td>
-            <td><span class="pill pill-partial">Partial</span></td>
-            <td>Vehicle management, pickup points, route fee assignment, GPS backend tracking engine, geofencing, route deviation, trip replay.</td>
-            <td>Driver phone background GPS collector app; offline queue; parent live tracking Flutter map screen.</td>
-          </tr>
-          <tr>
-            <td><strong>12. Communication & CMS</strong></td>
-            <td><code class="inline-code">AnnouncementController</code><br><code class="inline-code">NotificationController</code><br><code class="inline-code">WebSettingsController</code></td>
-            <td><span class="pill pill-implemented">Complete</span></td>
-            <td>Announcements, notices, Firebase push notifications, internal chat messaging, school public landing page with slider and gallery.</td>
-            <td>Two-way WhatsApp Cloud API messaging; voice broadcast integration.</td>
-          </tr>
-          <tr>
-            <td><strong>13. Certificate & ID Card Studio</strong></td>
-            <td><code class="inline-code">CertificateTemplateController</code><br><code class="inline-code">PhotoBooth Addon</code></td>
-            <td><span class="pill pill-implemented">Complete</span></td>
-            <td>Custom drag/drop certificate canvas, dynamic student placeholders, bulk print, automated webcam photo capture for student badges.</td>
-            <td>Staff ID cards & transfer certificate (TC) generation with automated sequence numbers.</td>
-          </tr>
-          <tr>
-            <td><strong>14. Hostel Management</strong></td>
-            <td><em>None</em></td>
-            <td><span class="pill pill-missing">Missing (0%)</span></td>
-            <td><strong>Completely absent in current codebase.</strong></td>
-            <td><strong>Full module implementation required:</strong> Buildings, room types, bed allocation, night curfew attendance, gate passes, visitor logs. (See Section 7).</td>
-          </tr>
-          <tr>
-            <td><strong>15. Canteen & Cafeteria POS</strong></td>
-            <td><em>None</em></td>
-            <td><span class="pill pill-missing">Missing (0%)</span></td>
-            <td><strong>Completely absent in current codebase.</strong></td>
-            <td><strong>Full module implementation required:</strong> Touchscreen POS, digital RFID student wallet, meal pre-booking, nutritional & allergy tracking, inventory. (See Section 8).</td>
-          </tr>
-          <tr>
-            <td><strong>16. Library Management System (LMS)</strong></td>
-            <td><em>None</em></td>
-            <td><span class="pill pill-missing">Missing (0%)</span></td>
-            <td><strong>Completely absent in current codebase.</strong></td>
-            <td><strong>Full module implementation required:</strong> Barcode/ISBN cataloging, Dewey classification, rack/shelf locator, book issue/return/renewal, automated overdue fines, e-book PDF repository. (See Section 9).</td>
-          </tr>
+          <tr><td>Multi-tenant SaaS, academics, students, staff, payroll, fees, exams, diaries, CMS</td><td><span class="pill pill-implemented">Complete</span></td><td>Fee concessions / scholarships / GST receipts; Tamil Nadu report-card and TC formats; EMIS export.</td></tr>
+          <tr><td>Attendance (daily, period-wise, teacher)</td><td><span class="pill pill-implemented">Complete</span></td><td>Biometric / RFID push; WhatsApp / SMS absence alerts.</td></tr>
+          <tr><td>Timetable V2 (solver, batch UI, teacher matrix, drag &amp; drop, proxies)</td><td><span class="pill pill-implemented">Complete</span></td><td>Travel time between buildings is not modelled (labs in different blocks are handled by same-block preference only).</td></tr>
+          <tr><td>Transport &amp; GPS</td><td><span class="pill pill-implemented">Complete</span></td><td>Real-time push to admin phones needs Firebase (L-09); websocket server is a single Ratchet process; <code class="inline-code">vehicle_locations</code> has no retention job.</td></tr>
+          <tr><td>Hostel, Canteen, Library</td><td><span class="pill pill-implemented">Built as addons</span></td><td>Online canteen top-up via payment gateway; posting hostel dues and library fines into the core fee ledger.</td></tr>
+          <tr><td>Groups &amp; leadership, lab batches</td><td><span class="pill pill-partial">Partial</span></td><td>Lab in-charge, equipment, incidents; event groups and event management not started.</td></tr>
+          <tr><td>Communication</td><td><span class="pill pill-missing">Missing</span></td><td>No SMS or WhatsApp channel; no Tamil translation of the backend.</td></tr>
         </tbody>
       </table>
     </div>
   </section>
 
-  <!-- =========================================================
-       SECTION 6: INTELLIGENT TIMETABLE MATRIX
-       ========================================================= -->
-  <section id="timetable-intelligent-matrix" class="audit-section">
+  <!-- 7 -->
+  <section id="transport-attendance-timetable" class="audit-section">
     <div class="section-header">
-      <h2><span>⏰</span> 6. Intelligent Timetable Matrix Engine & Multi-Standard Architecture</h2>
-      <span class="section-tag badge-info">Deep Algorithmic Analysis</span>
+      <h2><span>🚌</span> 7. Transport, attendance &amp; timetable spec — delivered</h2>
+      <span class="section-tag badge-success">7 of 7 modules</span>
     </div>
-
-    <div class="alert-card alert-info">
-      <strong style="color: #38bdf8; font-size: 1.05rem;">The User's Real-World Institutional Challenge:</strong>
-      <p style="margin-top: 6px;">
-        <em>"for example, if a teacher takes the maths in 11th and 12th for each section, and in some classes he can take chemistry class too. sometimes he even go to 10th class as well. so a teacher can attend any standard with any section, so we need to make an intelligent time table matrix to build a timetable without hassle."</em>
-      </p>
-    </div>
-
-    <h3 style="font-size: 1.15rem; margin: 24px 0 12px 0; color: #ffffff;">1. How the Current System Works vs. Why It Struggles</h3>
-    <p style="color: var(--text-secondary); margin-bottom: 12px;">
-      Our inspection of <code class="inline-code">Timetable.php</code>, <code class="inline-code">SubjectTeacher.php</code>, <code class="inline-code">TimetableGeneratorService.php</code>, and <code class="inline-code">TimetableGenerationService.php</code> reveals:
-    </p>
-    <ul style="margin-left: 24px; color: var(--text-secondary); font-size: 0.9rem; line-height: 1.8;">
-      <li><strong>Data Layer Capability:</strong> In the database, a teacher can already be assigned to multiple subjects across multiple classes and sections via <code class="inline-code">SubjectTeacher (class_section_id, subject_id, teacher_id)</code>. For example, Teacher A (Mr. Sharma) can legitimately teach Maths in 11-A, Maths in 11-B, Maths in 12-A, Chemistry in 11-A, and Science in 10-A. The database schema fully supports this!</li>
-      <li><strong>The Problem with V1 Generator:</strong> The V1 generator (<code class="inline-code">TimetableGeneratorService.php</code>) operates on a <em>single class section at a time</em> using a randomized <code class="inline-code">shuffle($queue)</code> greedy allocator. If you generate Class 11-A first, Teacher A is locked into Monday Period 1. When you subsequently generate Class 11-B or 12-A, Teacher A collides, gets rejected, and the generator either inserts an alternate teacher or fails to place the lecture! Generating class-by-class creates unavoidable <strong>scheduling deadlocks</strong>.</li>
-      <li><strong>The State of V2 Generator:</strong> In September 2026, a deterministic backtracking constraint solver (<code class="inline-code">TimetableGenerationService.php</code>) was written that accepts an array of <code class="inline-code">class_section_ids</code>. However, <strong>the Web UI in <code class="inline-code">edit.blade.php</code> is strictly scoped to one class section URL (<code class="inline-code">/timetable/{class_section_id}/edit</code>)</strong>. An administrator has no UI to trigger school-wide simultaneous generation!</li>
-      <li><strong>Missing Global Visibility:</strong> There is no <strong>Master Cross-Class Teacher Matrix</strong> where a principal can view all teachers as rows and all school periods as columns to see who is teaching where in real time.</li>
-    </ul>
-
-    <h3 style="font-size: 1.15rem; margin: 32px 0 12px 0; color: #ffffff;">2. Architecture of the Intelligent Master Timetable Matrix</h3>
-    <p style="color: var(--text-secondary); margin-bottom: 14px;">
-      To solve the user's challenge without hassle, the timetable system requires three interconnected layers:
-    </p>
-
-    <!-- Diagram / Wireframe Box -->
-    <div class="wireframe-box">
-      <h4 style="color: #38bdf8; margin-bottom: 12px;">Visual Concept: Master Teacher Schedule Matrix (School-Wide View)</h4>
-      <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">
-        Instead of editing class-by-class, the principal opens the Master Teacher Matrix. Each row is a teacher; columns are days and periods. Overlaps are physically impossible because each cell represents a teacher's single physical location.
-      </p>
-
-      <div class="matrix-grid-demo">
-        <div class="matrix-header-cell">Teacher / Day</div>
-        <div class="matrix-header-cell">Period 1 (09:00 - 09:45)</div>
-        <div class="matrix-header-cell">Period 2 (09:45 - 10:30)</div>
-        <div class="matrix-header-cell">Period 3 (10:45 - 11:30)</div>
-        <div class="matrix-header-cell">Period 4 (11:30 - 12:15)</div>
-        <div class="matrix-header-cell">Period 5 (01:00 - 01:45)</div>
-
-        <!-- Teacher 1 -->
-        <div class="matrix-cell" style="font-weight: 700; color: #ffffff; display: flex; align-items: center;">
-          Mr. Sharma<br><small style="color: var(--text-muted); font-weight: 400;">Maths & Chem</small>
-        </div>
-        <div class="matrix-cell">
-          <strong style="color: #ffffff;">Class 11-A</strong>
-          <span class="slot-tag tag-math">📐 Mathematics</span>
-          <small style="color: var(--text-muted);">Room 201</small>
-        </div>
-        <div class="matrix-cell">
-          <strong style="color: #ffffff;">Class 12-A</strong>
-          <span class="slot-tag tag-math">📐 Mathematics</span>
-          <small style="color: var(--text-muted);">Room 302</small>
-        </div>
-        <div class="matrix-cell">
-          <strong style="color: #ffffff;">Class 11-B</strong>
-          <span class="slot-tag tag-chem">🧪 Chemistry</span>
-          <small style="color: var(--text-muted);">Chem Lab 1</small>
-        </div>
-        <div class="matrix-cell">
-          <strong style="color: #94a3b8;">Free / Preparation</strong>
-          <span class="slot-tag tag-free">☕ Planning</span>
-        </div>
-        <div class="matrix-cell">
-          <strong style="color: #ffffff;">Class 10-A</strong>
-          <span class="slot-tag tag-math">📐 Mathematics</span>
-          <small style="color: var(--text-muted);">Room 105</small>
-        </div>
-
-        <!-- Teacher 2 -->
-        <div class="matrix-cell" style="font-weight: 700; color: #ffffff; display: flex; align-items: center;">
-          Dr. Priya Patel<br><small style="color: var(--text-muted); font-weight: 400;">Chemistry & Bio</small>
-        </div>
-        <div class="matrix-cell">
-          <strong style="color: #ffffff;">Class 12-B</strong>
-          <span class="slot-tag tag-chem">🧪 Chemistry</span>
-          <small style="color: var(--text-muted);">Chem Lab 2</small>
-        </div>
-        <div class="matrix-cell">
-          <strong style="color: #ffffff;">Class 11-A</strong>
-          <span class="slot-tag tag-chem">🧪 Chemistry</span>
-          <small style="color: var(--text-muted);">Chem Lab 1</small>
-        </div>
-        <div class="matrix-cell">
-          <strong style="color: #ffffff;">Class 10-B</strong>
-          <span class="slot-tag tag-chem">🔬 General Science</span>
-          <small style="color: var(--text-muted);">Room 106</small>
-        </div>
-        <div class="matrix-cell">
-          <strong style="color: #ffffff;">Class 12-A</strong>
-          <span class="slot-tag tag-chem">🧪 Chemistry</span>
-          <small style="color: var(--text-muted);">Chem Lab 1</small>
-        </div>
-        <div class="matrix-cell">
-          <strong style="color: #94a3b8;">Free / Office Hour</strong>
-          <span class="slot-tag tag-free">☕ Free</span>
-        </div>
-      </div>
-    </div>
-
-    <h3 style="font-size: 1.15rem; margin: 28px 0 12px 0; color: #ffffff;">3. Technical Implementation Specification for the Intelligent Solver</h3>
-
+    <p style="color:var(--text-secondary);margin-bottom:12px;">Implemented against the real schema rather than the spec's sample code where they differed (for example, <code class="inline-code">pickup_points.geofence_radius</code> already existed, so it was reused; the siren uses polling because no Echo/Pusher server is configured).</p>
     <div class="table-wrapper">
       <table class="audit-table">
-        <thead>
-          <tr>
-            <th>Component</th>
-            <th>Proposed Path / Technology</th>
-            <th>Core Algorithmic Responsibility</th>
-          </tr>
-        </thead>
+        <thead><tr><th>Req</th><th>What was built</th><th>Where</th></tr></thead>
         <tbody>
-          <tr>
-            <td><strong>School-Wide Batch Generator Modal</strong></td>
-            <td><code class="inline-code">resources/views/timetable/batch_generate_modal.blade.php</code></td>
-            <td>Allows admin to select multiple grades simultaneously: [x] Class 10 (A,B), [x] Class 11 (Science, Commerce), [x] Class 12 (Science, Commerce) and pass them as <code class="inline-code">class_section_ids[]</code> to V2 backend.</td>
-          </tr>
-          <tr>
-            <td><strong>Constraint Satisfaction Solver (CSP)</strong></td>
-            <td><code class="inline-code">App\Services\Timetable\TimetableGenerationService</code></td>
-            <td>
-              Implements <strong>MRV (Minimum Remaining Values)</strong> heuristic: Schedules the most constrained teachers first (e.g., senior teachers teaching 5 sections across 10th, 11th, and 12th). 
-              Applies <strong>LCV (Least Constraining Value)</strong> to pick slots that leave maximum free periods for other grades.
-            </td>
-          </tr>
-          <tr>
-            <td><strong>Hard & Soft Constraint Enforcer</strong></td>
-            <td><code class="inline-code">App\Services\Timetable\TimetableFeasibilityService</code></td>
-            <td>
-              <strong>Hard Constraints (Must Satisfy):</strong> Zero teacher clashes across all sections; zero room/lab clashes; respects locked slots; respects teacher unavailable slots.<br>
-              <strong>Soft Constraints (Optimized):</strong> Max 4-5 lectures/day per teacher; no more than 3 consecutive periods; avoid placing heavy subjects (Maths/Physics) at the very last period; balanced daily homework distribution.
-            </td>
-          </tr>
-          <tr>
-            <td><strong>Interactive Drag-and-Drop Matrix UI</strong></td>
-            <td><code class="inline-code">public/assets/js/custom/timetable-matrix.js</code></td>
-            <td>Allows admin to drag any slot to a new cell. Instantly validates teacher and lab availability via client-side matrix map; turns red and warns if Teacher A is teaching another class at that slot.</td>
-          </tr>
-          <tr>
-            <td><strong>Substitute / Proxy Recommender</strong></td>
-            <td><code class="inline-code">App\Services\Timetable\TimetableProxyService</code></td>
-            <td>When a teacher applies for leave via the Leave module, the system automatically checks the Master Matrix, identifies who is free during their periods with the same subject qualification, and recommends 1-click proxy assignment.</td>
-          </tr>
+          <tr><td>REQ-1 Speed alerts</td><td>Per-vehicle speed limit and repeat interval (vehicle form). Sustained overspeed raises a CRITICAL alert with limit, peak speed, duration, driver and route. Every admin page polls for unacknowledged alerts every 15 s and shows a popup with a browser-generated siren (stops after 20 s), call-driver and live-map buttons, and an acknowledge action with remarks. Live map shows overspeeding buses with a red ring and an “Overspeeding” filter.</td><td><code class="inline-code">AlertService</code>, <code class="inline-code">GpsAlertController::live|acknowledge</code>, <code class="inline-code">gpstransport::partials.speed-alert</code>, migration <code class="inline-code">2026_10_30_000002</code></td></tr>
+          <tr><td>REQ-2 Routes &amp; stops</td><td>Map route builder: click to add a stop, drag to move, per-stop geofence radius, halt time, landmark, contact person and phone, pickup and drop times, active flag. Separate morning and afternoon orders with one-click reverse. Draw the line through stops, add path points by hand, or snap to roads via a self-hosted OSRM server. Stops with booked students cannot be deleted. Trips copy stops in the order of their run.</td><td><code class="inline-code">GpsRouteController::saveRoute</code>, <code class="inline-code">route-builder.blade.php</code>, <code class="inline-code">RoutePickupPoint::forTrip</code>, migration <code class="inline-code">000003</code></td></tr>
+          <tr><td>REQ-3 Relief drivers</td><td>Relief roster per route vehicle for a date range and for both runs or pickup / drop only, with overlap and same-shift checks. While in force, the relief driver sees and runs the vehicle in both driver APIs and the primary driver is locked out of that run. The relief driver and the riding families get a push. Cancel at any time.</td><td><code class="inline-code">AlternateDriverController</code>, <code class="inline-code">RouteVehicle::operatedBy</code>, Transport → Relief drivers, migration <code class="inline-code">000004</code></td></tr>
+          <tr><td>REQ-4 Teacher attendance</td><td>Teacher attendance page with P / HD / OD / A / CL / ML, subject filter, the day's periods per teacher, and an uncovered-period counter. Saving an absence opens the proxy wizard with ranked free teachers (subject fit, class familiarity, load), re-validated on assign; the proxy gets a push.</td><td><code class="inline-code">TeacherAttendanceController</code>, <code class="inline-code">TeacherScheduleService</code>, migration <code class="inline-code">000005</code></td></tr>
+          <tr><td>REQ-5 View attendance</td><td>Class-section change refreshes the table; last section remembered; today pre-filled. New “Period-wise” tab: roll no, name, one column per period with its time, P / A / L / E badges and a daily summary.</td><td><code class="inline-code">attendance/view.blade.php</code>, <code class="inline-code">PeriodAttendanceController::matrix</code></td></tr>
+          <tr><td>REQ-6 Period eligibility &amp; menu</td><td>Period attendance can be marked only by an admin, the period's own teacher, or the proxy assigned for that date (others get 403; the absent teacher loses access once a proxy is set). Clicking a timetable card opens a menu: mark attendance, class diary, class roster &amp; leaders, gate pass / infirmary slip.</td><td><code class="inline-code">PeriodAttendanceController</code>, <code class="inline-code">attendance/period-mark.blade.php</code></td></tr>
+          <tr><td>REQ-7 Timetable alignment</td><td>Teacher timetable rendered as a bell-period grid: rows are the school's periods with breaks shown as full-width bands, columns are days, cards sit in their period. Lessons outside every bell period still get a row. Proxy periods for the week are listed under the grid.</td><td><code class="inline-code">TimetableController::teacherShow|teacherGrid</code>, <code class="inline-code">timetable/teacher/view.blade.php</code></td></tr>
         </tbody>
       </table>
     </div>
   </section>
 
-  <!-- =========================================================
-       SECTION 7: HOSTEL MANAGEMENT MODULE
-       ========================================================= -->
-  <section id="hostel-management-blueprint" class="audit-section">
+  <!-- 8 -->
+  <section id="verification" class="audit-section">
     <div class="section-header">
-      <h2><span>🏨</span> 7. Hostel Management Module — Production Architecture Blueprint</h2>
-      <span class="section-tag badge-danger">100% Unimplemented</span>
+      <h2><span>✅</span> 8. How this was verified</h2>
     </div>
-
-    <p style="margin-bottom: 16px; color: var(--text-secondary);">
-      Hostel Management is currently <strong>completely absent</strong> in Zolo SmartSchool. 
-      Below is the complete enterprise architecture, database schema, Eloquent models, business workflows, and API specifications required to implement this module.
-    </p>
-
-    <h3 style="font-size: 1.15rem; margin: 24px 0 12px 0; color: #38bdf8;">Complete Relational Database Schema (8 Tables)</h3>
-    <div class="table-wrapper">
-      <table class="audit-table">
-        <thead>
-          <tr>
-            <th>Table Name</th>
-            <th>Primary Columns & Types</th>
-            <th>Foreign Keys & Constraints</th>
-            <th>Purpose & Business Logic</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><code class="inline-code">hostel_blocks</code></td>
-            <td><code class="inline-code">id</code>, <code class="inline-code">school_id</code>, <code class="inline-code">name</code> (string), <code class="inline-code">code</code>, <code class="inline-code">type</code> (enum: 'Boys', 'Girls', 'Staff', 'Coed'), <code class="inline-code">total_floors</code> (int), <code class="inline-code">capacity</code> (int), <code class="inline-code">warden_id</code> (bigint unsigned)</td>
-            <td><code class="inline-code">school_id -> schools(id)</code><br><code class="inline-code">warden_id -> users(id)</code></td>
-            <td>Defines physical hostel buildings/wings and assigns Chief Wardens.</td>
-          </tr>
-          <tr>
-            <td><code class="inline-code">hostel_room_types</code></td>
-            <td><code class="inline-code">id</code>, <code class="inline-code">school_id</code>, <code class="inline-code">name</code> (e.g. 'AC 2-Bed Attached', 'Non-AC 4-Bed Dorm'), <code class="inline-code">fee_cycle</code> (enum: 'Monthly', 'Quarterly', 'Annual'), <code class="inline-code">base_fee</code> (decimal), <code class="inline-code">amenities_json</code> (json)</td>
-            <td><code class="inline-code">school_id -> schools(id)</code></td>
-            <td>Categorizes room pricing, billing cycles, and amenities (Wi-Fi, AC, Attached Bath, Study Desk).</td>
-          </tr>
-          <tr>
-            <td><code class="inline-code">hostel_rooms</code></td>
-            <td><code class="inline-code">id</code>, <code class="inline-code">school_id</code>, <code class="inline-code">hostel_block_id</code>, <code class="inline-code">room_type_id</code>, <code class="inline-code">room_number</code>, <code class="inline-code">floor</code> (int), <code class="inline-code">bed_capacity</code> (int), <code class="inline-code">occupied_beds</code> (int), <code class="inline-code">status</code> (enum: 'Available', 'Full', 'Maintenance')</td>
-            <td><code class="inline-code">hostel_block_id -> hostel_blocks(id)</code><br><code class="inline-code">room_type_id -> hostel_room_types(id)</code></td>
-            <td>Physical rooms with floor numbers and real-time bed occupancy tracking.</td>
-          </tr>
-          <tr>
-            <td><code class="inline-code">hostel_beds</code></td>
-            <td><code class="inline-code">id</code>, <code class="inline-code">school_id</code>, <code class="inline-code">hostel_room_id</code>, <code class="inline-code">bed_number</code> (e.g. '101-A', '101-B'), <code class="inline-code">is_occupied</code> (bool), <code class="inline-code">current_student_id</code> (nullable)</td>
-            <td><code class="inline-code">hostel_room_id -> hostel_rooms(id)</code><br><code class="inline-code">current_student_id -> users(id)</code></td>
-            <td>Individual bed slots for granular student allocation.</td>
-          </tr>
-          <tr>
-            <td><code class="inline-code">hostel_allocations</code></td>
-            <td><code class="inline-code">id</code>, <code class="inline-code">school_id</code>, <code class="inline-code">student_id</code>, <code class="inline-code">bed_id</code>, <code class="inline-code">session_year_id</code>, <code class="inline-code">allocation_date</code> (date), <code class="inline-code">vacate_date</code> (nullable), <code class="inline-code">status</code> (enum: 'Active', 'Transferred', 'Vacated'), <code class="inline-code">fee_status</code></td>
-            <td><code class="inline-code">student_id -> users(id)</code><br><code class="inline-code">bed_id -> hostel_beds(id)</code><br><code class="inline-code">session_year_id -> session_years(id)</code></td>
-            <td>Tracks historical and active student residency, integrates with fee invoicing.</td>
-          </tr>
-          <tr>
-            <td><code class="inline-code">hostel_attendances</code></td>
-            <td><code class="inline-code">id</code>, <code class="inline-code">school_id</code>, <code class="inline-code">student_id</code>, <code class="inline-code">hostel_block_id</code>, <code class="inline-code">date</code> (date), <code class="inline-code">roll_call_type</code> (enum: 'Morning', 'Night_Curfew'), <code class="inline-code">status</code> (enum: 'Present', 'Absent', 'On_Leave', 'Late'), <code class="inline-code">warden_id</code></td>
-            <td><code class="inline-code">student_id -> users(id)</code><br><code class="inline-code">warden_id -> users(id)</code></td>
-            <td>Night curfew roll-call (essential for student safety & boarder accountability).</td>
-          </tr>
-          <tr>
-            <td><code class="inline-code">hostel_gate_passes</code></td>
-            <td><code class="inline-code">id</code>, <code class="inline-code">school_id</code>, <code class="inline-code">student_id</code>, <code class="inline-code">pass_type</code> (enum: 'Day_Out', 'Night_Out', 'Home_Visit'), <code class="inline-code">out_time</code>, <code class="inline-code">expected_in_time</code>, <code class="inline-code">actual_in_time</code>, <code class="inline-code">parent_approved</code> (bool), <code class="inline-code">warden_approved</code> (bool), <code class="inline-code">qr_token</code></td>
-            <td><code class="inline-code">student_id -> users(id)</code></td>
-            <td>Digital gate pass with parent mobile OTP approval and security guard QR scan at school gates.</td>
-          </tr>
-          <tr>
-            <td><code class="inline-code">hostel_visitors</code></td>
-            <td><code class="inline-code">id</code>, <code class="inline-code">school_id</code>, <code class="inline-code">student_id</code>, <code class="inline-code">visitor_name</code>, <code class="inline-code">relation</code>, <code class="inline-code">contact</code>, <code class="inline-code">photo</code>, <code class="inline-code">id_proof</code>, <code class="inline-code">in_time</code>, <code class="inline-code">out_time</code>, <code class="inline-code">remarks</code></td>
-            <td><code class="inline-code">student_id -> users(id)</code></td>
-            <td>Maintains strict log of guardians/relatives visiting residential students.</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <h3 style="font-size: 1.15rem; margin: 28px 0 12px 0; color: #ffffff;">Hostel Workflows & Integration Points</h3>
-    <ul style="margin-left: 24px; color: var(--text-secondary); font-size: 0.9rem; line-height: 1.8;">
-      <li><strong>Automatic Fee Invoicing:</strong> When a bed is allocated to a student in <code class="inline-code">hostel_allocations</code>, the system automatically generates recurring hostel fee bills inside the existing <code class="inline-code">Fee</code> and <code class="inline-code">FeesPaid</code> architecture.</li>
-      <li><strong>Night Curfew Roll-Call on Staff Mobile App:</strong> Wardens open the staff app at 09:00 PM, select their block/floor, and tap students Present/Absent with 1-click photo verification. Absent students trigger an automated emergency SMS/WhatsApp to parents.</li>
-      <li><strong>Parental Gate Pass Approval:</strong> Boarders request leave via the student app. The parent receives an in-app push notification with "Approve" / "Reject". Once approved by parent and warden, a secure QR pass is generated for the security guard to scan.</li>
+    <ul style="color:var(--text-secondary);padding-left:20px;line-height:1.9;">
+      <li>All five new tenant migrations ran on MariaDB 11.4 through <code class="inline-code">demo:setup</code>, including converting an existing string <code class="inline-code">roll_number</code> back to an integer.</li>
+      <li>The app was served locally and driven over HTTP as school admin, three teachers and the relief roster: every new page returns 200; the JSON flows were exercised with positive and negative cases (absent teacher refused as proxy, proxy for own slot refused, non-assigned teacher gets 403, overlapping relief refused, cancelled relief cannot be cancelled twice, gate pass without a pickup person refused).</li>
+      <li>A script checked the roster scope and the overspeed engine against the live database: 13 of 13 checks passed (primary keeps the drop run under a pickup-only relief, relief ignored on other dates, single alert per cooldown, alert only after sustained overspeed).</li>
+      <li>Every changed PHP file passes <code class="inline-code">php -l</code> (PHP 8.4) and all Blade templates compile.</li>
+      <li><strong>Not verified:</strong> the Flutter apps were not rebuilt (no app code changed in this pass); real FCM delivery; the snap-to-roads button against a real OSRM server; behaviour under MySQL strict mode.</li>
     </ul>
   </section>
 
-  <!-- =========================================================
-       SECTION 8: CANTEEN & CAFETERIA MODULE
-       ========================================================= -->
-  <section id="canteen-management-blueprint" class="audit-section">
-    <div class="section-header">
-      <h2><span>🍽️</span> 8. Canteen, Cafeteria & Cashless Student Wallet — Production Blueprint</h2>
-      <span class="section-tag badge-danger">100% Unimplemented</span>
-    </div>
-
-    <p style="margin-bottom: 16px; color: var(--text-secondary);">
-      Canteen Management is currently <strong>completely absent</strong> in Zolo SmartSchool. 
-      Below is the production blueprint for an automated cafeteria management system with a touchscreen POS terminal, cashless RFID student wallet, and dietary allergy controls.
-    </p>
-
-    <h3 style="font-size: 1.15rem; margin: 24px 0 12px 0; color: #38bdf8;">Complete Relational Database Schema (8 Tables)</h3>
-    <div class="table-wrapper">
-      <table class="audit-table">
-        <thead>
-          <tr>
-            <th>Table Name</th>
-            <th>Primary Columns & Types</th>
-            <th>Foreign Keys & Constraints</th>
-            <th>Purpose & Business Logic</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><code class="inline-code">canteen_categories</code></td>
-            <td><code class="inline-code">id</code>, <code class="inline-code">school_id</code>, <code class="inline-code">name</code> (e.g. 'Hot Breakfast', 'Lunch Bowls', 'Beverages', 'Healthy Snacks'), <code class="inline-code">icon</code>, <code class="inline-code">order</code>, <code class="inline-code">is_active</code></td>
-            <td><code class="inline-code">school_id -> schools(id)</code></td>
-            <td>Organizes items for fast category-based browsing on the POS touchscreen.</td>
-          </tr>
-          <tr>
-            <td><code class="inline-code">canteen_items</code></td>
-            <td><code class="inline-code">id</code>, <code class="inline-code">school_id</code>, <code class="inline-code">category_id</code>, <code class="inline-code">name</code>, <code class="inline-code">code/barcode</code>, <code class="inline-code">selling_price</code> (decimal), <code class="inline-code">cost_price</code>, <code class="inline-code">image</code>, <code class="inline-code">dietary_type</code> (enum: 'Veg', 'Non-Veg', 'Vegan', 'Egg'), <code class="inline-code">allergens_json</code> (json: ['peanuts', 'dairy', 'gluten', 'soy']), <code class="inline-code">calories</code> (int), <code class="inline-code">is_available</code></td>
-            <td><code class="inline-code">category_id -> canteen_categories(id)</code></td>
-            <td>Menu catalog with dietary tags, nutritional info, and allergen warnings.</td>
-          </tr>
-          <tr>
-            <td><code class="inline-code">canteen_wallets</code></td>
-            <td><code class="inline-code">id</code>, <code class="inline-code">school_id</code>, <code class="inline-code">user_id</code> (student/staff), <code class="inline-code">balance</code> (decimal), <code class="inline-code">rfid_card_number</code> (unique string), <code class="inline-code">daily_spending_limit</code> (decimal), <code class="inline-code">blocked_categories_json</code> (json), <code class="inline-code">is_locked</code> (bool)</td>
-            <td><code class="inline-code">user_id -> users(id)</code></td>
-            <td>Cashless smart wallet linked to the student's RFID ID badge. Allows parents to set daily spending limits and blacklist junk foods.</td>
-          </tr>
-          <tr>
-            <td><code class="inline-code">canteen_wallet_transactions</code></td>
-            <td><code class="inline-code">id</code>, <code class="inline-code">wallet_id</code>, <code class="inline-code">type</code> (enum: 'Topup', 'Purchase', 'Refund', 'Penalty'), <code class="inline-code">amount</code> (decimal), <code class="inline-code">balance_after</code>, <code class="inline-code">payment_gateway</code> (Stripe/Razorpay/Cash), <code class="inline-code">reference_id</code>, <code class="inline-code">created_by</code></td>
-            <td><code class="inline-code">wallet_id -> canteen_wallets(id)</code></td>
-            <td>Immutable financial ledger for every top-up and debit.</td>
-          </tr>
-          <tr>
-            <td><code class="inline-code">canteen_orders</code></td>
-            <td><code class="inline-code">id</code>, <code class="inline-code">school_id</code>, <code class="inline-code">order_number</code>, <code class="inline-code">user_id</code> (student/staff), <code class="inline-code">total_amount</code>, <code class="inline-code">payment_mode</code> ('Wallet', 'Cash', 'Card'), <code class="inline-code">payment_status</code>, <code class="inline-code">order_type</code> ('Counter_POS', 'Pre_Order'), <code class="inline-code">status</code> ('Pending', 'Preparing', 'Ready', 'Completed', 'Cancelled'), <code class="inline-code">token_number</code> (int)</td>
-            <td><code class="inline-code">school_id -> schools(id)</code><br><code class="inline-code">user_id -> users(id)</code></td>
-            <td>Order headers for real-time POS processing and pre-order fulfillment.</td>
-          </tr>
-          <tr>
-            <td><code class="inline-code">canteen_order_items</code></td>
-            <td><code class="inline-code">id</code>, <code class="inline-code">order_id</code>, <code class="inline-code">canteen_item_id</code>, <code class="inline-code">quantity</code>, <code class="inline-code">unit_price</code>, <code class="inline-code">subtotal</code></td>
-            <td><code class="inline-code">order_id -> canteen_orders(id)</code><br><code class="inline-code">canteen_item_id -> canteen_items(id)</code></td>
-            <td>Line item breakdown of every purchase.</td>
-          </tr>
-          <tr>
-            <td><code class="inline-code">canteen_inventory_items</code></td>
-            <td><code class="inline-code">id</code>, <code class="inline-code">school_id</code>, <code class="inline-code">item_name</code>, <code class="inline-code">unit</code> ('kg', 'litres', 'pcs', 'packets'), <code class="inline-code">current_stock</code>, <code class="inline-code">reorder_threshold</code>, <code class="inline-code">unit_cost</code>, <code class="inline-code">supplier_info</code></td>
-            <td><code class="inline-code">school_id -> schools(id)</code></td>
-            <td>Tracks raw cafeteria ingredients (flour, oil, milk, vegetables) and alerts when stock is low.</td>
-          </tr>
-          <tr>
-            <td><code class="inline-code">canteen_meal_subscriptions</code></td>
-            <td><code class="inline-code">id</code>, <code class="inline-code">school_id</code>, <code class="inline-code">student_id</code>, <code class="inline-code">plan_name</code> (e.g. 'Monthly Full Lunch Plan'), <code class="inline-code">start_date</code>, <code class="inline-code">end_date</code>, <code class="inline-code">is_active</code>, <code class="inline-code">fee_id</code></td>
-            <td><code class="inline-code">student_id -> users(id)</code></td>
-            <td>Monthly dining plans for day-scholars and boarders; auto-bills through fee system.</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <h3 style="font-size: 1.15rem; margin: 28px 0 12px 0; color: #ffffff;">Key Features & Operational Workflows</h3>
-    <ul style="margin-left: 24px; color: var(--text-secondary); font-size: 0.9rem; line-height: 1.8;">
-      <li><strong>5-Second Counter Checkout:</strong> The cashier taps items on the touch terminal; the student taps their RFID smart card on the USB reader. The system verifies wallet balance, checks daily spending cap, and deducts the amount instantly with zero cash handling.</li>
-      <li><strong>Allergy & Dietary Safety Interlock:</strong> If a student's profile indicates a peanut or gluten allergy, and the cashier selects an item containing that allergen, the POS screen flashes a prominent red modal warning: <em>"ALLERGEN HAZARD: Student has registered peanut allergy. Item blocked."</em></li>
-      <li><strong>Parental Wallet Controls:</strong> Parents can top up the cafeteria wallet using credit card, UPI, or Stripe directly in the mobile app, set a maximum spending limit of $5.00/day, and view an itemized bill of exactly what their child ate for lunch.</li>
-    </ul>
-  </section>
-
-
-  <!-- =========================================================
-       SECTION 9: LIBRARY MANAGEMENT SYSTEM (LMS)
-       ========================================================= -->
-  <section id="library-management-blueprint" class="audit-section">
-    <div class="section-header">
-      <h2><span>📚</span> 9. Library Management System (LMS) — Production Architecture Blueprint</h2>
-      <span class="section-tag badge-danger">100% Unimplemented</span>
-    </div>
-
-    <p style="margin-bottom: 16px; color: var(--text-secondary);">
-      A modern educational institution requires a robust, automated <strong>Library Management System (LMS)</strong>. 
-      In Zolo SmartSchool, this module is currently <strong>completely absent</strong>. 
-      Below is the complete production blueprint covering physical book circulation, barcode/RFID tracking, overdue fine calculation, and a digital e-book repository.
-    </p>
-
-    <h3 style="font-size: 1.15rem; margin: 24px 0 12px 0; color: #38bdf8;">Complete Relational Database Schema (9 Tables)</h3>
-    <div class="table-wrapper">
-      <table class="audit-table">
-        <thead>
-          <tr>
-            <th>Table Name</th>
-            <th>Primary Columns & Types</th>
-            <th>Foreign Keys & Constraints</th>
-            <th>Purpose & Business Logic</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><code class="inline-code">library_categories</code></td>
-            <td><code class="inline-code">id</code>, <code class="inline-code">school_id</code>, <code class="inline-code">name</code> (e.g. 'Science & Technology', 'World Literature', 'Mathematics', 'Reference & Encyclopedia'), <code class="inline-code">code</code> (string), <code class="inline-code">parent_id</code> (nullable), <code class="inline-code">is_active</code></td>
-            <td><code class="inline-code">school_id -> schools(id)</code><br><code class="inline-code">parent_id -> library_categories(id)</code></td>
-            <td>Hierarchical book categorization conforming to international classification standards.</td>
-          </tr>
-          <tr>
-            <td><code class="inline-code">library_books</code></td>
-            <td><code class="inline-code">id</code>, <code class="inline-code">school_id</code>, <code class="inline-code">category_id</code>, <code class="inline-code">title</code>, <code class="inline-code">subtitle</code>, <code class="inline-code">author</code>, <code class="inline-code">publisher</code>, <code class="inline-code">isbn</code> (10/13 digit), <code class="inline-code">edition</code>, <code class="inline-code">publication_year</code>, <code class="inline-code">language</code>, <code class="inline-code">price</code> (decimal), <code class="inline-code">dewey_decimal_code</code>, <code class="inline-code">rack_location</code>, <code class="inline-code">shelf_number</code>, <code class="inline-code">total_copies</code> (int), <code class="inline-code">available_copies</code> (int), <code class="inline-code">is_digital</code> (bool), <code class="inline-code">digital_file_path</code>, <code class="inline-code">cover_image</code></td>
-            <td><code class="inline-code">category_id -> library_categories(id)</code></td>
-            <td>Master bibliographic book records with physical rack/shelf coordinate locators and digital e-book support.</td>
-          </tr>
-          <tr>
-            <td><code class="inline-code">library_book_copies</code></td>
-            <td><code class="inline-code">id</code>, <code class="inline-code">school_id</code>, <code class="inline-code">book_id</code>, <code class="inline-code">barcode_rfid</code> (unique string), <code class="inline-code">accession_number</code> (string), <code class="inline-code">copy_number</code> (int), <code class="inline-code">status</code> (enum: 'Available', 'Issued', 'Reserved', 'Lost', 'Damaged', 'Under_Repair'), <code class="inline-code">condition</code> (enum: 'New', 'Good', 'Fair', 'Poor'), <code class="inline-code">acquisition_date</code>, <code class="inline-code">acquisition_type</code> (enum: 'Purchase', 'Donation', 'Govt_Grant')</td>
-            <td><code class="inline-code">book_id -> library_books(id)</code></td>
-            <td>Individual physical copy tracking. Every physical book has a unique barcode/RFID sticker scanned at checkout.</td>
-          </tr>
-          <tr>
-            <td><code class="inline-code">library_members</code></td>
-            <td><code class="inline-code">id</code>, <code class="inline-code">school_id</code>, <code class="inline-code">user_id</code> (student or staff), <code class="inline-code">member_type</code> (enum: 'Student', 'Teacher', 'Staff'), <code class="inline-code">membership_number</code> (unique), <code class="inline-code">max_books_allowed</code> (int), <code class="inline-code">issue_duration_days</code> (int), <code class="inline-code">status</code> (enum: 'Active', 'Suspended', 'Expired'), <code class="inline-code">valid_until</code></td>
-            <td><code class="inline-code">user_id -> users(id)</code></td>
-            <td>Library member profile. Differentiates borrowing quotas (e.g. Students: 2 books for 14 days; Teachers: 5 books for 30 days).</td>
-          </tr>
-          <tr>
-            <td><code class="inline-code">library_issues</code></td>
-            <td><code class="inline-code">id</code>, <code class="inline-code">school_id</code>, <code class="inline-code">book_copy_id</code>, <code class="inline-code">member_id</code>, <code class="inline-code">issued_by</code> (librarian user_id), <code class="inline-code">issue_date</code> (date), <code class="inline-code">due_date</code> (date), <code class="inline-code">return_date</code> (nullable date), <code class="inline-code">returned_to</code> (nullable librarian), <code class="inline-code">status</code> (enum: 'Issued', 'Returned', 'Overdue', 'Lost'), <code class="inline-code">renewal_count</code> (int), <code class="inline-code">late_fine_amount</code> (decimal), <code class="inline-code">fine_paid</code> (bool), <code class="inline-code">remarks</code></td>
-            <td><code class="inline-code">book_copy_id -> library_book_copies(id)</code><br><code class="inline-code">member_id -> library_members(id)</code></td>
-            <td>Core transaction ledger for book check-out, renewal, return, and overdue penalty tracking.</td>
-          </tr>
-          <tr>
-            <td><code class="inline-code">library_reservations</code></td>
-            <td><code class="inline-code">id</code>, <code class="inline-code">school_id</code>, <code class="inline-code">book_id</code>, <code class="inline-code">member_id</code>, <code class="inline-code">reservation_date</code> (date), <code class="inline-code">expiry_date</code> (date), <code class="inline-code">status</code> (enum: 'Pending', 'Fulfilled', 'Expired', 'Cancelled'), <code class="inline-code">notified_at</code> (nullable timestamp)</td>
-            <td><code class="inline-code">book_id -> library_books(id)</code><br><code class="inline-code">member_id -> library_members(id)</code></td>
-            <td>Queue-based book reservation (hold) for books currently out on loan. Automatically notifies next member when copy returned.</td>
-          </tr>
-          <tr>
-            <td><code class="inline-code">library_fines</code></td>
-            <td><code class="inline-code">id</code>, <code class="inline-code">school_id</code>, <code class="inline-code">issue_id</code>, <code class="inline-code">member_id</code>, <code class="inline-code">amount</code> (decimal), <code class="inline-code">overdue_days</code> (int), <code class="inline-code">per_day_rate</code> (decimal), <code class="inline-code">status</code> (enum: 'Unpaid', 'Paid', 'Waived'), <code class="inline-code">fee_payment_id</code> (nullable), <code class="inline-code">payment_mode</code> ('Cash', 'Online', 'Fee_Invoice'), <code class="inline-code">paid_at</code>, <code class="inline-code">waived_reason</code>, <code class="inline-code">collected_by</code></td>
-            <td><code class="inline-code">issue_id -> library_issues(id)</code><br><code class="inline-code">member_id -> library_members(id)</code></td>
-            <td>Automated fine ledger. Can be collected at the library counter or billed onto the student's academic term fee invoice.</td>
-          </tr>
-          <tr>
-            <td><code class="inline-code">library_digital_access_logs</code></td>
-            <td><code class="inline-code">id</code>, <code class="inline-code">school_id</code>, <code class="inline-code">book_id</code>, <code class="inline-code">user_id</code>, <code class="inline-code">accessed_at</code>, <code class="inline-code">duration_seconds</code> (int), <code class="inline-code">ip_address</code>, <code class="inline-code">device</code></td>
-            <td><code class="inline-code">book_id -> library_books(id)</code><br><code class="inline-code">user_id -> users(id)</code></td>
-            <td>Auditing and reading analytics for digital e-books and PDFs.</td>
-          </tr>
-          <tr>
-            <td><code class="inline-code">library_settings</code></td>
-            <td><code class="inline-code">id</code>, <code class="inline-code">school_id</code>, <code class="inline-code">student_max_books</code> (default 2), <code class="inline-code">student_issue_days</code> (default 14), <code class="inline-code">staff_max_books</code> (default 5), <code class="inline-code">staff_issue_days</code> (default 30), <code class="inline-code">fine_per_day</code> (decimal, default 1.00), <code class="inline-code">grace_period_days</code> (int, default 1), <code class="inline-code">max_renewals</code> (int, default 2), <code class="inline-code">enable_rfid</code> (bool), <code class="inline-code">allow_online_reservation</code> (bool)</td>
-            <td><code class="inline-code">school_id -> schools(id)</code></td>
-            <td>Per-school configurable library policy rules.</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <h3 style="font-size: 1.15rem; margin: 28px 0 12px 0; color: #ffffff;">Key Capabilities & Operational Workflows</h3>
-    
-    <!-- Wireframe Box -->
-    <div class="wireframe-box">
-      <h4 style="color: #38bdf8; margin-bottom: 8px;">Visual Concept: Librarian High-Speed Issue/Return Terminal</h4>
-      <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">
-        Designed for zero-click barcode/RFID operation. Scanning a student's ID card instantly displays their active loans, overdue fines, and quota. Scanning the book barcode completes checkout in under 2 seconds.
-      </p>
-
-      <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 8px; padding: 18px;">
-        <div style="display: flex; gap: 16px; margin-bottom: 14px; flex-wrap: wrap;">
-          <div style="flex: 1; min-width: 240px; background: #1e293b; padding: 12px; border-radius: 6px;">
-            <small style="color: var(--text-muted); text-transform: uppercase; font-weight: 700;">1. Scan Member Card</small>
-            <div style="font-size: 1.1rem; color: #ffffff; font-weight: 700; margin-top: 4px;">Rahul Verma (Class 11-A)</div>
-            <div style="font-size: 0.8rem; color: #10b981; margin-top: 2px;">● Status: Eligible (1 / 2 Books Issued) | Overdue Fines: $0.00</div>
-          </div>
-          <div style="flex: 1; min-width: 240px; background: #1e293b; padding: 12px; border-radius: 6px;">
-            <small style="color: var(--text-muted); text-transform: uppercase; font-weight: 700;">2. Scan Book Barcode / RFID</small>
-            <div style="font-size: 1.1rem; color: #38bdf8; font-weight: 700; margin-top: 4px;">BC-9780132350884 (Copy #3)</div>
-            <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 2px;">"Concepts of Modern Physics" — Arthur Beiser [Rack B4, Shelf 2]</div>
-          </div>
-        </div>
-
-        <div style="display: flex; justify-content: space-between; align-items: center; background: #0f172a; padding: 12px 16px; border-radius: 6px; border: 1px solid var(--border-color);">
-          <div>
-            <span style="font-size: 0.85rem; color: var(--text-secondary);">Calculated Due Date: </span>
-            <strong style="color: #f59e0b; font-size: 0.95rem;">29 October 2026 (14 Days)</strong>
-          </div>
-          <div style="display: flex; gap: 8px;">
-            <span class="pill pill-implemented" style="padding: 6px 14px; font-size: 0.8rem; cursor: pointer;">⚡ Issue Book (Enter)</span>
-            <span class="pill pill-low" style="padding: 6px 14px; font-size: 0.8rem; cursor: pointer;">↩ Return Mode (F2)</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <ul style="margin-left: 24px; color: var(--text-secondary); font-size: 0.9rem; line-height: 1.8; margin-top: 16px;">
-      <li><strong>Automated Daily Overdue Calculation:</strong> A scheduled console command (<code class="inline-code">php artisan library:calculate-fines</code>) runs nightly. For each overdue book past the grace period, it computes <code class="inline-code">overdue_days * fine_per_day</code> (skipping official school holidays and Sundays) and updates <code class="inline-code">library_fines</code>.</li>
-      <li><strong>Online Public Access Catalog (OPAC) on Mobile Apps:</strong> Students and parents search the entire library catalog by title, subject, or author from the Flutter app. If a copy is available, the app displays its physical shelf locator (<code class="inline-code">Rack B4, Shelf 2</code>). If all copies are out, students can place a 1-click hold reservation.</li>
-      <li><strong>Secure E-Book / Digital PDF Viewer:</strong> Digital textbooks and research papers can be uploaded. When opened by a student, the built-in reader overlays a non-removable dynamic watermark (student's name, admission number, and timestamp) across pages to prevent unauthorized PDF redistribution.</li>
-      <li><strong>Automatic Replacement Billing for Lost/Damaged Books:</strong> When a book copy is marked 'Lost' or 'Damaged', the librarian can trigger 1-click billing; the cost is posted straight into the student's existing <code class="inline-code">FeesPaid</code> ledger as an optional fee.</li>
-    </ul>
-  </section>
-
-  <!-- =========================================================
-       SECTION 10: ADDON ECOSYSTEM & ROADMAP
-       ========================================================= -->
-  <section id="addon-ecosystem" class="audit-section">
-    <div class="section-header">
-      <h2><span>🧩</span> 10. Addon Ecosystem & Institutional Roadmap</h2>
-      <span class="section-tag badge-purple">9 Essential Tools</span>
-    </div>
-
-    <p style="margin-bottom: 16px; color: var(--text-secondary);">
-      Beyond the core academic ERP, a world-class educational SaaS platform requires modular addon tools. 
-      Below is the technical evaluation of the two existing addons and the architecture for seven required institutional addons.
-    </p>
-
-    <div class="table-wrapper">
-      <table class="audit-table">
-        <thead>
-          <tr>
-            <th>Addon Module</th>
-            <th>Type</th>
-            <th>Current Code Status</th>
-            <th>Architecture & Key Capabilities Required</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><strong>1. GPS Transport Addon</strong></td>
-            <td><span class="pill pill-partial">In Codebase</span></td>
-            <td><code class="inline-code">app/Addons/GpsTransport/</code><br>Backend 80% Complete</td>
-            <td>
-              <strong>To complete:</strong><br>
-              1. Implement driver phone background location service in Flutter staff app.<br>
-              2. Add offline SQLite GPS point queueing when cell reception drops.<br>
-              3. Connect parent Flutter app to <code class="inline-code">/api/gps/student/live-location</code> Leaflet/Google map stream.<br>
-              4. Replace <code class="inline-code">unpkg.com</code> Leaflet links with local bundled vendor files.
-            </td>
-          </tr>
-          <tr>
-            <td><strong>2. Photo Booth Addon</strong></td>
-            <td><span class="pill pill-implemented">In Codebase</span></td>
-            <td><code class="inline-code">app/Addons/PhotoBooth/</code><br>100% Functional</td>
-            <td>Automated webcam capture and image cropper for student admissions and student ID card generation. Production ready.</td>
-          </tr>
-          <tr>
-            <td><strong>3. Library Management System (LMS)</strong></td>
-            <td><span class="pill pill-critical">Core Blueprint Ready</span></td>
-            <td>Specification in Section 9</td>
-            <td>
-              Elevated to core institutional blueprint: 9 database tables, barcode/RFID rapid checkout terminal, automated overdue fine engine, OPAC mobile catalog, and digital e-book repository. (See Section 9).
-            </td>
-          </tr>
-          <tr>
-            <td><strong>4. Biometric & RFID Hardware Attendance Engine</strong></td>
-            <td><span class="pill pill-missing">New Addon</span></td>
-            <td>Not Implemented</td>
-            <td>
-              Direct TCP/IP / HTTP push SDK listener for ZKTeco, Essl, and Realtime biometric fingerprint and facial recognition turnstiles. Automatically syncs check-ins into <code class="inline-code">attendances</code> and <code class="inline-code">staff_attendances</code> tables.
-            </td>
-          </tr>
-          <tr>
-            <td><strong>5. Visitor Management & Gate Pass Studio</strong></td>
-            <td><span class="pill pill-missing">New Addon</span></td>
-            <td>Not Implemented</td>
-            <td>
-              Front-desk visitor check-in with webcam photo capture, OTP mobile verification, host staff approval, and instant thermal printed badge with QR code. Student early departure leave pass verification.
-            </td>
-          </tr>
-          <tr>
-            <td><strong>6. Health, Medical & Infirmary Clinic</strong></td>
-            <td><span class="pill pill-missing">New Addon</span></td>
-            <td>Not Implemented</td>
-            <td>
-              Student medical history (blood group, chronic ailments, vaccination logs), daily infirmary clinic visit logs, nurse prescription notes, emergency parent alert dispatch.
-            </td>
-          </tr>
-          <tr>
-            <td><strong>7. Fixed Assets & Inventory Procurement</strong></td>
-            <td><span class="pill pill-missing">New Addon</span></td>
-            <td>Not Implemented</td>
-            <td>
-              School property tracking (computers, laboratory glassware, desks, sports equipment), depreciation calculation, maintenance logs, department purchase requisitions and approval workflow.
-            </td>
-          </tr>
-          <tr>
-            <td><strong>8. Parent-Teacher Meeting (PTM) Appointment Scheduler</strong></td>
-            <td><span class="pill pill-missing">New Addon</span></td>
-            <td>Not Implemented</td>
-            <td>
-              Teachers publish 10-minute consultation time slots for PTM days. Parents book dedicated time slots via the mobile app, eliminating chaotic hallway waiting queues.
-            </td>
-          </tr>
-          <tr>
-            <td><strong>9. WhatsApp Cloud API Omnichannel Bot</strong></td>
-            <td><span class="pill pill-missing">New Addon</span></td>
-            <td>Not Implemented</td>
-            <td>
-              Official Meta WhatsApp Business Cloud API integration. Automatically dispatches instant WhatsApp alerts for student absence, bus approaching stop, fee payment receipts, and report card publications.
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
-
-  <!-- =========================================================
-       SECTION 11: ACTION PLAN & IMPLEMENTATION MILESTONES
-       ========================================================= -->
+  <!-- 9 -->
   <section id="action-plan" class="audit-section">
     <div class="section-header">
-      <h2><span>🚀</span> 11. Prioritized Action Plan & Implementation Milestones</h2>
-      <span class="section-tag badge-success">Roadmap to Production</span>
+      <h2><span>🚀</span> 9. Still open &amp; next steps</h2>
     </div>
-
-    <p style="margin-bottom: 20px; color: var(--text-secondary);">
-      A phased, high-impact implementation schedule designed for seamless execution without disrupting existing production environments:
-    </p>
-
     <div class="table-wrapper">
       <table class="audit-table">
-        <thead>
-          <tr>
-            <th>Milestone Phase</th>
-            <th>Primary Objectives</th>
-            <th>Target Deliverables & Exact Files</th>
-            <th>Timeline</th>
-          </tr>
-        </thead>
+        <thead><tr><th>Priority</th><th>Item</th><th>Why it is still open</th></tr></thead>
         <tbody>
-          <tr>
-            <td><strong style="color: #f43f5e;">Phase 1: Security & Privacy Hardening</strong></td>
-            <td>Eliminate critical vulnerabilities and achieve 100% zero-outbound privacy detachment.</td>
-            <td>
-              1. Set <code class="inline-code">'expiration' => 43200</code> in <code class="inline-code">config/sanctum.php</code>.<br>
-              2. Add <code class="inline-code">'api_key' => 'encrypted'</code> to <code class="inline-code">PaymentConfiguration::$casts</code>.<br>
-              3. Set <code class="inline-code">'strict' => true</code> in <code class="inline-code">config/database.php</code>.<br>
-              4. Remove lines 5-7 in <code class="inline-code">layouts/include.blade.php</code> (Google Fonts leak).<br>
-              5. Self-host MathJax in <code class="inline-code">OnlineExamController.php</code> and Leaflet in GPS views.
-            </td>
-            <td><strong>Week 1</strong></td>
-          </tr>
-          <tr>
-            <td><strong style="color: #38bdf8;">Phase 2: Intelligent Timetable Matrix</strong></td>
-            <td>Implement multi-class simultaneous generation UI and global teacher matrix.</td>
-            <td>
-              1. Create School-Wide Batch Generation Modal in <code class="inline-code">resources/views/timetable/</code>.<br>
-              2. Wire multi-class selection to <code class="inline-code">TimetableGenerationService::generate()</code>.<br>
-              3. Build Master Cross-Class Teacher Schedule Grid view.<br>
-              4. Implement drag-and-drop live conflict validation in <code class="inline-code">timetable-matrix.js</code>.
-            </td>
-            <td><strong>Weeks 2 - 3</strong></td>
-          </tr>
-          <tr>
-            <td><strong style="color: #a855f7;">Phase 3: Hostel Management Module</strong></td>
-            <td>Develop full residential boarding and curfew attendance system.</td>
-            <td>
-              1. Run migrations for 8 hostel tables (<code class="inline-code">hostel_blocks</code>, <code class="inline-code">hostel_rooms</code>, etc.).<br>
-              2. Create <code class="inline-code">HostelController</code>, models, and bed allocation screens.<br>
-              3. Implement night curfew roll-call and digital gate pass parent approval.
-            </td>
-            <td><strong>Weeks 4 - 5</strong></td>
-          </tr>
-          <tr>
-            <td><strong style="color: #10b981;">Phase 4: Canteen & Cashless RFID Wallet</strong></td>
-            <td>Build cafeteria POS terminal, digital wallets, and allergy safety interlocks.</td>
-            <td>
-              1. Run migrations for 8 canteen tables (<code class="inline-code">canteen_items</code>, <code class="inline-code">canteen_wallets</code>, etc.).<br>
-              2. Develop high-speed touchscreen POS interface.<br>
-              3. Implement RFID card checkout, spending caps, and allergen alert modals.
-            </td>
-            <td><strong>Weeks 6 - 7</strong></td>
-          </tr>
-          <tr>
-            <td><strong style="color: #f59e0b;">Phase 5: GPS Transport & Addons</strong></td>
-            <td>Complete real-time school bus tracking and core institutional utilities.</td>
-            <td>
-              1. Complete Flutter driver background GPS service and parent live map view.<br>
-              2. Implement Library Management System (LMS) and Biometric Push Sync.
-            </td>
-            <td><strong>Weeks 8 - 10</strong></td>
-          </tr>
+          <tr><td><span class="pill pill-critical">P0</span></td><td>Confirm the licence for multi-school resale</td><td>Business question; cannot be answered from code (section 3).</td></tr>
+          <tr><td><span class="pill pill-critical">P0</span></td><td>Decide on <code class="inline-code">ANIMAZON_LICENSE</code></td><td>While true, every school gets every paid feature.</td></tr>
+          <tr><td><span class="pill pill-high">P1</span></td><td>Create the school's Firebase project and turn push back on</td><td>Needed for overspeed, relief-driver and proxy notifications to reach phones (L-09).</td></tr>
+          <tr><td><span class="pill pill-high">P1</span></td><td>Make the tests portable and add CI</td><td>4 test files, hard-wired to one developer's database. The checks in section 8 should become automated tests.</td></tr>
+          <tr><td><span class="pill pill-high">P1</span></td><td>Route-level authorization and FormRequests</td><td><code class="inline-code">CheckRole</code> only checks login; access depends on per-method checks, which is how the gaps in section 5 happened.</td></tr>
+          <tr><td><span class="pill pill-medium">P2</span></td><td>Schema pass so strict mode can default on</td><td>Hundreds of NOT NULL columns without defaults.</td></tr>
+          <tr><td><span class="pill pill-medium">P2</span></td><td>SMS / WhatsApp and Tamil</td><td>Parents in the target market live on WhatsApp; the backend ships English only.</td></tr>
+          <tr><td><span class="pill pill-medium">P2</span></td><td>Self-host map tiles and OSRM; retention job for <code class="inline-code">vehicle_locations</code></td><td>Public OSM tiles are for light use; GPS points grow without limit.</td></tr>
+          <tr><td><span class="pill pill-low">P3</span></td><td>Replace the Google Maps key in the staff iOS <code class="inline-code">Info.plist</code></td><td>Key ownership unknown.</td></tr>
         </tbody>
       </table>
     </div>
   </section>
 
   <footer class="report-footer">
-    <p><strong>Zolo SmartSchool — Master Project Audit & Technical Architecture Dossier</strong></p>
-    <p style="margin-top: 6px;">Generated autonomously via deep static code analysis. Proprietary to Animazon. Zero tracking, zero telemetry, self-hosted.</p>
+    <p><strong>Zolo SmartSchool — audit re-run, 30 October 2026</strong></p>
+    <p style="margin-top:6px;">Replaces the first October 2026 dossier, which is preserved in git history.</p>
   </footer>
 
 </main>

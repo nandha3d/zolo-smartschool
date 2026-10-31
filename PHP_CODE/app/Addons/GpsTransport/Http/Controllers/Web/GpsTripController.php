@@ -11,6 +11,7 @@ use App\Addons\GpsTransport\Models\GpsTripStop;
 use App\Addons\GpsTransport\Models\VehicleCurrentState;
 use App\Http\Controllers\Controller;
 use App\Models\Route;
+use App\Models\RoutePickupPoint;
 use App\Models\RouteVehicle;
 use App\Models\User;
 use App\Models\Vehicle;
@@ -55,6 +56,7 @@ class GpsTripController extends Controller
     public function store(Request $request): JsonResponse
     {
         ResponseService::noFeatureThenSendJson(GpsTransportServiceProvider::FEATURE);
+        ResponseService::noAnyPermissionThenSendJson(['RouteVehicle-create', 'RouteVehicle-edit']);
 
         $request->validate([
             'vehicle_id'           => 'required|integer|exists:vehicles,id',
@@ -68,25 +70,42 @@ class GpsTripController extends Controller
             DB::beginTransaction();
 
             $tripNumber = 'TRP-' . Carbon::now()->format('Ymd') . '-' . strtoupper(substr(uniqid(), -4));
+            $scheduled = $request->scheduled_start_time ? Carbon::parse($request->scheduled_start_time) : Carbon::now();
+            $run = match ($request->trip_type) {
+                'MORNING' => 'pickup',
+                'EVENING' => 'drop',
+                default   => null,
+            };
+
+            // No driver chosen: whoever is rostered on the route vehicle that day, relief
+            // driver included.
+            $driverId = $request->driver_id;
+            if (!$driverId) {
+                $driverId = RouteVehicle::where('route_id', $request->route_id)->where('vehicle_id', $request->vehicle_id)
+                    ->where('status', 1)->first()?->effectiveDriverId($scheduled, $run);
+            }
 
             $trip = GpsTrip::create([
                 'trip_number'          => $tripNumber,
                 'trip_type'            => $request->trip_type,
                 'vehicle_id'           => $request->vehicle_id,
-                'driver_id'            => $request->driver_id,
+                'driver_id'            => $driverId,
                 'route_id'             => $request->route_id,
                 'status'               => 'SCHEDULED',
-                'scheduled_start_time' => $request->scheduled_start_time ?: Carbon::now(),
+                'scheduled_start_time' => $scheduled,
             ]);
 
-            // Copy stops from route
-            $route = Route::with('routePickupPoints.pickupPoint')->findOrFail($request->route_id);
-            foreach ($route->routePickupPoints as $rp) {
+            // Copy the active stops in the order this run visits them: the morning pickup
+            // order, or the afternoon drop order for evening trips.
+            $stops = RoutePickupPoint::forTrip((int) $request->route_id, $request->trip_type);
+            foreach ($stops as $i => $rp) {
                 GpsTripStop::create([
                     'trip_id'              => $trip->id,
                     'stop_id'              => $rp->pickup_point_id,
-                    'sequence'             => $rp->order,
-                    'planned_arrival_time' => $rp->pickup_time ?: $rp->drop_time,
+                    'sequence'             => $i + 1,
+                    'planned_arrival_time' => $request->trip_type === 'EVENING'
+                        ? ($rp->drop_time ?: $rp->pickup_time)
+                        : ($rp->pickup_time ?: $rp->drop_time),
                     'status'               => 'UPCOMING',
                 ]);
             }
@@ -131,6 +150,7 @@ class GpsTripController extends Controller
     public function start($id): JsonResponse
     {
         ResponseService::noFeatureThenSendJson(GpsTransportServiceProvider::FEATURE);
+        ResponseService::noAnyPermissionThenSendJson(['RouteVehicle-create', 'RouteVehicle-edit']);
 
         try {
             $trip = GpsTrip::findOrFail($id);
@@ -170,6 +190,7 @@ class GpsTripController extends Controller
     public function complete(Request $request, $id): JsonResponse
     {
         ResponseService::noFeatureThenSendJson(GpsTransportServiceProvider::FEATURE);
+        ResponseService::noAnyPermissionThenSendJson(['RouteVehicle-create', 'RouteVehicle-edit']);
 
         $trip = GpsTrip::with('studentAttendances.student.user')->findOrFail($id);
 

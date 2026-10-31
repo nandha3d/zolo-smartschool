@@ -13,6 +13,8 @@ class Vehicle extends Model
         'name',
         'vehicle_number',
         'capacity',
+        'speed_limit_kmh',
+        'speed_alert_cooldown_minutes',
         'status',
     ];
 

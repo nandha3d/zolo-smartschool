@@ -77,24 +77,34 @@ class GpsDashboardController extends Controller
     public function liveStats(): JsonResponse
     {
         ResponseService::noFeatureThenSendJson(GpsTransportServiceProvider::FEATURE);
+        ResponseService::noAnyPermissionThenSendJson(['vehicles-list', 'route-list', 'RouteVehicle-list']);
 
-        $states = VehicleCurrentState::with(['vehicle', 'trip.route', 'driver'])->get();
+        $states = VehicleCurrentState::with(['vehicle', 'trip.route', 'driver'])
+            ->when(request('route_id'), fn ($q, $routeId) => $q->whereHas('trip', fn ($t) => $t->where('route_id', $routeId)))
+            ->get();
         $staleThreshold = config('gpstransport.defaults.stale_threshold_seconds', 300);
+        $defaultLimit = (float) config('gpstransport.defaults.speed_limit_kmh', 45.0);
         $now = Carbon::now();
 
-        $fleet = $states->map(function ($state) use ($now, $staleThreshold) {
+        $fleet = $states->map(function ($state) use ($now, $staleThreshold, $defaultLimit) {
             $isOnline = $state->last_location_at && $now->diffInSeconds($state->last_location_at) <= $staleThreshold;
+            $limit = (float) ($state->vehicle?->speed_limit_kmh ?: $defaultLimit);
+            $status = $isOnline ? ($state->speed >= 3 ? 'MOVING' : 'STOPPED') : 'OFFLINE';
+            if ($isOnline && (float) $state->speed > $limit) {
+                $status = 'OVERSPEED';
+            }
             return [
                 'vehicle_id'     => $state->vehicle_id,
                 'vehicle_number' => $state->vehicle?->vehicle_number ?? "Bus #{$state->vehicle_id}",
                 'latitude'       => (float) $state->latitude,
                 'longitude'      => (float) $state->longitude,
                 'speed'          => (float) $state->speed,
+                'speed_limit'    => $limit,
                 'heading'        => (float) $state->heading,
-                'status'         => $isOnline ? ($state->speed >= 3 ? 'MOVING' : 'STOPPED') : 'OFFLINE',
+                'status'         => $status,
                 'is_online'      => $isOnline,
                 'route_name'     => $state->trip?->route?->name ?? 'Unassigned',
-                'driver_name'    => $state->driver?->name ?? 'Unassigned',
+                'driver_name'    => $state->driver?->full_name ?? 'Unassigned',
                 'eta'            => $state->eta ?? 'N/A',
                 'battery_level'  => $state->battery_level,
                 'last_seen'      => $state->last_location_at ? $state->last_location_at->diffForHumans() : 'Never',
@@ -107,7 +117,8 @@ class GpsDashboardController extends Controller
             'summary' => [
                 'active_trips'       => GpsTrip::where('status', 'ACTIVE')->count(),
                 'active_emergencies' => GpsEmergencyIncident::whereIn('status', ['OPEN', 'ACKNOWLEDGED'])->count(),
-                'moving'             => $fleet->where('status', 'MOVING')->count(),
+                'moving'             => $fleet->whereIn('status', ['MOVING', 'OVERSPEED'])->count(),
+                'overspeeding'       => $fleet->where('status', 'OVERSPEED')->count(),
                 'stopped'            => $fleet->where('status', 'STOPPED')->count(),
                 'offline'            => $fleet->where('status', 'OFFLINE')->count(),
             ],

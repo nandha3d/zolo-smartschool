@@ -67,7 +67,7 @@
 
                                 @if ($schoolSettings['SCHOOL_RECAPTCHA_SITE_KEY'] ?? '')
                                     <div class="col-12">
-                                        <div class="g-recaptcha mt-4" data-sitekey={{ $schoolSettings['SCHOOL_RECAPTCHA_SITE_KEY'] }}></div>
+                                        <div class="g-recaptcha mt-4" data-sitekey="{{ $schoolSettings['SCHOOL_RECAPTCHA_SITE_KEY'] }}"></div>
                                     </div>    
                                 @endif
 
@@ -101,7 +101,10 @@
 @endsection
 
 @section('script')
-    <script async src="https://www.google.com/recaptcha/api.js"></script>
+    {{-- Only when the school has configured reCAPTCHA, so visitors are not sent to Google otherwise. --}}
+    @if ($schoolSettings['SCHOOL_RECAPTCHA_SITE_KEY'] ?? '')
+        <script async src="https://www.google.com/recaptcha/api.js"></script>
+    @endif
     <script src="{{ asset('/assets/vendor/jquery/jquery.min.js') }}"></script>
     <script src="{{ asset('/assets/js/custom/common.js') }}"></script>
     <script src="{{ asset('/assets/js/custom/custom.js') }}"></script>
